@@ -1,5 +1,5 @@
 {
-  "name": "zhenghao.me",
+  "name": "zhenghao.io",
   "version": "1.0.0",
   "description": "Personal Website of Zhenghao He",
   "main": "index.js",
@@ -28,7 +28,6 @@
     "mdx-bundler": "^6.0.2",
     "next": "^11.1.2",
     "next-plugin-preact": "^3.0.6",
-    "next-pwa": "^5.4.0",
     "next-seo": "^4.28.1",
     "preact": "^10.5.15",
     "preact-render-to-string": "^5.1.19",

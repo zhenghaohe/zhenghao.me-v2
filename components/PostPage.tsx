@@ -12,8 +12,8 @@ export const PostPage: React.FC<Props> = ({ meta, children }) => {
       <NextSeo
         title={`${meta.title} - Zhenghao`}
         description={meta.description}
-        canonical={`https://zhenghao.me/posts/${meta.slug}`}
-        openGraph={{ url: `https://zhenghao.me/posts/${meta.slug}` }}
+        canonical={`https://zhenghao.io/posts/${meta.slug}`}
+        openGraph={{ url: `https://zhenghao.io/posts/${meta.slug}` }}
       />
       <Head>
         <link rel="stylesheet" href="/styles/prism.css" />
