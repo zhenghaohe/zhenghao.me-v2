@@ -8,8 +8,6 @@ const Images = () => {
   return (
     <>
       {images.map((image, i) => {
-        console.log(image);
-        
         return (
         <div
           key={image.src}

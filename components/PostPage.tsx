@@ -7,8 +7,6 @@ import { formateDateFull, validDate } from '@/utils/formatDate';
 type Props = { meta: PostMeta };
 
 export const PostPage: React.FC<Props> = ({ meta, children }) => {
-  console.log(meta);
-  
   return (
     <>
       <NextSeo
