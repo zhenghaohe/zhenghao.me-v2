@@ -11,7 +11,7 @@ export function MyPic() {
               className={`max-w-md mx-auto`}>
               <Image
                 src={image}
-                alt="art"
+                alt="picture of the author"
                 placeholder="blur"
                 objectFit="contain"
                 className="z-10"

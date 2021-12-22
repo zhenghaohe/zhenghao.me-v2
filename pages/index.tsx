@@ -7,8 +7,7 @@ import Image from 'next/image';
 
 import { Experience } from '@/components/Experience';
 import { components } from '@/components/MDXComponents';
-import { Projects } from '@/components/Projects';
-import { Spacer, Spacer2 } from '@/components/Spacer';
+import { Spacer } from '@/components/Spacer';
 import { MyPic} from '@/components/MyPic';;
 
 import { loadMDX } from '@/utils/loadMDX';
@@ -22,7 +21,7 @@ export const getStaticProps = async () => {
   return { props: { code } };
 };
 
-const mdxComponents = { ...components, Experience, Projects, Spacer , Spacer2, Image, MyPic};
+const mdxComponents = { ...components, Experience, Spacer, Image, MyPic};
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
