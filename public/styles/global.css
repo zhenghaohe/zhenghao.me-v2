@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body.light {
+    --theme: 'light';
+    --color-text: #31302e;
+    --color-text-secondary: #6d6f88;
+    --color-background: #fdfdfd;
+    --color-nav-background: transparent;
+    --color-muted: #cccfd077;
+    --color-heading-primary: #34384d;
+    --color-heading-secondary: #08ce3a;
+
+    --color-link-posts: #eb3b75;
+
+    --sc-bg: #f1f1f1;
+    --sc-divider-light: rgba(140, 140, 140, 0.42);
+    --sc-divider-dark: rgba(140, 140, 140, 1);
+
+    --syntax-background: hsl(60, 0%, 96%);
+    --syntax-comment: hsl(0, 0%, 43.5%);
+    --syntax-text: hsl(60, 0%, 20%);
+    --syntax-operator: hsl(39, 0%, 17.5%);
+    --syntax-string: hsl(60, 0%, 35%);
+    --syntax-number: hsl(42.3, 0%, 30%);
+    --syntax-primary: hsl(45, 0%, 32.5%);
+    --syntax-keyword: hsl(36.3, 0%, 19%);
+    --syntax-html-tag: hsl(0, 0%, 32%);
+    --syntax-boolean: hsl(60, 0%, 20%);
+  }
+
+  body.dark {
+    --theme: 'dark';
+    --color-text: #b0b0b0;
+    --color-text-secondary: #dbdada;
+    --color-background: #0f0d0c;
+    --color-nav-background: #00000063;
+    --color-muted: #2c2d2dbb;
+    --color-heading-primary: #ffffff;
+    --color-heading-secondary: #50fa7b;
+    --color-link-posts: #d63369;
+
+    --sc-bg: #111;
+    --sc-divider-light: rgba(200, 200, 200, 0.12);
+    --sc-divider-dark: rgba(200, 200, 200, 0.48);
+
+    --syntax-background: hsl(60, 0%, 8.8%);
+    --syntax-comment: hsl(0, 0%, 50.2%);
+    --syntax-text: hsl(60, 0%, 80%);
+    --syntax-operator: hsl(39, 0%, 92.5%);
+    --syntax-string: hsl(60, 0%, 65%);
+    --syntax-number: hsl(42.3, 0%, 60%);
+    --syntax-primary: hsl(45, 0%, 67.5%);
+    --syntax-keyword: hsl(36.3, 0%, 87.8%);
+    --syntax-html-tag: hsl(33.9, 0%, 68%);
+    --syntax-boolean: hsl(60, 0%, 80%);
+  }
+
+  html,
+  body,
+  #__next {
+    @apply w-full h-full;
+    --sc-width: 6px;
+    scroll-behavior: smooth;
+  }
+
+  html {
+    font: 100%/1.75;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New,
+      monospace;
+    font-stretch: 25% 150%;
+  }
+
+  @supports (font-variation-settings: normal) {
+    html {
+      font: 100%/1.75 'iA Quattro', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        Liberation Mono, Courier New, monospace;
+      font-stretch: 25% 150%;
+    }
+  }
+
+  * {
+    scrollbar-color: var(--sc-divider-light) var(--sc-bg);
+  }
+
+  ::-webkit-scrollbar {
+    width: var(--sc-width);
+  }
+  ::-webkit-scrollbar:horizontal {
+    height: var(--sc-width);
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--sc-bg);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--sc-divider-light);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--sc-divider-dark);
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    color: var(--color-text);
+    background: var(--color-background);
+    font-weight: 400;
+  }
+
+  *::selection {
+    @apply bg-yellow-500 text-warmGray-800;
+  }
+
+  .shadow_line {
+    box-shadow: inset 0 -1px 0 0 currentColor;
+  }
+
+  .link-btn {
+    height: max-content;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered hover:bg-hovered dark:hover:bg-hovered dark:hover:text-warmGray-800 dark:bg-unhovered dark:text-black;
+  }
+
+  .button {
+    @apply p-2 border-2 border-warmGray-200 dark:border-warmGray-500;
+  }
+
+  .link {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 180%;
+    animation: gradient 8s ease infinite;
+    @apply bg-iridescent;
+  }
+
+  article :is(h1, h2, h3, h4, h5, h6) {
+    @apply flex mt-8 mb-5 font-semibold text-warmGray-800 dark:text-warmGray-200;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+  article h3 {
+    @apply text-lg;
+  }
+
+  article img {
+    @apply w-full mx-auto;
+  }
+
+  article hr {
+    @apply w-1/3 text-primary;
+  }
+
+  article p {
+    @apply my-4;
+  }
+
+  article strong {
+    @apply text-warmGray-800 dark:text-warmGray-200;
+  }
+
+  article blockquote code {
+    @apply not-italic;
+  }
+
+  article :not(pre) > code {
+    background: var(--syntax-background);
+
+    font-family: 'Fira Code', monospace;
+    @apply rounded-sm mx-1 py-[2px] px-2 text-sm text-warmGray-800 dark:text-warmGray-200;
+  }
+  article :not(pre) > code::before {
+    content: '`';
+  }
+
+  article :not(pre) > code::after {
+    content: '`';
+  }
+
+  article blockquote {
+    @apply relative py-1 pl-[2ch] pr-[1ch] my-8 italic bg-[#ada86314];
+  }
+
+  article blockquote::before {
+    content: '';
+    @apply absolute top-0 left-0 inline-block w-1 h-full bg-[color:var(--color-text)];
+  }
+
+  article li {
+    @apply relative my-3 pl-7;
+  }
+
+  article li::before {
+    content: '—';
+    @apply absolute left-1 opacity-90;
+  }
+}
+
+article .anchor {
+  padding-left: 0.5rem;
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
+}
+
+article :is(h2, h3, h4, h4, h6):hover .anchor {
+  opacity: 0.6;
+}

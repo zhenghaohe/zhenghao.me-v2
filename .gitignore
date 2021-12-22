@@ -1,0 +1,29 @@
+# Project Dependencies
+node_modules/
+
+log
+
+# Next build files 
+.next
+
+# VSCode config files
+.vscode
+
+# Secret environement variables
+.env
+
+# Deployemt related
+.now
+out
+
+# Ignore next-mdx-enhanced cache directory
+.mdx-data
+
+.ds_store
+
+.linaria-cache
+
+public/*.js
+public/*.js.map
+public/robots.txt
+public/sitemap.xml
