@@ -1,6 +1,6 @@
-# [heyitsarpit.dev](https://heyitsarpit.dev)
+# [zhenghao.io](https://zhenghao.io)
 
-Source code for my personal website and blog [heyitsarpit.dev](https://heyitsarpit.dev).
+Source code for my personal website and blog [zhenghao.io](https://zhenghao.io).
 
 ## built with
 
@@ -11,3 +11,5 @@ Source code for my personal website and blog [heyitsarpit.dev](https://heyitsarp
 - [typescript](https://www.typescriptlang.org/)
 - [prettier](https://github.com/prettier/prettier)
 - [eslint](https://eslint.org/)
+
+inspired by [Arpit](https://heyitsarpit.dev/).

@@ -111,7 +111,7 @@
   }
 
   *::selection {
-    @apply bg-yellow-500 text-warmGray-800;
+    @apply bg-unhovered text-warmGray-800;
   }
 
   .shadow_line {
