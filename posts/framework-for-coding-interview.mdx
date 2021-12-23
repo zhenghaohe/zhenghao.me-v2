@@ -1,0 +1,80 @@
+---
+title: A framework for coding interviews
+published: true
+listed: true
+date: '12/23/2021'
+description: Walk through of a framework I've used in technical coding interviews
+tags: technical interviews
+---
+
+Since last year, I have been interviewing a lot with different companies - FANNGs companies and startups. All of the interviews had some portion of data structure & algorithms type (a.k.a leetcode questions) of questions as part of the interview process: in my experience, FANNGs companies tend to be algorithms-heavy while startups e.g. Stripe focus more on practical skills such as debugging.
+
+I ended up getting offers from Meta (f.k.a Facebook), Microsoft, Asana, Twitch, Coinbase etc. so I guess the way I approached the coding interviews worked, to some extent, at least for me. But before I write it down and share it with you, I want to preemptively say that I have never done any competitive programming so there are people out there who are way better at solving algorithm questions than me. I have never been on on the other side of table either - I haven’t conducted any interviews. Therefore this blog post might just be *self-serving* but I still hope you find a thing or two useful from it.
+
+
+> This blog post is targeted at those who are preparing for interviews for general software engineer roles, not for roles like software research engineers or applied scientists.
+
+## Questions to ask before coding
+
+Take a moment to internalize the problem and repeat the goal of the challenge back to the interviewer(s). This will either get you confirmation on your way forward or they'll help you correct course. After that, you need to ask a series of clarifying questions:
+
+### 1. Define input and output
+1. How is the input stored? E.g. If we are given a collection of words, is it a list of strings or a Trie?
+    1. What kind of values are there? E.g. Are there negative numbers? Floating points? Will there be empty inputs? Are there duplicates within the input?
+    2. Can I always assume valid input? E.g. If we need to find the kth largest element in the array, can `k` be negative number, or can it be bigger than the array size?
+2. How is the output defined? i.e. What do we need to return - Are we returning index or actual items? What if there are multiple equally qualified outputs?
+
+
+### 2. Check your assumptions about the size/range/scale of the data
+
+1. How big is the size of the input? 
+2. How big is the range of the values? E.g. If we are dealing with multiplication here, do we need to worry about integer overflow? 
+3. Or stack overflow if we are using recursion?
+
+### 3. Ask requirements for runtime and space complexity
+
+This is pretty self-explanatory and they probably want an optimal solution but it is still worth asking. 
+
+For example, if the size of the input is small enough, a `O(n^2)` solution might be more desirable than a `O(nlogn)` solution if `n` is [small enough.](https://stackoverflow.com/questions/23329234/which-is-better-on-log-n-or-on2)
+
+### 4. Check assumptions of the environment the code is running on
+
+1. What kind of environment is this algorithm expected to run in? - single or multi-threaded environment?
+2. Can I assume I can use new syntax/languages features in whatever the langauge I am using? In the context of JavaScript, I would ask if we have transpiling and polyfills available for older browsers.
+3. Can I destroy/mutate the original array/graph/data structure?
+
+After asking these questions, from there, start writing comments in the editor and outlining step by step what it is what you'll be doing. This will do a few things for you, primarily giving you a great blueprint to follow. This will also show them how you think, how you communicate, and it lets them give you feedback before you even start, which hopefully they do!
+
+Finally, it's time to solve the challenge and start coding.
+
+## During coding
+You want to give the interviewers as many positive signals as possible. 
+
+1. See if you can divide the problems into subproblems
+2. Separate your code into logical units
+3. Discuss tradeoffs - consider pros and cons and alternatives
+    1. are you favouring runtime complexity over space complexity by throwing a hashmap at the question?
+    2. are you aware of a potential large memory footprint caused by a recursive approach without tail call optimization?
+4. come up with your own test cases and run it through your code. 
+5. explain the time and sapce complexity
+
+
+## A note on coding interviews
+
+Whether or not these coding interviews are good tools or meaningful ways to assess software engineer candidates across multiple dimensions is a contentious topic. While there are people geniuely believe that they can get meaningful signals from these leetcode questions, I found there are generally two camps of people who also are in favor of algorithm-style coding interviews
+
+1. “I’m good at this style of question and I’m smart, therefore this style of question tells you how smart someone is”
+2. “I used to suck at these and after spending countless hours grinding leetcode, now I know how to play the game and you need to be in practice at the game too if you want to join my company”
+
+I think I can at least understand the former line of reasoning, even if I disagree. What seems so funny to me is the latter. Maybe they do get a lot of value out of grinding leetcode. I am not sure.
+
+I personally think this algorithm type of programming problems is a fine way to assess many things - problem solving skills, communication skills, coding skills etc. They can be streamlined and standardized and therefore they are scalable. They are useful for eliminating false positives at the cost of having a few false negatives.
+
+But I don’t think high performance on coding interview has a very positively correlation with high performance on the actual job. It’s really difficult to measure programmer effectiveness in anything resembling an objective manner, so I don’t know any better solutions either.
+
+
+## Some meta-techniques for improving coding skills
+
+- Get feedback from an expert coach. If not, this could be from a layperson, although personally I haven’t never felt the need to conduct a mock interview with a friend...
+- Or get feedback from yourself by recording yourself solving those questions. In modern software development, we never operate a complex software system without metrics or tracing, but it's normal to operate yourself without metrics or tracing, even though you're much more complex and harder to understand than the software you work on. By viewing a replay yourselve, you might improve a lot things that otherwise are completely non-obvious to you.
+- Learn to talk while you code. Just practice it like any other skill. Turn a mundane talk into a captivating high-wire act. Instead of you proving yourself, you talk like you teach others how to do the thing you are doing and people are attracted to confidence.
