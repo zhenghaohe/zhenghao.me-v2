@@ -10,7 +10,16 @@ export const getStaticProps = async () => {
   return { props: { posts } };
 };
 
-const PostPreview: React.FC<PostMeta> = ({ slug, title, date }) => {
+const formatTags= (tags: string) => {
+  let formattedTagsArr: string[] = []
+  for(const tagStr of tags.split(',')) {
+    formattedTagsArr.push(`#${tagStr}`)
+  }
+  return formattedTagsArr.join(', ')
+}
+
+
+const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
   return (
     <li className="my-8">
       <Link href={`posts/${slug}`}>
@@ -21,13 +30,14 @@ const PostPreview: React.FC<PostMeta> = ({ slug, title, date }) => {
           <h3 className="font-light link-btn">{title}</h3>
         </a>
       </Link>
+      <small>{formatTags(tags)}</small>
     </li>
   );
 };
 
-const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
+export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
   const postsByYear: Record<string, PostMeta[]> = {};
-
+  
   posts.forEach((post) => {
     const year = new Date(post.date).getFullYear();
     const knownPosts = postsByYear[year] || [];
