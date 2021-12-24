@@ -53,8 +53,9 @@ For frontend-focused system design interviews, you would spend most of the time 
 - frontend/client side architecture, such as which rendering pattern to choose - client side rendering, or server side rendering or static generation or something in between?
 - What kind of data fetching mechanism to use - REST vs. GRAPHQL vs. gRPC and what should the APIs look like?
 - Specifics about UI components
-    - a newsfeed which has an infinite scroll behaviour with all the images lazily loaded while ensuring the client side has the aspect ratio upfront to prevent layout shift.
+    - a newsfeed which has an infinite scroll behaviour with all the images lazily loaded while ensuring the client side has the aspect ratio of the images upfront to prevent layout shift.
     - an autocomplete UI component which also receives images from server pushes in parallel with fetching search result data.
+    - a gallery page which pulles images and displays them in the correct order despite the asynchrony that might cause them to arrive out of order.
 - How do you leverage different layers of cache to decrease latency or support offline mode.
 - if they want to get framework specific, which is totally possible, they might even ask you to define a particular React components’s props.
 
