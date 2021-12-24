@@ -17,10 +17,10 @@ Now that I have done a fair amount of system design interviews of both types, I 
 
 ## Similarities
 
-Both frontend-focused and backend-focused system design interviews share a lot of similarities in terms of how you approach it methodically: 
+Both frontend-focused and backend-focused system design interviews share a lot of similarities in terms of how you can approach it methodically: 
 
-1. starting with gathering system requirements, 
-2. laying out a clear plan and identifying major distinguishable components of the system, 
+1. starting with gathering system requirements
+2. laying out a clear plan and identifying major distinguishable components of the system
 3. proceeding to end to end api design
 4. talking about optimization
 
@@ -43,7 +43,7 @@ During the backend-focused system design interviews, you would spend most of the
 
 2. discussing which type of database to use and how to aggregate data across different shards
 
-3. designing SQL table schema.
+3. designing SQL table schema
 
 4. Choosing the right the cross-region strategy if your service has a global userbase
 <br />
@@ -73,7 +73,7 @@ A lot times when having one type of system design interviews, you can over simpl
 Outside of the differences with the technical topics I needed to dig deep into during the interviews, I found there are two other interesting differences that stand out between the two types:
 
 1. For frontend system design interviews I was often encouraged to treat the interviewers as the product manager and we spent some time just fleshing out the brief solution for each user story. For the backend system design interviews, we didn’t really get to talk about any user interaction (I am aware that the definition of users of your system might vary, depending on whether it is customer-facing vs. developer-facing)
-2. The two types of system design interviews also differ a lot in terms of *estimating* certain system's needs based on the potential scale of the system. The system needs can be storage needs or throughput needs or any other types of requirements. 
+2. These two types of system design interviews also differ a lot in terms of *estimating* certain system's needs based on the potential scale of the system. The system needs can be storage needs or throughput needs or any other types of requirements. 
     - It is common and expected to do these estimation during backend system design interviews since your design decision is only feasible when all of the system needs can realistically be met. 
     - But for the frontend system design interview, I rarely needed to do any **quantitative estimation** - for example, when I was designing some live feed during a frontend system design interview, I didn’t need to do estimations like “*So let’s say each message was roughly 140 characters long and it is utf8 so that’s 140 bytes and an average user gets 10000 messages over a certain period of time so we ended up allocating 1.4mb memory on user devices*”. Again, I am not saying that this would never come up during a frontend system design interview. in my experience It is just much, much more rare compared to backend ones.
 
