@@ -12,9 +12,11 @@ Try read the following TypeScript code snippet and work it out in your head to p
 ```typescript
 // 1. any and unknown
 let stringVariable: string = 'string'
-let anyVariable: any = stringVariable
-let unknownVariable: unknown = stringVariable
+let anyVariable: any
+let unknownVariable: unknown 
 
+anyVariable = stringVariable
+unknownVariable = stringVariable
 stringVariable = anyVariable
 stringVariable = unknownVariable
 
@@ -30,7 +32,6 @@ anyVariable = neverVariable
 stringVariable = neverVariable
 
 
-
 // 3. `void` pt. 1
 let undefinedVariable: undefined 
 let voidVariable: void
@@ -39,6 +40,7 @@ let unknownVariable: unknown
 voidVariable = undefinedVariable
 undefinedVariable = voidVariable
 voidVariable = unknownVariable
+
 
 // 4. `void` pt. 2
 
