@@ -90,6 +90,8 @@ In TypeScript, there are two types are that the supertypes of all other types: `
 They accepts any value of any type, encompassing all other types.
 ![alt](/art/blog/type-hierarchy-tree/top.png)
 
+> This graph is by no means an exhaustive list of all the types that TypeScript has. Check out [the source code](https://github.com/microsoft/TypeScript/blob/main/src/compiler/types.ts#L642) of TypeScript if you are interested to see all the types that it supports.
+
 For example, every `string` type is a subtype of the `any` type and the `unknown` type. That means the following assignments are allowed:
 
 ```typescript
