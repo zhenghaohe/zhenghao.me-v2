@@ -7,7 +7,7 @@ description: A reflection on my mental model of TypeScript’s type system
 tags: typescript
 ---
 
-Try read the following TypeScript code snippet and work it out in your head to predicate whether or not there would any type errors for each assignment:
+Try read the following TypeScript code snippet and work it out in your head to predicate whether or not there would be any type errors for each assignment:
 
 ```typescript
 // 1. any and unknown
@@ -49,9 +49,9 @@ function fn(cb: () => void): void {
 fn(() => 'string')
 ```
 
-If you have been writing TypeScript for a while you might be thinking: “This is much simpler than the code I’m writing every day. What’s the point?”. And if you were able to come up with the correct answers without paste the code into your editor and let the compiler does its job, I am genuinely going to be impressed. At least I couldn’t get them all right after writing TypeScript for more than a year. I was really confused by this part of TypeScript which involves types like `any`, `unknown`, `void` and `never`
+If you have been writing TypeScript for a while you might be thinking: “This is much simpler than the code I’m writing every day. What’s the point?”. And if you were able to come up with the correct answers without pasting the code into your editor and let the compiler does its job, I am genuinely going to be impressed. At least I couldn’t get them all right despite writing TypeScript for more than a year. I was really confused by this part of TypeScript which involves types like `any`, `unknown`, `void` and `never`
 
-I didn’t have the correct mental model for how those types works. Without a consistent and accurate mental model, I could only rely on my experience or intuitions or constant trial and error playing with the TypeScript compiler. 
+I realized I didn’t have the correct mental model for how those types works. Without a consistent and accurate mental model, I could only rely on my experience or intuitions or constant trial and error from playing with the TypeScript compiler. 
 
 The blog post is my attempt to introspect and rebuild the mental model of TypeScript’s type system. 
 
@@ -60,7 +60,7 @@ Turns out all types in TypeScript take their place in a hierarchy. You can visua
 
 You are probably familiar with inheritance, one of the well-known concepts in object-oriented programming. Inheritance establishes an `is-a` relationship between a child class and a parent class. If our parent class is `Vehicle`, and our child class is `Car`, the relationship is “`Car` is `Vehicle`”. However it doesn’t work the other way around - an instance of the child class logically is not an instance of the parent class. “`Vehicle` is not `Car`”.  This is the semantic meaning of inheritance, and it also applies to the type hierarchy in TypeScript. 
 
-According to [the Liskov substitution principle](https://en.wikipedia.org/wiki/Liskov_substitution_principle), instances of `Vehicle` (supertype) should be substitutable with instances of its child class (subtype) `Cars` without altering the correctness of the program. In other words, If we expect a certain behavior from a type, its subtypes should honor it.
+According to [the Liskov substitution principle](https://en.wikipedia.org/wiki/Liskov_substitution_principle), instances of `Vehicle` (supertype) should be substitutable with instances of its child class (subtype) `Cars` without altering the correctness of the program. In other words, If we expect a certain behavior from a type (`Vehicle`), its subtypes (`Car`) should honor it.
 
 > I should mention that the Liskov substitution principle is from a 30-year-old paper written for PhD's. There are a ton of nuances to it that I cannot possibly cover in one blog post.
 
@@ -69,6 +69,7 @@ Putting this together, in TypeScript, you can assign/substitute an instance of a
 > By the way I just realize the meaning of the word “substitute” changes radically depending on [the preposition that follows it](https://www.blog.voicetube.com/archives/55539).  In this blog post, when I say "substitute A with B”, it means we end up with B instead of A.
 
 ### two ways of checking assignability/substitutability
+
 1. you can just assign a variable of one type to a variable of another type to see if it raises a type error, just like what I did in the code snippet at the beginning of this post.
 2. you can use the `extend` keyword to perform a conditional type check. 
     ```typescript
@@ -81,7 +82,7 @@ One last concept before we actually dive into the solving the questions presente
 
 There are two ways in which supertype/subtype relationships are enforced. The first one, which most mainstream statically-typed languages (such as Java) use, is called **nominal typing**, where we need to *explicitly* declare a type is the subtype of another type via syntax like `class Foo extends Bar`. The second one, which TypeScript uses is **structural typing**, which doesn’t require us to state the relationship *explicitly* in the code. An instance of `Foo` type is a subtype of `Bar` as long as it has all the members that `Bar` type has, even if `Foo` has some additional members.
 
-Another way to think about this supertype-subtype relationship is to check which type is more strict, a type of `{name: string, age: number}`  is more strict than the type `{name: string}` since the former requires more members defined in its instances.
+Another way to think about this supertype-subtype relationship is to check which type is more strict, type `{name: string, age: number}`  is more strict than the type `{name: string}` since the former requires more members defined in its instances. Therefore type `{name: string, age: number}`  is a subtype of type `{name: string}`.
 
 
 ## the top of the tree
@@ -90,7 +91,7 @@ In TypeScript, there are two types are that the supertypes of all other types: `
 They accepts any value of any type, encompassing all other types.
 ![alt](/art/blog/type-hierarchy-tree/top.png)
 
-> This graph is by no means an exhaustive list of all the types that TypeScript has. Check out [the source code](https://github.com/microsoft/TypeScript/blob/main/src/compiler/types.ts#L642) of TypeScript if you are interested to see all the types that it supports.
+> This graph is by no means an exhaustive list of all the types that TypeScript has. Check out [the source code](https://github.com/microsoft/TypeScript/blob/main/src/compiler/types.ts#L642) of TypeScript if you are interested to see all the types that it currently supports.
 
 For example, every `string` type is a subtype of the `any` type and the `unknown` type. That means the following assignments are allowed:
 
@@ -100,17 +101,20 @@ let any: any = string // ✅
 let unknown: unknown = string // ✅
 ```
 
-Assigning a subtype to its supertype is called **upcast**. By the Liskov substitution principle, upcast is safe. 
+### type cast
 
-You can think of upcast is like walking up the tree - replacing types that are more strict with their supertypes that are more generic.
+Assigning a subtype to its supertype is called **upcast**. By the Liskov substitution principle, upcast is safe so the compiler lets you do it implicitly, no questions asked.
 
-The opposite is called **downcast**. Think of it as walking down the tree - making the type more specific and strict.
+> There are exceptions where TypeScript disallows the implicit upcast. I will address that [at the end of the post](#situations-where-typescript-disallows-implicit-upcast).
+
+
+You can think of upcast similiar to walking up the tree - replacing (sub)types that are more strict with their supertypes that are more generic.
+
+The opposite is called **downcast**. Think of it as walking down the tree - replacing the (super)type more generic with their subtypes that are more strict.
 
 ![alt](/art/blog/type-hierarchy-tree/cast.png)
 
-Unlike upcast, downcast is not safe and most strongly typed languages don’t allow this automatically. 
-
-Assigning variables of the `any` and `unknown` type to the `string` type is downcast:
+Unlike upcast, downcast is not safe and most strongly typed languages don’t allow this automatically. As an example, assigning variables of the `any` and `unknown` type to the `string` type is downcast:
 
 ```typescript
 let any: any
@@ -119,11 +123,11 @@ let stringA: string = any // ✅ ⬆️upcast
 let stringB: string = unknown // ❌ ⬇️downcast
 ```
 
-When we assign `unknown` to `stringA`, the TypeScript complier gives us a type error, which is expected since it is downcast so it cannot be performed without explicitly bypassing the type checker.
+When we assign `unknown` to a `string` type, the TypeScript complier gives us a type error, which is expected since it is downcast so it cannot be performed without explicitly bypassing the type checker.
 
-However TypeScript would happily allow us to assign `any` to `stringB`, which seems contradictory to our theory.
+However TypeScript would happily allow us to assign `any` to a `string` type, which seems contradictory to our theory.
 
-The exception here with `any` is because, in TypeScript any exists to act as a backdoor to escape to the JavaScript world. It reflects JavaScript’s overarching flexibility. Typescript is a compromise. This exception exists not due to some failure in design but the nature of not being the actual runtime language as the runtime language here is still JavaScript.
+The exception here with `any` is because, in TypeScript the `any` type exists to act as a backdoor to escape to the JavaScript world. It reflects JavaScript’s overarching flexibility. Typescript is a compromise. This exception exists not due to some failure in design but the nature of not being the actual runtime language as the runtime language here is still JavaScript.
 
 
 ## the bottom of the tree
@@ -131,9 +135,7 @@ The exception here with `any` is because, in TypeScript any exists to act as a b
 The `never` type is the bottom for the tree, from which no further branches extend.
 ![alt](/art/blog/type-hierarchy-tree/bottom.png)
 
-Symmetrically, it behaves like the an anti-type of the top types - `any` and `unknow`: it is the subtype of all types. 
-
-The compiler allows you to assign `never` to any other types (i.e. upcast) and forbids assigning any other types (including the `any` type) to a `never` type (i.e. downcast)
+Symmetrically, the `never` type behaves like the an anti-type of the top types - `any` and `unknow`, whereas `any` and `unknown` accept all values, `never` doesn’t accept any value (including the `any` type) at all since it is the subtype of all types. 
 
 ```typescript
 let any: any 
@@ -144,7 +146,7 @@ number = never // ✅ ⬆️upcast
 ```
 
 If you think hard enough, you might have realized that `never` should have an infinite amount of types and members, as it must be assignable or substitutable to its supertypes, i.e. every other type in the type system in TypeScript according to the Liskov substitution principle. For example, our program should behave correctly after we substitute `number` and `string` with `never` since `never` is the subtype of both `string` and `number` types and it shouldn’t break the behavior defined by its supertypes.
-This is impossible to achieve so what TypeScript decided to do is to make `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot create an actual value. No instances of it can be created. The canonical example where such a type is fitting is when we want to type a return value from a function that never returns.
+Technically this is impossible to achieve so what TypeScript decided to do is to make `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot create an actual value. No instances of it can be created. The canonical example where such a type is fitting is when we want to type a return value from a function that never returns.
 
 >  A function might not return for several reasons: it might throw an exception on all code paths, it might loop forever because it has the code that we want to run continuously until the whole system is shut down, like the event loop. All these scenarios are valid.
 
@@ -152,17 +154,13 @@ This is impossible to achieve so what TypeScript decided to do is to make `never
 function fnThatNeverReturns(): never {
 	throw 'It never returns'
 }
+
+const number: number = fnThatNeverReturns() // ✅ ⬆️upcast
 ```
 
-You can assign a variable of type `never` to any types as it is a subtype for every other type.
+The assignment above might seem wrong to you at first but it is actually fine - the compiler knows that our function never returns so nothing will ever be assigned to the `number` variable. Types exist to ensure that the data is correct at runtime. If the assignment never actually happens at runtime, and the compiler knows that for sure in advance, then the types don’t matter.
 
-```typescript
-const number: number = fnThatNeverReturns()
-```
-
-This might seems wrong at first but it is actually fine - the compiler knows that our function never returns so nothing will ever be assigned to the `number` variable. Types exist to ensure that the data is correct at runtime. If the assignment never actually happens at runtime, and the compiler knows that for sure in advance, then the types don’t matter.
-
-There is another way to produce a `never` type: when we intersect two types that aren’t compatible - e.g. `{x: number} & {x: string}`.
+There is another way to produce a `never` type is to intersect two types that aren’t compatible - e.g. `{x: number} & {x: string}`.
 
 
 
@@ -187,7 +185,7 @@ const a: Baz = {age: 12, name:'foo'} // ❌ Type 'string' is not assignable to t
 If you are familiar with TypeScript and have used it to write library code then you probably have used `never` a ton. It is pretty common and idiomatic in TypeScript to use `never` to annotate impossibility, used for situations that could occur, but should never occur:
 1. ensure exhaustive checks within `switch` and `if-else` statement.
     - For a more concrete example check out [this blog post](https://tkdodo.eu/blog/exhaustive-matching-in-type-script)
-2. it is useful when you want to write a utility type that distributes conditional types since `never` in a union type will automatically be ignored by the compiler. Such as this following utility type that extracts the types that matches the name property from a union type:
+2. it is useful when you want to write a utility type that distributes conditional types since `never` in a union type will automatically be ignored by the compiler. Such as this following utility type that extracts the types that matches the `name` property from a union type:
     ```typescript
     type Foo = {
     name: 'foo'
@@ -216,18 +214,16 @@ There shouldn’t be too much surprise as to how those types work once we have e
     type UserWithEmail = {name: string, email: string}
     type UserWithoutEmail = {name: string}
 
-    type A = UserWithEmail extends UserWithoutEmail ? true : false // true
+    type A = UserWithEmail extends UserWithoutEmail ? true : false // true ✅ ⬆️upcast 
     ```
-
-> There are exceptions where TypeScript disallows the implicit upcast. I will address that [at the end of the post](#situations-where-typescript-disallows-implicit-upcast).
 
 However there is one type I want to talk more about in this section since people often confuse it with the bottom type `never` and that type is `void`.
 
 
-`void` in TypeScript is a supertype of `undefined` - TypeScript allows you to assign `undefined` to `void` (upcaset) but not the other way around (downcast) 
+`void` in TypeScript is a supertype of `undefined` - TypeScript allows you to assign `undefined` to `void` (upcaset) but again, not the other way around (downcast) 
 ![alt](/art/blog/type-hierarchy-tree/void.png)
 
-This can also be verified via:
+This can also be verified via the `extends` keyword:
 ```typescript
 type A = undefined extends void ? true : false;  // true
 type B = void extends undefined ? true : false; // false
@@ -251,11 +247,11 @@ This is where TypeScript is trying to be pragmatic and complements the way JS wo
 
 ## situations where TypeScript disallows implicit upcast
 
-Generally there are two situations, and to be honest it is pretty rare to find yourself in these situations:
+Generally there are two situations, and to be honest it should be pretty rare to find yourself in these situations:
 
 1. When we pass literal objects directly to function
 
-```tsx
+```typescript
 function fn(obj: {name: string}) {}
 
 fn({name: 'foo', key: 1}) // ❌ Object literal may only specify known properties, and 'key' does not exist in type '{ name: string; }'
@@ -264,9 +260,10 @@ fn({name: 'foo', key: 1}) // ❌ Object literal may only specify known propertie
 
 2. When we assign literal objects directly to variables with explicit types
 
-```tsx
+```typescript
 type UserWithEmail = {name: string, email: string}
 type UserWithoutEmail = {name: string}
 
 let userB: UserWithoutEmail = {name: 'foo', email: 'foo@gmail.com'} // ❌ Type '{ name: string; email: string; }' is not assignable to type 'UserWithoutEmail'.
 ```
+
