@@ -180,7 +180,7 @@ type Baz = Foo & Bar
 const a: Baz = {age: 12, name:'foo'} // ❌ Type 'string' is not assignable to type 'never'
 ```
 
-### practical applications for `never` 
+### practical application of never 
 
 If you are familiar with TypeScript and have used it to write library code then you probably have used `never` a ton. It is pretty common and idiomatic in TypeScript to use `never` to annotate impossibility, used for situations that could occur, but should never occur:
 1. ensure exhaustive checks within `switch` and `if-else` statement.
