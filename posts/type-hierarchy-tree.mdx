@@ -137,7 +137,7 @@ The exception here with `any` is because, in TypeScript the `any` type exists to
 The `never` type is the bottom for the tree, from which no further branches extend.
 ![alt](/art/blog/type-hierarchy-tree/bottom.png)
 
-Symmetrically, the `never` type behaves like the an anti-type of the top types - `any` and `unknow`, whereas `any` and `unknown` accept all values, `never` doesn’t accept any value (including the `any` type) at all since it is the subtype of all types. 
+Symmetrically, the `never` type behaves like the an anti-type of the top types - `any` and `unknow`, whereas `any` and `unknown` accept all values, `never` doesn’t accept any value (including values of the `any` type) at all since it is the subtype of all types. 
 
 ```typescript
 let any: any 
@@ -148,7 +148,8 @@ number = never // ✅ ⬆️upcast
 ```
 
 If you think hard enough, you might have realized that `never` should have an infinite amount of types and members, as it must be assignable or substitutable to its supertypes, i.e. every other type in the type system in TypeScript according to the Liskov substitution principle. For example, our program should behave correctly after we substitute `number` and `string` with `never` since `never` is the subtype of both `string` and `number` types and it shouldn’t break the behavior defined by its supertypes.
-Technically this is impossible to achieve so what TypeScript decided to do is to make `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot create an actual value. No instances of it can be created. The canonical example where such a type is fitting is when we want to type a return value from a function that never returns.
+
+Technically this is impossible to achieve. Instead, TypeScript makes `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot have an actual value at runtime. The canonical example where such a type is fitting is when we want to type a return value from a function that never returns.
 
 >  A function might not return for several reasons: it might throw an exception on all code paths, it might loop forever because it has the code that we want to run continuously until the whole system is shut down, like the event loop. All these scenarios are valid.
 
@@ -160,7 +161,7 @@ function fnThatNeverReturns(): never {
 const number: number = fnThatNeverReturns() // ✅ ⬆️upcast
 ```
 
-The assignment above might seem wrong to you at first but it is actually fine - the compiler knows that our function never returns so nothing will ever be assigned to the `number` variable. Types exist to ensure that the data is correct at runtime. If the assignment never actually happens at runtime, and the compiler knows that for sure in advance, then the types don’t matter.
+The assignment above might seem wrong to you at first - if `never` is an empty type, why is that we can assign it to a `number` type? The reason why such an assignment is fine is that the compiler knows that our function never returns so nothing will ever be assigned to the `number` variable. Types exist to ensure that the data is correct at runtime. If the assignment never actually happens at runtime, and the compiler knows that for sure in advance, then the types don’t matter.
 
 There is another way to produce a `never` type is to intersect two types that aren’t compatible - e.g. `{x: number} & {x: string}`.
 
