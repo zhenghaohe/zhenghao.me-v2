@@ -121,7 +121,7 @@ Unlike upcast, downcast is not safe and most strongly typed languages don’t al
 ```typescript
 let any: any
 let unknown: unknown
-let stringA: string = any // ✅ ⬆️upcast
+let stringA: string = any // ✅ ⬇️downcast - it is allowed because `any` is different..
 let stringB: string = unknown // ❌ ⬇️downcast
 ```
 
@@ -270,3 +270,5 @@ type UserWithoutEmail = {name: string}
 let userB: UserWithoutEmail = {name: 'foo', email: 'foo@gmail.com'} // ❌ Type '{ name: string; email: string; }' is not assignable to type 'UserWithoutEmail'.
 ```
 
+## Further Reading
+- [Assignability Matrix in the TypeScript official docs](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#any-unknown-object-void-undefined-null-and-never-assignability)
