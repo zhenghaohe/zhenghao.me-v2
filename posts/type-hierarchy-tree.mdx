@@ -51,7 +51,7 @@ function fn(cb: () => void): void {
 fn(() => 'string')
 ```
 
-If you have been writing TypeScript for a while you might be thinking: “This is much simpler than the code I’m writing every day. What’s the point?”. And if you were able to come up with the correct answers without pasting the code into your editor and let the compiler does its job, I am genuinely going to be impressed. At least I couldn’t get them all right despite writing TypeScript for more than a year. I was really confused by this part of TypeScript which involves types like `any`, `unknown`, `void` and `never`
+If you were able to come up with the correct answers without pasting the code into your editor and let the compiler does its job, I am genuinely going to be impressed. At least I couldn’t get them all right despite writing TypeScript for more than a year. I was really confused by this part of TypeScript which involves types like `any`, `unknown`, `void` and `never`
 
 I realized I didn’t have the correct mental model for how those types works. Without a consistent and accurate mental model, I could only rely on my experience or intuitions or constant trial and error from playing with the TypeScript compiler. 
 
@@ -59,7 +59,7 @@ The blog post is my attempt to introspect and rebuild the mental model of TypeSc
 
 ## It is a hierarchy tree
 Turns out all types in TypeScript take their place in a hierarchy. You can visualize it as a tree-like structure. Minimally, in a tree, we can a parent node and a child node. In a type system, for such a relationship, we call the parent node a supertype and the child node a subtype.
-
+![alt](/art/blog/type-hierarchy-tree/supertype-subtype.png)
 You are probably familiar with inheritance, one of the well-known concepts in object-oriented programming. Inheritance establishes an `is-a` relationship between a child class and a parent class. If our parent class is `Vehicle`, and our child class is `Car`, the relationship is “`Car` is `Vehicle`”. However it doesn’t work the other way around - an instance of the child class logically is not an instance of the parent class. “`Vehicle` is not `Car`”.  This is the semantic meaning of inheritance, and it also applies to the type hierarchy in TypeScript. 
 
 According to [the Liskov substitution principle](https://en.wikipedia.org/wiki/Liskov_substitution_principle), instances of `Vehicle` (supertype) should be substitutable with instances of its child class (subtype) `Cars` without altering the correctness of the program. In other words, If we expect a certain behavior from a type (`Vehicle`), its subtypes (`Car`) should honor it.
@@ -70,40 +70,36 @@ Putting this together, in TypeScript, you can assign/substitute an instance of a
 
 > By the way I just realize the meaning of the word “substitute” changes radically depending on [the preposition that follows it](https://www.blog.voicetube.com/archives/55539).  In this blog post, when I say "substitute A with B”, it means we end up with B instead of A.
 
-### two ways of checking assignability/substitutability
+### nominal and structural typing
+There are two ways in which supertype/subtype relationships are enforced. The first one, which most mainstream statically-typed languages (such as Java) use, is called **nominal typing**, where we need to *explicitly* declare a type is the subtype of another type via syntax like `class Foo extends Bar`. The second one, which TypeScript uses is **structural typing**, which doesn’t require us to state the relationship *explicitly* in the code. An instance of `Foo` type is a subtype of `Bar` as long as it has all the members that `Bar` type has, even if `Foo` has some additional members.
 
-1. you can just assign a variable of one type to a variable of another type to see if it raises a type error, just like what I did in the code snippet at the beginning of this post.
-2. you can use the `extend` keyword to perform a conditional type check. 
+Another way to think about this supertype-subtype relationship is to check which type is more strict, type `{name: string, age: number}`  is more strict than the type `{name: string}` since the former requires more members defined in its instances. Therefore type `{name: string, age: number}`  is a subtype of type `{name: string}`.
+![alt](/art/blog/type-hierarchy-tree/supertype-subtype2.png)
+
+
+## two ways of checking assignability/substitutability
+One last thing before we dive into the type hierarchy tree in TypeScript:
+
+1. **type cast**: you can just assign a variable of one type to a variable of another type to see if it raises a type error. [More on that later](#upcast--downcast).
+2. `extends` keyword: you can extend one type to another: 
     ```typescript
     type A = string extends unknown? true : false;  // true
     type B = unknown extends string? true : false; // false
     ```
 
-### nominal and structural typing
-One last concept before we actually dive into the solving the questions presented at the beginning of the post.
-
-There are two ways in which supertype/subtype relationships are enforced. The first one, which most mainstream statically-typed languages (such as Java) use, is called **nominal typing**, where we need to *explicitly* declare a type is the subtype of another type via syntax like `class Foo extends Bar`. The second one, which TypeScript uses is **structural typing**, which doesn’t require us to state the relationship *explicitly* in the code. An instance of `Foo` type is a subtype of `Bar` as long as it has all the members that `Bar` type has, even if `Foo` has some additional members.
-
-Another way to think about this supertype-subtype relationship is to check which type is more strict, type `{name: string, age: number}`  is more strict than the type `{name: string}` since the former requires more members defined in its instances. Therefore type `{name: string, age: number}`  is a subtype of type `{name: string}`.
-
-
 ## the top of the tree
+Let's talk about the type hierarchy tree.
+
 In TypeScript, there are two types are that the supertypes of all other types: `any` and `unknown`.
 
-They accepts any value of any type, encompassing all other types.
+They accept any value of any type, encompassing all other types.
 ![alt](/art/blog/type-hierarchy-tree/top.png)
 
 > This graph is by no means an exhaustive list of all the types that TypeScript has. Check out [the source code](https://github.com/microsoft/TypeScript/blob/main/src/compiler/types.ts#L642) of TypeScript if you are interested to see all the types that it currently supports.
 
-For example, every `string` type is a subtype of the `any` type and the `unknown` type. That means the following assignments are allowed:
-
-```typescript
-let string: string = 'foo'
-let any: any = string // ✅
-let unknown: unknown = string // ✅
-```
-
-### type cast
+### upcast & downcast
+There are two types of type cast - **upcast** and **downcast**.
+![alt](/art/blog/type-hierarchy-tree/cast.png)
 
 Assigning a subtype to its supertype is called **upcast**. By the Liskov substitution principle, upcast is safe so the compiler lets you do it implicitly, no questions asked.
 
@@ -112,9 +108,16 @@ Assigning a subtype to its supertype is called **upcast**. By the Liskov substit
 
 You can think of upcast similiar to walking up the tree - replacing (sub)types that are more strict with their supertypes that are more generic.
 
-The opposite is called **downcast**. Think of it as walking down the tree - replacing the (super)type that are more generic with their subtypes that are more strict.
+For example, every `string` type is a subtype of the `any` type and the `unknown` type. That means the following assignments are allowed:
 
-![alt](/art/blog/type-hierarchy-tree/cast.png)
+```typescript
+let string: string = 'foo'
+let any: any = string // ✅ ⬆️upcast
+let unknown: unknown = string // ✅ ⬆️upcast
+```
+
+
+The opposite is called **downcast**. Think of it as walking down the tree - replacing the (super)type that are more generic with their subtypes that are more strict.
 
 Unlike upcast, downcast is not safe and most strongly typed languages don’t allow this automatically. As an example, assigning variables of the `any` and `unknown` type to the `string` type is downcast:
 
@@ -182,28 +185,6 @@ type Baz = Foo & Bar
 
 const a: Baz = {age: 12, name:'foo'} // ❌ Type 'string' is not assignable to type 'never'
 ```
-
-### practical application of never 
-
-If you are familiar with TypeScript and have used it to write library code then you probably have used `never` a ton. It is pretty common and idiomatic in TypeScript to use `never` to annotate impossibility, used for situations that could occur, but should never occur:
-1. ensure exhaustive checks within `switch` and `if-else` statement.
-    - For a more concrete example check out [this blog post](https://tkdodo.eu/blog/exhaustive-matching-in-type-script)
-2. it is useful when you want to write a utility type that distributes conditional types since `never` in a union type will automatically be ignored by the compiler. Such as this following utility type that extracts the types that matches the `name` property from a union type:
-    ```typescript
-    type Foo = {
-    name: 'foo'
-    }
-
-    type Bar = {
-        name: 'bar'
-    }
-
-    type All = Foo | Bar
-
-    type ExtractType<T, G> = T extends {name: G} ? T : never
-
-    type ExtractedType = ExtractType<All, 'foo' | 'non-exsitence'> 
-    ```
 
 ## types in between
 
