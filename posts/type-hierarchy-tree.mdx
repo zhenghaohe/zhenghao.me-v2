@@ -57,6 +57,8 @@ I realized I didn’t have the correct mental model for how those types works. W
 
 The blog post is my attempt to introspect and rebuild the mental model of TypeScript’s type system. 
 
+> A warning up front: this is not a short article. You can jump directly to [the section](#the-top-of-the-tree) where I explore the type hierarchy tree if you are in a hurry.
+
 ## It is a hierarchy tree
 Turns out all types in TypeScript take their place in a hierarchy. You can visualize it as a tree-like structure. Minimally, in a tree, we can a parent node and a child node. In a type system, for such a relationship, we call the parent node a supertype and the child node a subtype.
 ![alt](/art/blog/type-hierarchy-tree/supertype-subtype.png)
@@ -200,6 +202,10 @@ There shouldn’t be too much surprise as to how those types work once we have e
 
     type A = UserWithEmail extends UserWithoutEmail ? true : false // true ✅ ⬆️upcast 
     ```
+    - Or assign an non-empty object to an empty object:
+        ```typescript
+            const emptyObject: {} = {foo: 'bar'} // ✅ ⬆️upcast 
+        ```
 
 However there is one type I want to talk more about in this section since people often confuse it with the bottom type `never` and that type is `void`.
 
