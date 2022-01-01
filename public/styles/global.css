@@ -137,6 +137,7 @@
 
   article :is(h1, h2, h3, h4, h5, h6) {
     @apply flex mt-8 mb-5 font-semibold text-warmGray-800 dark:text-warmGray-200;
+    scroll-margin-top: 5rem;
   }
 
   h2 {
