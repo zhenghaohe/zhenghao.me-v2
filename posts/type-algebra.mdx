@@ -23,14 +23,14 @@ And there is [boolean algebra](https://en.wikipedia.org/wiki/Boolean_algebra), w
 
 Lastly there is [set algebra](https://en.wikipedia.org/wiki/Algebra_of_sets). In Set Theory we have union (∪, the `|` operator in TypeScript) and intersection (∩, the `&` opeartor in TypeScript) operation:
 
-1. intersection distributes over union: the type `A & (B | C)` is equivalent to `(A & B) | (A & C)`. We've distributed the `A` over the `B | C`
+1. intersection distributes over union: the type `A & (B | C)` is equivalent to `(A & B) | (A & C)`. We've distributed the `A` over the `B | C`.
 2. union also distributes over intersection: The type `A | (B & C)` is equivalent to `(A | B) & (A | C)`.
 
 TypeScript is very much related to Set Theory and the union and intersection operations around types also follow the algebraic laws in Set Theory - in the context of TypeScript, I call this **type algebra**.
 
 Although I doubt you would write complex types like `A & (B | C)` everyday, sometimes you do have to reason through the type algebra to decipher TypeScript error messages and find out what’s happening.
 
-## An example
+## Understand confusing type error messages by applying type algebra
 
 Now let’s walk through a concrete (contrived) example and see how we can apply type algebra to understand a potential type error.
 
@@ -61,7 +61,7 @@ const conference: VirtualEvent = {type: 'conference', isVirtual: false} // ❌ t
 We start with the type `IsVirtual & TechEvent`. It's easier to think about this type if we distribute the intersection over the union.
 
 ```typescript
-// these three types are equivalent through type algebra
+// By applying type algebra, we get three equivalent types:
 type VirtualEvent = IsVirtual & TechEvent
 type VirtualEvent = IsVirtual & (Conference | Meetup)
 type VirtualEvent = (IsVirtual & Conference) | (IsVirtual & Meetup)
@@ -79,7 +79,7 @@ Let’s create a `meetup` variable to verify our assumptions:
 const meetup: VirtualEvent = {type: 'meetup', isVirtual: true} // ❌ Type '"meetup"' is not assignable to type '"conference"'
 ```
 
-The code above doesn’t compile, which is expected. The type errors are interesting though. What does `conference` have to do with this `meetup` variable? The variable is for a meetup, not a conference. Here the compiler is not going to tell us exactly why something went wrong, so we have to work the types out for ourselves through type algebra:
+The code above doesn’t compile, which is expected. The type error message is interesting though. What does `conference` have to do with this `meetup` variable? The variable is for a meetup, not a conference. Here the compiler is not going to tell us exactly why something went wrong, so we have to work the types out for ourselves through type algebra:
 
 1. The type `VirtualEvent` is created by the intersection `(IsVirtual & Conference) | (IsVirtual & Meetup)`
 2. The right side of the union `IsVirtual & Meetup` is `{isVirtual: true} & {type: 'meetup', isVirtual: false}`, which gives us `never` because `true & false` for the `isVirtual` property is an empty intersection.
