@@ -19,7 +19,7 @@ We all have learned some algebraic laws from our math classes:
 And there is [boolean algebra](https://en.wikipedia.org/wiki/Boolean_algebra), which is a little different than the ordinary algebra we just saw:
 
 1. Logical conjunction (and, the `&&` operator in JavaScript)  distributes over the disjunction (or, the `||` operator in JavaScript): the `x` in `x && (y || z)` distributes over `y || z`  , resulting in the equivalent expression `(x && y) || (x && z)`
-2. the disjunction also distributes over conjunction. `x || (y && z)` we rewrite that expression as `(x || y) && (x || z)`
+2. the disjunction (`||`) also distributes over conjunction (`&&`). For `x || (y && z)`, we rewrite that expression as `(x || y) && (x || z)`
 
 Lastly there is [set algebra](https://en.wikipedia.org/wiki/Algebra_of_sets). In Set Theory we have union (∪, the `|` operator in TypeScript) and intersection (∩, the `&` opeartor in TypeScript) operation:
 
