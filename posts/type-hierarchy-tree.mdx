@@ -154,7 +154,7 @@ number = never // ✅ ⬆️upcast
 
 If you think hard enough, you might have realized that `never` should have an infinite amount of types and members, as it must be assignable or substitutable to its supertypes, i.e. every other type in the type system in TypeScript according to the Liskov substitution principle. For example, our program should behave correctly after we substitute `number` and `string` with `never` since `never` is the subtype of both `string` and `number` types and it shouldn’t break the behavior defined by its supertypes.
 
-Technically this is impossible to achieve. Instead, TypeScript makes `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot have an actual value at runtime. The canonical example where such a type is fitting is when we want to type a return value from a function that never returns.
+Technically this is impossible to achieve. Instead, TypeScript makes `never` an empty type (a.k.a an uninhabitable type): a type for which we cannot have an actual value at runtime, nor can we do anything with the type e.g. accessing properties on its instances. The canonical usecase for `never` is when we want to type a return value from a function that **never returns**.
 
 >  A function might not return for several reasons: it might throw an exception on all code paths, it might loop forever because it has the code that we want to run continuously until the whole system is shut down, like the event loop. All these scenarios are valid.
 
@@ -188,6 +188,8 @@ type Baz = Foo & Bar
 const a: Baz = {age: 12, name:'foo'} // ❌ Type 'string' is not assignable to type 'never'
 ```
 
+> Edit from the future: I realized that there are some nuances to the resulting type - if disjoint properties are considered as discriminant properties (roughly, those whose values are of literal types or unions of literal types), the whole type is reduced to `never`. This is a feature introduced in TypeScript 3.9. Check out [this PR](https://github.com/microsoft/TypeScript/pull/36696) for details and motivation.
+
 ## types in between
 
 We have talked about the top types and the bottom type. The types in between are just the other regular types you use everyday - `number`, `string`, `boolean`, composite types like `object` etc.
@@ -209,8 +211,10 @@ There shouldn’t be too much surprise as to how those types work once we have e
 
 However there is one type I want to talk more about in this section since people often confuse it with the bottom type `never` and that type is `void`.
 
+In many other languages, [such as C++](https://docs.microsoft.com/en-us/cpp/cpp/void-cpp?view=msvc-170), `void` is used as the a function return type that means that function doesn't return. However, in TypeScript, for a function that doesn't return at all, the correct type of the return value is `never`.
 
-`void` in TypeScript is a supertype of `undefined` - TypeScript allows you to assign `undefined` to `void` (upcaset) but again, not the other way around (downcast) 
+
+So what is the type `void` in TypeScript? `void` in TypeScript is a supertype of `undefined` - TypeScript allows you to assign `undefined` to `void` (upcaset) but again, not the other way around (downcast) 
 ![alt](/art/blog/type-hierarchy-tree/void.png)
 
 This can also be verified via the `extends` keyword:
