@@ -63,7 +63,7 @@
   #__next {
     @apply w-full h-full;
     --sc-width: 6px;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth; */
   }
 
   html {
