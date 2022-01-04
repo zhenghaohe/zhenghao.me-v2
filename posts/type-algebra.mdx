@@ -26,15 +26,15 @@ Lastly there is [set algebra](https://en.wikipedia.org/wiki/Algebra_of_sets). In
 1. intersection distributes over union: the type `A & (B | C)` is equivalent to `(A & B) | (A & C)`. We've distributed the `A` over the `B | C`.
 2. union also distributes over intersection: The type `A | (B & C)` is equivalent to `(A | B) & (A | C)`.
 
-TypeScript is very much related to Set Theory and the union and intersection operations around types also follow the algebraic laws in Set Theory - in the context of TypeScript, I call this **type algebra**.
+TypeScript is very much related to Set Theory and the union and intersection operations around types also follow the algebraic laws in Set Theory - in the context of TypeScript, I call it **type algebra**.
 
 Although I doubt you would write complex types like `A & (B | C)` everyday, sometimes you do have to reason through the type algebra to decipher TypeScript error messages and find out what’s happening.
 
 ## Apply type algebra
 
-Now let’s walk through a concrete (contrived) example and see how we can apply type algebra to understand a potential type error.
+Now let’s walk through a concrete (contrived) example and see how we can apply type algebra to understand a confusing type error.
 
-Imagine we have two types of tech events - conferences and meetup. Conferences can be held either in-person or online virtually via Zoom while meetups must be held in-person at some physical location. And we have a type TechEvent which is a union of those two types of events. Finally we have an `IsVirtual` object type that only specifies `{isVirtual: true}`.
+Imagine we have two types of tech events - conferences and meetups. Conferences can be held either in-person or online virtually via Zoom while meetups must be held in-person at some physical location. To model this, we have a type `TechEvent` which is a union of those two types of events. Finally we have an `IsVirtual` object type that only specifies `{isVirtual: true}`, meaning an event is held online.
 
 ```typescript
 type Conference = {type: 'conference', isVirtual: boolean} 
@@ -67,47 +67,46 @@ type VirtualEvent = IsVirtual & (Conference | Meetup)
 type VirtualEvent = (IsVirtual & Conference) | (IsVirtual & Meetup)
 ```
 
-The `conference` variable requires its `isVirtual` to be `true` because the `Conference` type has `isVirtual: boolean`, but the type `IsVirtual` has `isVirtual: true`. When we intersect the two types, we get `isVirtual: boolean & true`. Intersecting `boolean & true` is equivalent to just `true`. That is why the type error above is asking for `true` for the `isVirtual` property.
+It is not hard to understand why the `conference` variable requires its `isVirtual` to be `true` - given that the `Conference` type has `isVirtual: boolean`, and the type `IsVirtual` has `isVirtual: true`, when we intersect the two types, we end up with `isVirtual: boolean & true`. Intersecting `boolean & true` is equivalent to just `true`. That is why the type error above is asking for `true` for the `isVirtual` property.
 
-So far it seems pretty straightforward. However for the type `Meetup`, things are much more complicated. `Meetup` has `isVirtual: false`. What happens when we intersect that with `isVirtual: true` in `IsVirtual`?  If you are familiar with TypeScript you might know that an impossible intersection produces the `never` type. Therefore, we might expect `{type: 'meetup', isVirtual: false} & {isVirtual: true}` to give us `{type: 'meetup', isVirtual: never}`. 
-
-> If you are not familiar with the never type, I have written [a blog post](type-hierarchy-tree#the-bottom-of-the-tree) covering that as well.
-
-Let’s create a `meetup` variable to verify our assumptions:
+So far it seems pretty straightforward. However for the type `Meetup`, things are much more complicated. `Meetup` has `isVirtual: false`, and `IsVirtual` has `isVirtual: true`. When we intersect them in the type `VirtualEvent`, something unexpected happens:
 
 ```typescript
 const meetup: VirtualEvent = {type: 'meetup', isVirtual: true} // ❌ Type '"meetup"' is not assignable to type '"conference"'
 ```
 
-The code above doesn’t compile, which is expected. The type error message is interesting though. What does `conference` have to do with this `meetup` variable? The variable is for a meetup, not a conference. Here the compiler is not going to tell us exactly why something went wrong, so we have to work the types out for ourselves through type algebra:
+The code above doesn’t compile because of a type error, which shouldn't come as a surprise. The type error itself is interesting though. 
+It says "Type 'meetup' is not assignable to type 'conference'" - but what does `conference` have to do with this `meetup` variable? The variable is for a meetup, not a conference. Here the compiler is not going to tell us exactly what went wrong, so we have to work the types out for ourselves through type algebra:
 
 1. The type `VirtualEvent` is created by the intersection `(IsVirtual & Conference) | (IsVirtual & Meetup)`
 2. The right side of the union `IsVirtual & Meetup` is `{isVirtual: true} & {type: 'meetup', isVirtual: false}`, which gives us `never` because `true & false` for the `isVirtual` property is an empty intersection.
 3. Now the intersection becomes `(IsVirtual & Conference) | never` and TypeScript automatically discards `never` from a union type.
 4. Now the intersection becomes just `IsVirtual & Conference`, which is `{type: 'conference', isVirtual: true}`
 
-Go back to the erroneous assignment:
+> If you are not familiar with the `never` type, I have written [a blog post](type-hierarchy-tree#the-bottom-of-the-tree) covering that as well.
+
+Go back to the erroneous assignment again:
 
 ```typescript
 const meetup: VirtualEvent = {type: 'meetup', isVirtual: true} // ❌ Type '"meetup"' is not assignable to type '"conference"'   
 ```
 
-We get an identical error message by replacing the `VirtualEvent` type with the equivalent version that we got through type algebra - `{type: 'conference', isVirtual: true}`
+IF we replace the `VirtualEvent` type with the equivalent version that we got through type algebra - `{type: 'conference', isVirtual: true}`, we would get an identical type error:
 
 ```typescript
 const meetup: {type: 'conference', isVirtual: true} = {type: 'meetup', isVirtual: true} // ❌ Type '"meetup"' is not assignable to type '"conference"'   
 ```
 
-Now it becomes apparent as to why the the compiler reported that 'meetup' isn't assignable to 'conference'.
+Now I hope it have become apparent to you as to why the the compiler reported that 'meetup' isn't assignable to 'conference': the compiler dropped the entire right side of the union because of the `never` type we got by distributing the intersection over the union.
 
-> You might think `{isVirtual: true} & {type: 'meetup', isVirtual: false}` should give us `{type: 'meetup', isVirtual: never}`. Yes it used to be that case before TypeScript 3.9. But afterward they introduced this feature to reduce empty intersections to `never` immediately upon construction. Check out [this PR](https://github.com/microsoft/TypeScript/pull/36696) for details and motivation.
+> You might think `{isVirtual: true} & {type: 'meetup', isVirtual: false}` should give us `{type: 'meetup', isVirtual: never}`, as opposed to just one `never` type. Actually it used to be the case before TypeScript 3.9. But afterward they introduced this feature to reduce empty intersections to `never` immediately upon construction. Check out [this PR](https://github.com/microsoft/TypeScript/pull/36696) for details and motivation.
 
 ## Don’t extend type algebra
 
-There are some type annotations in TypeScript that you might think they are equivalent but actually they are not:
+There are some type annotations in TypeScript that you might think they are good candidates for the distributivity law but actually they are not:
 
 - `(number | string) []` and`number[] | string[]` - the former represents an array of numbers and/or strings and the latter means an array of numbers or an array of strings.
-- `keyof (A & B`) and `keyof A & keyof B` - the former gives you a union of literal strings of the property names of the intersection of type `A` and `B` and the latter gives you an intersection of two union of literal strings of the property names of type `A and B`.
+- `keyof (A & B)` and `keyof A & keyof B` - the former gives you a union of literal strings of the property names of the intersection of type `A` and `B` and the latter gives you an intersection of two union of literal strings of the property names of type `A and B`.
 - `typeof foo & typeof bar` and `typeof (foo & bar)`  - the latter is not even valid TypeScript.
 
 
