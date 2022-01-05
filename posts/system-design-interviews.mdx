@@ -9,15 +9,13 @@ tags: technical interviews,musing
 
 ## Context
 
-As I mentioned in [my last post](zhenghao.io/posts/framework-for-coding-interview), I have been interviewing a lot for the past year - not conducting interviews, I was the candidate being interviewed. Most of the interview processes I had with big tech companies consisted of 1-2 system design rounds depending on the level of the role. Unlike traditional **backend-focused** system design questions, for which you can find lots of prep resources online such as the famous [grokking system design interview](https://www.educative.io/courses/grokking-the-system-design-interview)
-
-or [system design primer](https://github.com/donnemartin/system-design-primer), I didn’t know what to expect for a **frontend-focused** system design interview as there are very few resources out there talking about this type of interviews.
+As I mentioned in [my last post](zhenghao.io/posts/framework-for-coding-interview), I have been interviewing a lot for the past year - not conducting interviews, I was the candidate being interviewed. Most of the interview processes I had with big tech companies consisted of 1-2 system design rounds depending on the level of the role. Unlike traditional **backend-focused** system design questions, for which you can find lots of prep resources online such as the famous [grokking system design interview](https://www.educative.io/courses/grokking-the-system-design-interview) or [system design primer](https://github.com/donnemartin/system-design-primer), I didn’t know what to expect for a **frontend-focused** system design interview as there are very few resources out there talking about this type of interviews.
 
 Now that I have done a fair amount of system design interviews of both types, I want to give you a summary of what to expect, especially for the frontend ones since I have been mostly working on the frontend side.
 
 ## Similarities
 
-Both frontend-focused and backend-focused system design interviews share a lot of similarities in terms of how you can approach it methodically: 
+Both frontend-focused and backend-focused system design interviews share a lot of similarities in terms of the methodology you can adopt to solve the design questions: 
 
 1. starting with gathering system requirements
 2. laying out a clear plan and identifying major distinguishable components of the system
@@ -31,7 +29,7 @@ Other kinds of similarities include:
 
 1. The interviewer is relying on you to drive the presentation. You can't to rely on the interviewer to have your back.
 2. While the topics can be either micro or macro, you probably won’t need to actually write code - it is rare to jam some portion of coding in the middle of a system design interview
-3. Both types will consist of open ended questions are not like scantron school exams. There probably isn’t a checklist of things for you to cover one by one. Nor are you expect to drill deep into all of those. When you realize your interviewer is biased toward a particular part of the system, pivot your focus to that area. Other times you focus on your strengths and lead the converstation.
+3. Unlike scantron school exams, both types will consist of mainly open ended questions. There probably isn’t a checklist of things for you to cover one by one. Nor are you expected to drill deep into all of those. When you realize your interviewer is biased toward a particular part of the system, which they usually do, pivot your focus to that area. Other times you focus on your strengths and lead the converstation.
 
 <br />
 
@@ -52,18 +50,18 @@ During the backend-focused system design interviews, you would spend most of the
 
 For frontend-focused system design interviews, you would spend most of the time talking about stuff like:
 
-- frontend/client side architecture, such as which rendering pattern to choose - client side rendering, or server side rendering or static generation or something in between?
+- frontend/client side architecture, such as the appropriate rendering pattern to choose - client side rendering, or server side rendering or static generation or something in between?
 - What kind of data fetching mechanism to use - REST vs. GRAPHQL vs. gRPC and what should the APIs look like?
 - Specifics about UI components
     - a newsfeed which has an infinite scroll behaviour with all the images lazily loaded while ensuring the client side has the aspect ratio of the images upfront to prevent layout shift.
-    - an autocomplete UI component which also receives images from server pushes in parallel with fetching search result data.
-    - a gallery page which pulles images and displays them in the correct order despite the asynchrony that might cause them to arrive out of order.
+    - an autocomplete UI component which fetches search result data incrementally in batches while receiving images from server pushes in parallel.
+    - a gallery page which pulles images and displays them in the correct order despite the asynchrony that comes with the network requests that might cause them to arrive out of order.
 - How do you leverage different layers of cache to decrease latency or support offline mode.
-- if they want to get framework specific, which is totally possible, they might even ask you to define a particular React components’s props.
+- if they want to get framework-specific, which is totally possible, they might even ask you to define a particular React components’s props or manage complex state in a React app.
 
 <br />
 
-A lot times when having one type of system design interviews, you can over simplify the opposite side: 
+A lot times having one type of system design interviews means you can over simplify the opposite side: 
 
 - In a backend system design interview, the client-side/frontend is reduced to an API layer - you don’t need to consider all the intricacies of the browser or the pesky rerenders your real-time updates would cause.
 
@@ -75,7 +73,7 @@ A lot times when having one type of system design interviews, you can over simpl
 
 Outside of the differences with the technical topics I needed to dig deep into during the interviews, I found there are two other interesting differences that stand out between the two types:
 
-1. For frontend system design interviews I was often encouraged to treat the interviewers as the product manager and we spent some time just fleshing out the brief solution for each user story. For the backend system design interviews, we didn’t really get to talk about any user interaction (I am aware that the definition of users of your system might vary, depending on whether it is customer-facing vs. developer-facing)
+1. For frontend system design interviews I was often encouraged to treat the interviewers as the **product manager** and we spent some time just fleshing out the brief solution for each user story. For the backend system design interviews, we didn’t really get to talk about any user interaction (I am aware that the definition of users of your system might vary, depending on whether it is customer-facing vs. developer-facing)
 2. These two types of system design interviews also differ a lot in terms of *estimating* certain system's needs based on the potential scale of the system. The system needs can be storage needs or throughput needs or any other types of requirements. 
     - It is common and expected to do these estimation during backend system design interviews since your design decision is only feasible when all of the system needs can realistically be met. 
     - But for the frontend system design interview, I rarely needed to do any **quantitative estimation** - for example, when I was designing some live feed during a frontend system design interview, I didn’t need to do estimations like “*So let’s say each message was roughly 140 characters long and it is utf8 so that’s 140 bytes and an average user gets 10000 messages over a certain period of time so we ended up allocating 1.4mb memory on user devices*”. Again, I am not saying that this would never come up during a frontend system design interview. in my experience It is just much, much more rare compared to backend ones.
@@ -83,7 +81,7 @@ Outside of the differences with the technical topics I needed to dig deep into d
 <br />
 
 ## Career Ceiling
-This is a little bit tangential but I do want to talk about this. 
+> I am going to talk about something that is a little tangential. I don't think this is going to be a hot take but if you just want to pass the upcoming interviews, then you are welcome to skip this part.
 
 I have done interviews for both frontend focused roles and general software engineer roles. As I went through the preparation process for the system designs interviews, it just occurred to me that there is indeed a career ceiling for a pure frontend focused software engineer role.
 
@@ -91,13 +89,24 @@ Ok so let’s first get this out of the way - you can be extremely successful as
 
 Also it is hard to discuss any topic intelligently when we cannot agree on definitions. By saying frontend devs I meant developers/engineers who solely work on the UI of a software system. And by saying career ceiling I meant the potential terminal title and the highest level such a dev/engineer can achieve in the technical individual contributor track. 
 
-This is an unspoken thing and a very impolite conversation. Part of the ceiling comes from some traditional baggage 
+This is an unspoken thing and a very impolite conversation. And [there are exceptions](https://twitter.com/swyx/status/1236023548227072000) to this but just statistically speaking there seems to be a career ceiling for frontend-only devs. 
+
+### Fighting the inertia
+
+Part of the ceiling comes from some traditional baggage:
 
 - modern frontend development is fairly new compared to the backend counterpart. I have seen some bias in the industry that frontend is not real engineering compared to the backend and that needs absolutely to be combated.
 
 - power structure persists for a very long time and that’s partially why most of VP Eng and CTOs out there are backend/infra devs.
 
-I had this realization that when I was going through the backend system design interviews vs. the frontend system design interviews - the technical topics those interviews tend to cover let me think about some economic reasoning leading to the perception of a "Frontend Ceiling” as well. Your value to the company really depends on how many machines/compute/storage run through **you**. As a dev/engineer, that means much money you control and pure frontend devs just don’t take as much. Of course frontend is just as hard and as important especially for consumer facing products but at the end of the day your compute is being run on someone else’s machine or device and the company just don’t value that as much as the compute that they themselves need to pay for and to scale. 
+### Economic reasoning
+
+I had this realization that when I was going through the backend system design interviews vs. the frontend system design interviews - the technical topics those interviews tend to cover let me think about some economic reasoning leading to the perception of a "Frontend Ceiling” as well. Your value to the company really depends on how many machines/compute/storage run through **you**. As a dev/engineer, that means much money you control and frontend-only devs just don’t take as much. Of course frontend is just as hard and as important especially for consumer facing products but at the end of the day your compute is being run on someone else’s machine or device and the company just don’t value that as much as the compute that they themselves need to pay for and to scale. 
+
+### Short-lived vs. Long-running
+
+On top of that, normally the frontend/web apps are short-lived on the client side - the user opens the browser tab that loads your app and after 20 minutes they might just close the tab, and all the memory allocated by your app is on their devices from that point onward. On the other hand, the backend servers/services behind probably keep running for months or even years. One implication resulting from this difference is that you can generally get away with bad code that leads to performance problems down the road in frontend apps because they are short-lived and the scale of the data they are dealing with is probably small, but you cannot ignore that in a long-running backend service.
 
 
-Again, [there are exceptions](https://twitter.com/swyx/status/1236023548227072000) to this but just statistically speaking there seems to be a ceiling.
+<br />
+Good luck with your interviews.
