@@ -1,9 +1,9 @@
 import Image from 'next/image';
 import { images } from '@/utils/arts';
 
-const image = images[1]
+const image = images[0]
 
-export function MyPic() {
+export function AboutPic() {
     return (
 
          <div
