@@ -31,7 +31,7 @@ There are two schools of thought that I have seen when it comes to the mental mo
 1. storage box, house, or some kind of container
 2. label, wire, or some kind of reference
 
-### a box
+### A box
 
 For most people, "box" is probably the first metaphor they were taught to use when learning to program. I guess this is because to most people their first formally-taught programming language is C. At least for my generation, we didn't teach Python at CS101.
 
@@ -76,7 +76,7 @@ Now that we have two chunks of memory of the size 16 bytes and they are independ
 
 Therefore, variables in C/C++ are like boxes, unless you declare them as a reference/pointer.
 
-### a wire
+### A wire
 The “box” mental model fails when the variables and the values are stored in different places in memory. 
 
 ```
@@ -184,7 +184,7 @@ This (mostly) has to do with the nature of the language being dynamically typed.
 
 Wrapping primitives types inside another data structure that records extra metadata about the value is known as [boxing](https://leonardschuetz.ch/blog/nan-boxing/).
 
-## small integers
+## Small integers
 And I have been mentioning that small integers are an exception to this boxing rule. In V8, small integers (the term in V8 is `smi`) are heavily optimized so they can be encoded inside of a pointe. Unlike other types, a `smi` can be stored directly in the pointer without allocating additional storage for it.
 
 This means, it is technically to say that `a` has the value `123` as in `const a = 123`:
@@ -268,3 +268,13 @@ In fact, this is exactly pass-by-value - the value that gets passed and copied i
 
 ## Notes on terminology
 For variables that point to objects, some people also like to refer to them as references to objects. In this context, a reference and a pointer is the same thing. A pointer and a reference both function to provide access to data stored somewhere else - an indirection to another value. In languages like Java and JavaScript that have only one or the other, the choice of terminology is largely an arbitrary decision. The terminology only matters for languages like C++, which is unusual in having both pointers and [references](https://en.cppreference.com/w/cpp/types/is_reference).
+
+## Closing thoughts
+When it comes to learning a programming language, there are always two levels of abstraction involved:
+1. the language itself, i.e., the static and runtime semantics defined by the language specification.
+
+2. the underlying implementation details, i.e., a specific virtual machine that implements the language.
+
+When discussing programming languages, always remember what level of abstraction you're operating at.
+
+Lastly, this post is largely inspired by Dan Abramov's course [JustJavaScript](https://justjavascript.com/). He elegantly explained how JavaScript works in a poetic and allegorical way without going to any implementation details. Whether you are new to the language or you are already an experienced dev, I encourage you to check out his course.
