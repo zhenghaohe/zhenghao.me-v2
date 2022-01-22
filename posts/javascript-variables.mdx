@@ -10,7 +10,7 @@ When we start learning to program, we often are taught using some metaphor to he
 
 In this post, I will:
 
-1. stay at the language specification level, discuss different types of mental models around variables
+1. stay at the language specification level, discuss different types of mental models for variables
 2. come down the ladder of abstraction and peek under the hood at the JavaScript language implementation to see what JavaScript variables are actually made of
 3. bust one of the most famous urban legends in JavaScript - pass-by-reference for object
 
@@ -20,8 +20,8 @@ In this post, I will:
 This blog post will probably get too long and, maybe in some people's view, pedantic. So I figured I would put up a quick TL;DR:
 
 1. Instead of thinking of a JavaScript variable as a box, you should think of it as a label, a wire, something that points to/references the value.
-2. JavaScript variables are all implemented as pointers, and values are always on the heap, including primitive values and objects. (except for small integers due to pointer tagging)
-3. Objects are not passed by reference. You might argue it comes down to nomenclature, but in JavaScript passing objects to a function, or primitive values to a function are not handled differently in memory.
+2. JavaScript variables are all implemented as pointers, and values are always on the heap, including primitive values and objects. (except for small integers due to [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8))
+3. [Objects are not passed by reference](#why-javascript-can-not-do-pass-by-reference). You might argue it all comes down to nomenclature, but in JavaScript passing objects or primitive values to a function are not handled differently in memory.
 
 
 ## Mental models for Variables
@@ -61,72 +61,76 @@ The variable `foo` will be the size of 4 integers, so that is 16 bytes in memory
 
 When you assign it to a different variable or pass it as an argument to a function, you are literally carrying a blob of memory with the size of 16 bytes around and copying the full contents into the new variable or the parameter. 
 
-> This is the default behavior in C++. You can avoid them by having the copy constructor deleted or being private or passing by reference instead of passing by value. Since this is not a post about C++, I will not go into details.
-
 ```
 Line foo{{1, 2}, {3, 4}};
 Line bar = foo;
 ```
+
+> This is the default behavior in C++. You can avoid them by having the copy constructor deleted or being private or passing by reference instead of passing by value. Since this is not a post about C++, I will not go into details.
+
 
 The assignment operator `bar = foo` replaces the contents of the object `bar` with a copy of the full contents of `foo`.
 ![alt](/art/blog/javascript-variables/cppLineExample2.png)
 
 Now that we have two chunks of memory of the size 16 bytes and they are independent to each other, e.g. `foo.pos1` and `bar.pos1` are two separate objects.
 
-Therefore, variables in C/C++ are like boxes, unless you declare them a reference/pointer.
+Therefore, variables in C/C++ are like boxes, unless you declare them as a reference/pointer.
 
 ### a wire
-The “box” mental model fails when the variables and the values bound to them are stored in different places in memory. 
+The “box” mental model fails when the variables and the values are stored in different places in memory. 
 
 ```
 const foo = {pos1: {x: 1, y: 2}, pos2: {x: 3, y: 4}};
 ```
-Unlike the C++ example above, `foo` in JavaScript does not contain the object value inside. There is an extra layer of indirection here. 
+Unlike the C++ example, `foo` in the JavaScript snippet above does not contain the object value inside. There is an extra layer of indirection here. 
 ![alt](/art/blog/javascript-variables/JSLineExample1.png)
 When we assign the value of `foo` to a new variable `bar`  as in `const bar = foo`, they will start to share the same object, resulting in `foo.pos1` and `bar.pos1` being the very same object.
 ![alt](/art/blog/javascript-variables/JSLineExample2.png)
 
-So instead of thinking variables as boxes, in JavaScript, think of variables as wires, that connect you to values.
+So instead of thinking variables as boxes, in JavaScript, think of variables as wires, that **connect** you to values.
 
 ### what about primitive values?
-The above example is about objects in JavaScript. At this point you might become suspicious about the correctness or effectiveness of a “wire” mental modal for values of primitive types. For example, if we initialize `foo` to be of the type string , number or boolean , will the variable actually hold the value inside, like what we have seen in the C++ example?
+The above example is about objects in JavaScript. At this point you might be suspicious about the correctness or effectiveness of a “wire” mental modal for values of primitive types. For example, if we initialize `foo` to be of the type string, number or boolean, will the variable actually hold the value inside, like what we have seen in the C++ example?
 
 ```javascript
 const foo = 'baz'
 const bar = foo
 ```
 
-Given the code snippet above, will we end up with two separate memory chunks that *duplicately* make up the string `baz`? Or there is only one string `baz` at runtime which is pointed by both variable `foo` and `bar`? 
+Given the JavaScript code snippet above, will we end up with two separate memory chunks that *duplicately* make up the string `baz`? Or there is only one string `baz` at runtime which is pointed by both variable `foo` and `bar`? 
 
 The answer is the latter. It is not much different than objects, except that objects are immutable and primitive types are not. 
 ![alt](/art/blog/javascript-variables/JSPrimitiveExample1.png)
 
-There is another difference between object values and primitive values - using object literals always gives you new, unique objects, while primitive values are **reused**. 
-What that means is that `const a = {}; const b = {}` gives us two different object value `{}`, but with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime. Same thing with other types of primitive values like number (except for small integers), booleans, `undefined` etc.. This might seem strange to you at first. I will prove it to you in a separate blog post.
+Besides immutability, there is another difference between object values and primitive values - using object literals always gives you new, **unique** objects, while primitive values are **reused**. 
 
-Having the right mental modal, the right approximation can have a huge positive impact on our day-to-day programming, even if the mental modal itself is deceptively simple and intuitive. Remember, JavaScript variables do not have or store values - they only **point** to or **refer** to values.
+That means `const a = {}; const b = {}` gives us two different object value `{}`, but with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime. Same thing with other types of primitive values like number (except for small integers), booleans, `undefined` etc.. This might seem strange to you at first. I will prove it to you in a separate blog post.
+
 
 ## What does the spec say
 Before I dive into the language implementation to really show you what JavaScript variables are made of from a low-level V8 perspective, I want to make a point that, even without peeking into what's under the hood, we can infer which mental modal should we use just by understanding the language specification. After all, all the language semantics defined by the specification have to be preserved by the language implementations.
 
-The indirection or separation of JavaScript variables and their corresponding values is expressed in the ECMAScript specification via this abstract [Reference Record Specification Type](https://tc39.es/ecma262/#sec-reference-record-specification-type). It is not revealed in JavaScript - you can never obtain them or interact with them directly. I will refer Reference Record Specification Type as Reference in the following.  I will refer to it as Reference in the following.
+> I will be the first to admit that the spec is hard to read. It is not written from the perspective of a language tutorial. Instead, it is written from the point of view of how to write a javascript interpreter. You can skip this section if you are not interested in the spec.
+
+The indirection or separation of JavaScript variables and their corresponding values is expressed in the ECMAScript specification via this abstract [Reference Record Specification Type](https://tc39.es/ecma262/#sec-reference-record-specification-type). It is not revealed in JavaScript - you can never obtain them or interact with them directly. 
+
+I will refer Reference Record Specification Type as Reference in the following.
 
 A Reference is a specification device used to represent a **location** at which you can read a value or write a value into. But they themselves do not store values, as you cannot find `[[value]]` field in [its definition](https://tc39.es/ecma262/#sec-reference-record-specification-type). It is used throughout the spec, but you can rarely sense its existence when writing JavaScript because, typically, you interact with values obtained through them.
 
-For example: when you write an assignment like `a = b`, it gets evaluated, and two References for variables `a` and `b` get constructed (to be precise, `a` and `b` are identifiers). The Reference of the right-hand side (RHS) of the equation gets passed to this abstract function called [GetValue](https://tc39.es/ecma262/#sec-getvalue), which fetches the value bound to/pointed by the Reference. Then an abstract [PutValue](https://tc39.es/ecma262/#sec-putvalue) is invoked with the obtained value from RHS and the Reference of the left-hand side (LHS), setting the new binding via `SetMutableBinding`. Note that the left-hand side remains a Reference during the assignment since the engine needs to know where to store the value, while the right-hand side is always evaluated as a value via `GetValue`. You can't put the Reference of RHS to the Reference of LHS. That's precisely why you cannot have a variable pointing to another variable - a wire only connects you to a value.
+For example: when you write an assignment like `a = b`, it gets evaluated, and two References for variables `a` and `b` get constructed (to be precise, `a` and `b` are identifiers). The Reference of the right-hand side (RHS) of the equation gets passed to this abstract function called [GetValue](https://tc39.es/ecma262/#sec-getvalue), which fetches the value bound to/pointed by the Reference. That value and the Reference of the left-hand side (LHS) are then passed to the abstract [PutValue](https://tc39.es/ecma262/#sec-putvalue) function, setting a new binding via `SetMutableBinding`. Note that the LHS remains a Reference during the assignment since the engine needs to know **where** to store the value, while the RHS is always evaluated as a value via `GetValue`. You can't pass the Reference of RHS to `PutValue`. That's precisely why you cannot have a variable pointing to another variable in JavaScript- a wire only connects you to a value.
 
-One of the only two operators which can operate directly at a Reference is `delete`, (the other is `typeof`). When you use `delete` to delete a property in an object, you are not delete the value pointed by the property. Instead, you are merely deleting the Reference, i.e. the location at which the value is stored.
+One of the only two operators which can operate directly at a Reference is `delete`, (the other is `typeof`). When you use `delete` on a property in an object, you are not deleting the value pointed by the property. Instead, you are merely deleting the Reference, i.e. the location at which the value is stored.
 
-I will be the first to admit that the spec is hard to read. It is not written from the perspective of a language tutorial. Instead, it is written from the point of view of how to write a javascript interpreter. The point I am trying to make about the Reference from the spec is that, even by staying at the abstraction level of the language itself without peeking into its implementation, we can still form the right mental modal on JavaScript variables and be an effective JavaScript developer.
 
 ## What are JavaScript variables made of exactly
-The topics discussed below are all considered “implementation details”. This is where the language specification ends, and the implementation starts.
+The topics discussed from this point forward are all considered “implementation details”. This is where the language specification ends, and the implementation starts.
 
-> I am going to explain what JavaScript variables really are from the perspective of the JavaScript engine - V8. There are different JavaScript engines in the wild. And even just for V8 along, it is very complex, and it has multiple ways to run code, and its various parts and pipelines have been rewritten many times over the years. What I describe today might not be outdated tomorrow. Don't rely on the implementation details.
+> I am going to explain what JavaScript variables really are from the perspective of the JavaScript engine - V8. There are different JavaScript engines in the wild. And even just for V8 along, it is very complex, and it has multiple ways to run code, and its various parts and pipelines have been rewritten many times over the years. What I describe today might become outdated tomorrow. Don't rely on the implementation details.
 
-Let’s step back for a second. At its simplest, think of a variable as an identifier, an alias to the chunk of memory at which its immediate value is stored. At compile time, Your variables are all turned into the memory addresses. Wherever that variable is used in the code, its (immediate) value will be accessed via that memory address. 
+Let’s step back for a second. At its simplest, think of a variable as an identifier, an alias to the chunk of memory at which its immediate value is stored. At compile time, Your variables are all turned into the memory addresses. Wherever a variable is used in the code, its (immediate) value will be accessed via that memory address. 
 
-As we have discussed, the values we see in our code are not directly stored in JavaScript variables. At a low level, that means the bits from the memory block of which a JavaScript variable is an alias does not make up its value directly. Then what exactly is stored in a JavaScript variable? The answer, it stores a memory address of some other memory block. Starting at that address, there is a separate chunk of memory, at which a real value, the value we see, manipulate and pass around in our JavaScript program, is stored.
+As we have discussed, the values we create in our JavaScript program are not directly stored in JavaScript variables. At a low level, that means the bits from the memory block of which a JavaScript variable is an alias does not make up its value directly. Then what exactly is stored in a JavaScript variable? The answer, it stores a memory address of some other memory block. Starting at that address, there is a separate chunk of memory, at which a "real JavaScript" value, the value we see, manipulate and pass around in our JavaScript program, is stored.
 
 If you are familiar with the concept of a pointer, you already know the answer: the variables in JavaScript are exactly pointers. (again, except for small integers)
 
@@ -149,52 +153,53 @@ Now we assign the empty object to variable `b` in `const b = a`:
 
 variables `a` and `b` are loaded at different memory locations, but they store the same immediate value - the (starting) memory address at which the empty object `{}` is stored.
 
-Therefore, it is technically incorrect to say that “variable `a` has the empty object as its value ” - variable `a` only has the memory address of that object.
+Again, it shows why it is technically incorrect to say that “variable `a` has the empty object as its value ” - variable `a` only has the memory address of that object.
 
 ### Everything is on the heap
 
-We haven't talked much about primitive values. For V8 currently, values of primitive types, except for integers ranging from 2³¹ to 2³¹-1 on a 64bit architecture (more on this later), are just like objects - they are stored separately, and the JavaScript variables can only point to them. 
+We haven't talked much about primitive values. For V8 currently, values of primitive types, except for integers ranging from -2³¹ to 2³¹-1 on a 64-bit architecture ([more on this later](#small-integers)), are just like objects - they are stored separately, and the JavaScript variables can only point to them. 
 
 This is clearly stated in one of [the V8 blog posts](https://v8.dev/blog/pointer-compression#value-tagging-in-v8):
 > “JavaScript values in V8 are represented as objects and allocated on the V8 heap, no matter if they are objects, arrays, numbers or strings. This allows us to represent any value as a pointer to an object.”
 
 The term Heap is a general, well-understood, computing term. In C++ they are referred to [in the Standard](https://en.cppreference.com/w/cpp/language/storage_duration) as the "dynamic storage". Think of it as just a part of the memory. And in order to access data allocated on the heap, the pointers, i.e. the immediate values of your JavaScript variables are (most probably) located on somewhere called the stack or registers, pointing to the heap objects. 
 
-However, this is an oversimplification. I am planning on writing another blog post about the memory layout in V8.
+> This is still an oversimplification. I am planning on writing another blog post about the memory layout in V8.
 
 
 ## The hidden layer in JavaScript
 
-The second table (blue) in the previous diagrams is always hidden in the JavaScript world, just like our Reference Record Specification Type. Within JavaScript, you cannot see or interact with memory addresses except for retrieving the actual values pointed by them, nor can you get the memory address of that memory address itself either. Mouthful right? Interacting with your memory in a low-level way can get really tricky, so the JavaScript engine manages that for you. 
+The second table (blue) in the previous diagrams is always hidden in the JavaScript world, just like our Reference Record Specification Type. Within JavaScript, you cannot see or interact with a pointer (i.e. JavaScript variables) except for retrieving the actual values pointed by them, nor can you get the memory address of a pointer itself either. Mouthful right? Interacting with your memory in a low-level way can get really tricky, so the JavaScript engine manages that for you. 
 
-For example, when you place an assignment operator = between two variables in `a = b`, you don’t really need to think about scenarios like this as it cannot happen in JavaScript:
+For example, when you place the assignment operator `=` between two variables as in `a = b`, you don’t really need to think about scenarios like this diagram below as it cannot happen in JavaScript:
 
 ![alt](/art/blog/javascript-variables/hiddenLayerInJS.png)
 
-Now you know what JavaScript variables are made of - they are (directly) made of memory addresses, pointing to where the values you create and manipulate in your JavaScript program are actually stored. But don't go overboard and use pointers to refer to every JavaScript variable you declared. Unlike C/C++, for JavaScript, the pointer is not a term that gets used in the language semantics. Calling variables pointers would not add any useful distinction.
+Now you know what JavaScript variables/object properties are made of - they are (directly) made of pointers, storing memory addresses and pointing to values you create and manipulate in your JavaScript program. But don't go overboard and use pointers to refer to every JavaScript variable you declared. Unlike C/C++, for JavaScript, a pointer is not a term that gets used in the language semantics. Calling variables pointers would not add any useful distinction.
 
 ## Boxing
 
 You might be thinking: why do we have to add extra pointer indirections between values and variables/object properties? 
-This (most likely) has to do with the nature of the language is dynamically typed. In a dynamically typed programming language, the type checks are performed at runtime. However, the variables can hold any type of value at runtime. Therefore the types cannot be associated with a variable but with the underlying value pointed/referenced by the variable. To achieve that, we need a uniform memory representation for JavaScript variable - a pointer. And the real values are allocated somewhere on the heap(dynamic memory), containing metadata such as the type and the size of the value, pointed by those pointers. 
-Wrapping primitives types inside another data structure that records extra metadata about the value is known as boxing.
+This (mostly) has to do with the nature of the language being dynamically typed. In a dynamically typed programming language, the type checks are performed at runtime. However, the variables can hold any type of value at runtime. Therefore the types cannot be associated with a variable but with the underlying value pointed/referenced by a variable. To achieve that, we need a uniform memory representation for JavaScript variables - pointers. And the real values are allocated somewhere on the heap (dynamic memory), containing metadata such as the type and the size of the value, pointed by those pointers (i.e. JavaScript variables). 
+
+Wrapping primitives types inside another data structure that records extra metadata about the value is known as [boxing](https://leonardschuetz.ch/blog/nan-boxing/).
 
 ## small integers
-And I have been mentioning that small integers are an exception to this boxing rule. Small integers are heavily optimized so they can be encoded inside of a pointe. Unlike every other type, a small integer can be stored directly in the pointer without allocating additional storage for it.
+And I have been mentioning that small integers are an exception to this boxing rule. In V8, small integers (the term in V8 is `smi`) are heavily optimized so they can be encoded inside of a pointe. Unlike other types, a `smi` can be stored directly in the pointer without allocating additional storage for it.
 
 This means, it is technically to say that `a` has the value `123` as in `const a = 123`:
 ![alt](/art/blog/javascript-variables/smiExample.png)
 
-Read this article from V8 if you are interested in how they distinguish between a small integer vs. a pointer for an immediate value. This technique is called [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8), and it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
+Read this article from V8 if you are interested in how they distinguish between a `smi` vs. a pointer for an immediate value. This technique is called [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8), and it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
 
 So now let me revise the statements I made previously for completeness:
 1. The value of a JavaScript variable (or an object property) is either an immediate integer or a pointer to some other memory at which the real value is stored.
-2. Therefore, we can say a JavaScript variable or an object property has the value only when the value is a small integer. Otherwise, they only point to values.
+2. Therefore, we can say a JavaScript variable or an object property has the value only when the value is a `smi`. Otherwise, they only point to values.
 
 
 ## Why JavaScript can not do pass-by-reference
 
-This myth is not unique in the JavaScript community. I have seen this come up in [the Java community](https://www.javadude.com/articles/passbyvalue.htm) as well.
+This myth is not unique to the JavaScript community. I have seen this come up in [the Java community](https://www.javadude.com/articles/passbyvalue.htm) as well.
 
 The answer has already been given: JavaScript can not do pass-by-reference because we can't have a variable point to another variable - a wire only connects us to a value.
 
@@ -224,37 +229,38 @@ void swap(int &r1, int &r2) {
 
 This is not possible in JavaScript. But I don't think we need to throw functions into the mix to explain why JavaScript does not support pass-by-reference.
 
-At its core, for JavaScript to support pass-by-reference, we need to have a way to change the value of a given variable without doing a re-assignment.
+At its core, for JavaScript to support pass-by-reference, we need to have a way to change the value pointed/referenced by a given variable without doing a re-assignment on the variable itself.
 
 For example, we declare variable `a` in `let a = 1`, is there a way to change the number that `a` has from `1` to `2` without directly reassigning `2` to `a` as in `a = 2`?
 
 ```javascript
 let a = 1
-// ... any thing another than `a = 2`
+//... doing anything another than `a = 2`
 console.log(a) // if a can be changed to `2` then JavaScript can do pass-by-reference
 ```
 
 You cannot. It is impossible in JavaScript:
-1. if we stay at the JavaScript language specification level, as I pointed out early, you cannot bind a variable identifier with a Reference Record Specification type.
+1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type.
 2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x11`, we cannot get that address and store it inside of another variable `b`.
 
-You might argue things would change if `a` points to an object. For example, if we declare variable `a` as `const a = {}`, there are indeed ways to modify the object without directly reassigning `a` a new value. 
+You might argue things would change if `a` points to an object. For example, if we declare variable `a` as `const a = { val: 1 }`, there are indeed ways to modify the object to `{ val: 2 }` without directly reassigning `a` a new object value. 
 
 In fact a lot of people get the wrong impression when passing an object to a function: within that function, it is true we can mutate the object, and that mutation would reflect on the object value passed from the outside. An example would be:
 
 ```javascript
-const a = {}
+const a = { val: 1 }
 function fn(input) {
-	input.val = 1
+	input.val = 2
 }
 
 fn(a) 
 
-console.log(a) // `{}' -> {val: 1}' 
+console.log(a) // `{ val: 1 }' -> { val: 2 }' 
 ```
 
 But this has nothing to do with pass-by-reference - the variable a still points to the same object - [the identity of the object](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)) didn't change. 
-In fact, this is exactly pass-by-value - the value that gets passed and copied is the memory address of the object `{}`.
+
+In fact, this is exactly pass-by-value - the value that gets passed and copied is a pointer that has the memory address of the object `{ val: 1 }`.
 
 ![alt](/art/blog/javascript-variables/passbyvalueExample.png)
 
