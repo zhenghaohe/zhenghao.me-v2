@@ -241,7 +241,9 @@ console.log(a) // if a can be changed to `2` then JavaScript can do pass-by-refe
 
 You cannot. It is impossible in JavaScript:
 1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type.
-2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x11`, we cannot get that address and store it inside of another variable `b`.
+2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b`.
+![alt](/art/blog/javascript-variables/jsPassbyreference.png)
+
 
 You might argue things would change if `a` points to an object. For example, if we declare variable `a` as `const a = { val: 1 }`, there are indeed ways to modify the object to `{ val: 2 }` without directly reassigning `a` a new object value. 
 
