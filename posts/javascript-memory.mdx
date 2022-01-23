@@ -4,7 +4,7 @@ published: true
 listed: true
 date: '01/22/2022'
 tags: javascript
-description: Why the majority of articles out there on this topic are probably wrong
+description: Why primitive values are not allocated on the stack
 ---
 
 
@@ -18,7 +18,7 @@ There are a wealth of resources online such as this claiming that in JavaScript 
 
 2. The stack only stores temporary, function-local and small variables (mostly pointers) and that's largely unrelated to JavaScript types.
 
-## These are all implementation details
+## They are all implementation details
 
 First of all, the JavaScript language itself doesn’t mandate memory layout. You cannot find the term “Stack” or “Heap” used in the ECMAScript specification. In fact, I doubt you can find anything about memory layout in any language specification - even for C++, which is considered much more low-level than JavaScript, does not have the terms defined in [its standard](https://en.cppreference.com/w/cpp/language/storage_duration).
 
@@ -179,6 +179,13 @@ Take a heap snapshot for this script above we get:
 ![alt](/art/blog/javascript-memory/smi.png)
 
 You can tell that two `smi`s are "pointing" to the same memory location `@427911` - that is because they have the same bit pattern for the same value `123`, and Chrome DevTools still treats them as pointers even though they are invalid pointers due to pointer tagging. For `HeapNumber`s, they are pointing to the different memory locations `@427915` and `@427927`, meaning they are not reused.
+
+## Put these together
+Here is a diagram that conceptually illustrates some **possible** memory layout in V8:
+
+![alt](/art/blog/javascript-memory/overview.png)
+
+
 
 ## Closing thoughts
 
