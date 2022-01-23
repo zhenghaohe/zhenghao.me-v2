@@ -11,7 +11,7 @@ description: Why primitive values are not allocated on the stack
 
 I admit this title is a little clickbaity. Maybe a more accurate title should be “the JavaScript memory model that is implemented in the current version of V8 demystified (with some oversimplification)”. 
 
-There are a wealth of resources online such as this claiming that in JavaScript primitive values are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future. It really frustrates me when I see people regurgitate what other people say online. If you don’t want to bother reading the source code of JavaScript VMs that’s totally fine, just don’t write about things you don’t really understand.
+There are a wealth of resources online such as this claiming that in JavaScript primitive values are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future.
 
 ## TL;DR:
 1. All JavaScript values are allocated on the heap accessed by pointers no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` due to [pointer tagging]([https://v8.dev/blog/pointer-compression#value-tagging-in-v8](https://v8.dev/blog/pointer-compression#value-tagging-in-v8))).
