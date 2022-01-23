@@ -60,12 +60,14 @@ memoryUsed()
 The size of the heap memory used before we create the string was 3.78 MB.
 ![alt](/art/blog/javascript-memory/before.png)
 
-After I create a string of a size of 10 MB, the heap memory used increases to 13.78 MB - the difference between the before and after is precisely 10 MB. See the stack size we printed out before, it was only 864 KB - there is no way the stack can store such a string.
+After I create a string of a size of 10 MB, the heap memory used increases to 13.78 MB
 ![alt](/art/blog/javascript-memory/after.png)
 
+The difference between the before and after is precisely 10 MB. See the stack size we printed out before, it was only 864 KB - there is no way the stack can store such a string.
 
 
-## Primitive values are mostly reused
+
+## Primitive values are (mostly) reused
 
 ### String interning
 
@@ -178,7 +180,9 @@ const num2 = new MyNumbers()
 Take a heap snapshot for this script above we get:
 ![alt](/art/blog/javascript-memory/smi.png)
 
-You can tell that two `smi`s are "pointing" to the same memory location `@427911` - that is because they have the same bit pattern for the same value `123`, and Chrome DevTools still treats them as pointers even though they are invalid pointers due to pointer tagging. For `HeapNumber`s, they are pointing to the different memory locations `@427915` and `@427927`, meaning they are not reused.
+You can tell that two `smi`s are "pointing" to the same memory location `@427911` - that is because they have the same bit pattern for the same value `123`, and Chrome DevTools still treats them as pointers even though they are invalid pointers due to pointer tagging. 
+
+As to `HeapNumber`s, they are pointing to the different memory locations `@427915` and `@427927`, meaning they are not reused.
 
 ## Put these together
 Here is a diagram that conceptually illustrates some **possible** memory layout in V8:
