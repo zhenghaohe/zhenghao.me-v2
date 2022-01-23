@@ -1,0 +1,164 @@
+---
+title: JavaScript memory model demystified
+published: true
+listed: true
+date: '01/22/2022'
+tags: javascript
+description: Why the majority of articles out there on this topic are probably wrong
+---
+
+
+
+I admit this title is a little clickbaity. Maybe a more accurate title should be “the JavaScript memory model that is implemented in the current version of V8 demystified (with some oversimplification)”. 
+
+There are a wealth of resources online such as this claiming that in JavaScript values of primitive types are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future. It really frustrates me when I see people regurgitate what other people say online. If you don’t want to bother reading the source code of JavaScript VMs that’s totally fine, just don’t write about things you don’t really understand.
+
+## TL;DR:
+1. All JavaScript values are allocated on the heap accessed by pointer no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` due to [pointer tagging]([https://v8.dev/blog/pointer-compression#value-tagging-in-v8](https://v8.dev/blog/pointer-compression#value-tagging-in-v8))).
+
+2. The stack only store temporary, function-local and sufficiently small variables (mostly pointers) and that's largely unrelated to JavaScript types.
+
+## These are all implementation details
+
+First of all, the JavaScript language itself doesn’t mandate memory layout. You cannot find the term “Stack” or “Heap” used in the ECMAScript specification. In fact, I doubt you can find anything about memory layout in any language specification - even for C++, which is considered much more low-level than JavaScript, does not have the terms defined in [its standard](https://en.cppreference.com/w/cpp/language/storage_duration).
+
+These are considered implementation details. Asking how JavaScript handles memory allocation is like asking if JavaScript is a compiled or interpreted language. It is a **wrong** question. What interpreted or compiled is not the languages but instead implementations - we can easily build simple AST interpreter for JavaScript, or a Stack-based virtual machine, or static LLVM compiler to native code.
+
+However being an implementation detail doesn’t mean it is a myth. You can trivially check this yourself by dong memory profiling with Chrome DevTools. If you want the ground truth, you can always look up the source code for the VM - at least for V8 it is all open-sourced. 
+
+
+## Everything is on the heap
+> Again, all of the examples in this post are based on V8’s implementation. The V8 source code is from commit Id [a684fc4c927940a073e3859cbf91c301550f4318](https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318).
+
+Contrary to common belief, primitive values are (typically) allocated on the heap.
+
+> Pretty much every type of JavaScript values in V8 are represented as objects and allocated on the V8 heap. I covered how JavaScript values are presented in V8 in details [in this post](/posts/javascript-variables).
+
+
+If you don’t want to really dig into V8’s source code, there is an easy way that I can prove this to you.
+
+1. First use `node --v8-options | grep -B0 -A1 stack-size` to get the default size of stack in V8 on your machine. For me it outputs 864 KB.
+2. Create a JavaScript file. Create a giant string and use `process.memoryUsage().heapUsed` to get the size of the heap used.
+
+This is a script that does that:
+
+```javascript
+function memoryUsed() {
+    const mbUsed = process.memoryUsage().heapUsed / 1024 / 1024
+    console.log(`Memory used: ${mbUsed} MB`);
+    
+}
+
+console.log('before');
+memoryUsed()
+
+const bigString = 'x'.repeat(10*1024*1024)
+console.log(bigString); // need to use the string otherwise the compiler would just optimize it into nothingness
+
+console.log('after');
+memoryUsed()  
+```
+
+The size of the heap memory used before we create the string was 3 MB.
+
+After I create a string of a size of 10 MB, the heap memory used increases to 13 MB - the difference between the before and after is precisely 10mb. See the stack size we printed out before, it was only 864 KB - there is no way it can store such a string.
+
+
+
+## String interning
+A quick question: for our 10 MB string created by `'x'.repeat(10*1024*1024)`, does an assignment (e.g. `const anotherString = bigString`) duplicate the string in memory so that we end up with 20 MB in total allocated on the heap? 
+
+The answer is no - there is no duplicate strings allocated. You can easily verify this by adding `const anotherString  = bigString` after the declaration of `bigString` and check to see if the heap memory size increases or not. 
+
+You can also check this via memory profiling using Chrome DevTools.
+![alt](/art/blog/javascript-memory/memoryProfile.png)
+
+Create a html file with the following snippet:
+
+```html
+<body>
+    <button id='btn'>btn</button>
+    <script>  
+    const btn = document.querySelector('#btn')
+    btn.onclick = () => { 
+        const string1 = 'foo'
+        const string2 = 'foo'
+    }
+</body>
+```
+
+Run the memory profiling and click on the button to create two variables with the same string value `foo`.
+![alt](/art/blog/javascript-memory/onlyOneString.png)
+
+You will see there is only one heap string allocated.
+
+This is called [string interning](https://en.wikipedia.org/wiki/String_interning). Inside V8, this is implemented via `StringTable`
+
+```c++
+explicit StringTable(Isolate* isolate);
+  ~StringTable();
+
+  int Capacity() const;
+  int NumberOfElements() const;
+
+  // Find string in the string table. If it is not there yet, it is
+  // added. The return value is the string found.
+  Handle<String> LookupString(Isolate* isolate, Handle<String> key);
+
+  // Find string in the string table, using the given key. If the string is not
+  // there yet, it is created (by the key) and added. The return value is the
+  // string found.
+  template <typename StringTableKey, typename IsolateT>
+  Handle<String> LookupKey(IsolateT* isolate, StringTableKey* key);
+```
+
+## Oddballs
+
+There are a special subset of primitive values called [Oddball](https://chromium.googlesource.com/v8/v8/+/master/src/builtins/base.tq#500) in V8.
+```c++
+type Null extends Oddball;
+type Undefined extends Oddball;
+type True extends Oddball;
+type False extends Oddball;
+type Exception extends Oddball;
+type EmptyString extends String;
+type Boolean = True|False;
+```
+They are pre-allocated on the heap by V8 before the first line of your script runs - it doesn’t matter if your JavaScript program actually uses them down the road or not.
+
+They are always reused - there is only one value of each `Oddball` type:
+
+```javascript
+function Oddballs() {
+            this.undefined = undefined
+            this.true = true
+            this.false = false
+            this.null = null
+            this.emptyString = ''
+        }
+const obj1 = new Oddballs()
+const obj2 = new Oddballs()
+```
+
+Take a heap snapshot for this script above we get:
+![alt](/art/blog/javascript-memory/oddballs.png)
+
+
+You see? Each `Oddball` type only has the same memory location on the heap even though the values are pointed by different objects' properties. 
+
+## Numbers are complicated
+
+In V8, small integers (the term in V8 is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it.
+
+So technically, a `smi` can exist on the stack since they don’t need additional storage allocated on the heap, depending how the variables:
+1. `const a = 123` **could** be on the stack
+2. `var a = 123` is on the heap, since it becomes a property of the global object
+
+
+Also it depends on what the rest of the script is doing, and the runtime environment. The optimizing compiler keeps pointers held in registers as long as it can; it'll spill to the stack only when needed (e.g. registers run out).
+
+## Memory is complicated
+
+In preparation for writing this blog post, I pulled out my college textbook on operating system. It's almost 600 pages long. Of which a discussion on memory takes about a third of it. 
+
+Computer memory is an incredibly complex topic. And nearly every answer to a question related to memory varies across compilers and processor architectures. For example, our variables are not always in memory (RAM) - they can be loaded directly in the destination registers, become part of instruction as an immediate value, or even get optimized entirely away into nothingness. The compiler can do whatever it wants as long as all the language semantics defined by the specification are preserved - the [as-if rule](https://stackoverflow.com/questions/15718262/what-exactly-is-the-as-if-rule).
