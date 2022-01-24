@@ -3,7 +3,7 @@ title: What are JavaScript variables made of
 published: true
 listed: true
 date: '01/21/2022'
-tags: javascript
+tags: javascript,v8
 ---
 When we start learning to program, we often are taught using some metaphor to help us understand one of the most fundamental concepts in programming- variable. You may or may not have been told to think of variables as storage boxes or houses. Whatever that metaphor was, it became the mental shortcuts we use when we read/write programs, but we rarely take the time to introspect these intuitions we developed over time.
 
@@ -57,7 +57,7 @@ Line foo;
 The variable `foo` will be the size of 4 integers, so that is 16 bytes in memory. 
 > The exact size can vary depending on the CPU architecture and maybe not precisely 4 `int` as there might be some additional padding for alignment purposes.
 
-![alt](/art/blog/javascript-variables/cppLineExample.jpg)
+![alt](/art/blog/javascript-variables/cppLineExample.png)
 
 When you assign it to a different variable or pass it as an argument to a function, you are literally carrying a blob of memory with the size of 16 bytes around and copying the full contents into the new variable or the parameter. 
 
@@ -70,7 +70,7 @@ Line bar = foo;
 
 
 The assignment operator `bar = foo` replaces the contents of the object `bar` with a copy of the full contents of `foo`.
-![alt](/art/blog/javascript-variables/cppLineExample2.jpg)
+![alt](/art/blog/javascript-variables/cppLineExample2.png)
 
 Now that we have two chunks of memory of the size 16 bytes and they are independent to each other, e.g. `foo.pos1` and `bar.pos1` are two separate objects.
 
@@ -83,9 +83,9 @@ The “box” mental model fails when the variables and the values are stored in
 const foo = {pos1: {x: 1, y: 2}, pos2: {x: 3, y: 4}};
 ```
 Unlike the C++ example, `foo` in the JavaScript snippet above does not contain the object value inside. There is an extra layer of indirection here. 
-![alt](/art/blog/javascript-variables/JSLineExample1.jpg)
+![alt](/art/blog/javascript-variables/JSLineExample1.png)
 When we assign the value of `foo` to a new variable `bar`  as in `const bar = foo`, they will start to share the same object, resulting in `foo.pos1` and `bar.pos1` being the very same object.
-![alt](/art/blog/javascript-variables/JSLineExample2.jpg)
+![alt](/art/blog/javascript-variables/JSLineExample2.png)
 
 So instead of thinking variables as boxes, in JavaScript, think of variables as wires, that **connect** you to values.
 
@@ -100,7 +100,7 @@ const bar = foo
 Given the JavaScript code snippet above, will we end up with two separate memory chunks that *duplicately* make up the string `baz`? Or there is only one string `baz` at runtime which is pointed by both variable `foo` and `bar`? 
 
 The answer is the latter. It is not much different than objects, except that objects are immutable and primitive types are not. 
-![alt](/art/blog/javascript-variables/JSPrimitiveExample1.jpg)
+![alt](/art/blog/javascript-variables/JSPrimitiveExample1.png)
 
 > Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are comlicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post](https://www.zhenghao.io/posts/javascript-memory) on the topic of the memory model in V8.
 
@@ -118,7 +118,7 @@ A Reference is a specification device used to represent a **location** at which 
 
 For example: when you write an assignment like `a = b`, it gets evaluated, and two References for variables `a` and `b` get constructed (to be precise, `a` and `b` are identifiers). The Reference of the right-hand side (RHS) of the equation gets passed to this abstract function called [GetValue](https://tc39.es/ecma262/#sec-getvalue), which fetches the value bound to/pointed by the Reference. That value and the Reference of the left-hand side (LHS) are then passed to the abstract [PutValue](https://tc39.es/ecma262/#sec-putvalue) function, setting a new binding via `SetMutableBinding`. Note that the LHS remains a Reference during the assignment since the engine needs to know **where** to store the value, while the RHS is always evaluated as a value via `GetValue`. You can't pass the Reference of RHS to `PutValue`. That's precisely why you cannot have a variable pointing to another variable in JavaScript- a wire only connects you to a value.
 
-![alt](/art/blog/javascript-variables/whatspecsays.jpg)
+![alt](/art/blog/javascript-variables/whatspecsays.png)
 
 One of the only two operators which can operate directly at a Reference is `delete`, (the other is `typeof`). When you use `delete` on a property in an object, you are not deleting the value pointed by the property. Instead, you are merely deleting the Reference, i.e. the location at which the value is stored.
 
@@ -141,14 +141,14 @@ const a = {}
 ```
 
 What happens in memory can be illustrated as:
-![alt](/art/blog/javascript-variables/JSTableExample1.jpg)
+![alt](/art/blog/javascript-variables/JSTableExample1.png)
 
 
 
 > Usually, memory addresses are represented in hexadecimal, but I am not going to bother here for simplicity.
 
 Now we assign the empty object to variable `b` in `const b = a`:
-![alt](/art/blog/javascript-variables/JSTableExample2.jpg)
+![alt](/art/blog/javascript-variables/JSTableExample2.png)
 
 
 variables `a` and `b` are loaded at different memory locations, but they store the same immediate value - the (starting) memory address at which the empty object `{}` is stored.
@@ -158,7 +158,7 @@ Again, it shows why it is technically incorrect to say that “variable `a` has 
 ### let vs. const
 The difference between declaring variables using `let` keyword and `const` keyword is that you can change the memory address stored in a variable declared with `let` but not ones declared with `const` - note that a variable itself is not moved through the memory:
 
-![alt](/art/blog/javascript-variables/letvsconst.jpg)
+![alt](/art/blog/javascript-variables/letvsconst.png)
 
 And the empty object `{}` would get garbage collected later if it is no longer reachable from the your JavaScript program.
 
@@ -181,7 +181,7 @@ The second table (blue) in the previous diagrams is always hidden in the JavaScr
 For example, unlike languages like Go, C or C++, in JavaScript you cannot use a reference operator `&` to retrieve the memory address of a variable e.g. `int* b = &a`.
 For that reason, this diagram below as it cannot happen in JavaScript:
 
-![alt](/art/blog/javascript-variables/hiddenLayerInJS.jpg)
+![alt](/art/blog/javascript-variables/hiddenLayerInJS.png)
 
 > In languages like C, C++, and GO where the second table is visible, you can [dereference](https://en.cppreference.com/w/c/language/operator_member_access) a pointer to change the value pointed to by it.
 
@@ -198,7 +198,7 @@ Wrapping primitives types inside another data structure that records extra metad
 And I have been mentioning that small integers are an exception to this boxing rule. In V8, small integers (the term in V8 is `smi`) are heavily optimized so they can be encoded inside of a pointe. Unlike other types, a `smi` can be stored directly in the pointer without allocating additional storage for it.
 
 This means, it is technically to say that `a` has the value `123` as in `const a = 123`:
-![alt](/art/blog/javascript-variables/smiExample.jpg)
+![alt](/art/blog/javascript-variables/smiExample.png)
 
 Read this article from V8 if you are interested in how they distinguish between a `smi` vs. a pointer for an immediate value. This technique is called [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8), and it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
 
@@ -256,7 +256,7 @@ You cannot. It is impossible in JavaScript:
 1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type. This prevents you from having a variable that has the **location** (i.e. a Reference) of another variable as its value.
 2. going deeper into the implementation level, there is no way to get a variable’s memory address [due to the hidden layer](#the-hidden-layer-in-javascript) we discussed above. 
             - For example, if variable `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b` and later dereference `b` to access and change data contained the memory block of variable `a`.
-![alt](/art/blog/javascript-variables/jsPassbyreference.jpg)
+![alt](/art/blog/javascript-variables/jsPassbyreference.png)
 
 
 You might argue things would change if `a` points to an object. For example, if we declare variable `a` as `const a = { val: 1 }`, there are indeed ways to modify the object to `{ val: 2 }` without directly reassigning `a` a new object value. 
@@ -278,7 +278,7 @@ But this has nothing to do with pass-by-reference - the variable `a` still point
 
 In fact, this is exactly **pass-by-value** - the value that gets passed and copied is a pointer that has the memory address of the object `{ val: 1 }`.
 
-![alt](/art/blog/javascript-variables/passbyvalueExample.jpg)
+![alt](/art/blog/javascript-variables/passbyvalueExample.png)
 
 > JavaScript inventor Brendan Eich himself also confirmed that the reference/pointer of the object is copied in [an old email](https://groups.google.com/g/netscape.public.mozilla.jseng/c/bSNJUWKg1mI/m/NBc8-e71lX8J). Maybe another more fitting or intuitive name for how object arguments are passed and evaluated should be [pass-by-share](http://dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/#call-by-sharing).
 

@@ -3,7 +3,7 @@ title: JavaScript memory model demystified
 published: true
 listed: true
 date: '01/22/2022'
-tags: javascript
+tags: javascript,v8
 description: Why primitive values are not allocated on the stack
 ---
 
@@ -57,10 +57,10 @@ memoryUsed()
 ```
 
 The size of the heap memory used before we create the string was 3.78 MB.
-![alt](/art/blog/javascript-memory/before.jpg)
+![alt](/art/blog/javascript-memory/before.png)
 
 After I create a string of a size of 10 MB, the heap memory used increases to 13.78 MB
-![alt](/art/blog/javascript-memory/after.jpg)
+![alt](/art/blog/javascript-memory/after.png)
 
 The difference between the before and after is precisely 10 MB. See the stack size we printed out before, it was only 864 KB - there is no way the stack can store such a string.
 
@@ -75,7 +75,7 @@ A quick question: for our 10 MB string created by `'x'.repeat(10*1024*1024)`, do
 The answer is no - there is no duplicate strings allocated. You can easily verify this by adding `const anotherString  = bigString` after the declaration of `bigString` and check to see if the heap memory size increases or not. 
 
 You can also check this via memory profiling using Chrome DevTools.
-![alt](/art/blog/javascript-memory/memoryProfile.jpg)
+![alt](/art/blog/javascript-memory/memoryProfile.png)
 
 Create a html file with the following snippet:
 
@@ -92,7 +92,7 @@ Create a html file with the following snippet:
 ```
 
 Run the memory profiling and click on the button to create two variables with the same string value `foo`.
-![alt](/art/blog/javascript-memory/onlyOneString.jpg)
+![alt](/art/blog/javascript-memory/onlyOneString.png)
 
 You will see there is only one heap string allocated.
 
@@ -147,7 +147,7 @@ const obj2 = new Oddballs()
 ```
 
 Take a heap snapshot for this script above we get:
-![alt](/art/blog/javascript-memory/oddballs.jpg)
+![alt](/art/blog/javascript-memory/oddballs.png)
 
 
 You see? Each `Oddball` type only has the same memory location on the heap even though the values are pointed by different objects' properties. 
@@ -208,7 +208,7 @@ const num2 = new MyNumbers()
 ```
 
 Take a heap snapshot and we get:
-![alt](/art/blog/javascript-memory/smi.jpg)
+![alt](/art/blog/javascript-memory/smi.png)
 
 If you look closely enough, you would find that it seems like two `smi`s are "pointing" to the same memory location `@427911`. `smi`s are immeidate integer values that point to nowhere. What caused this is the fact that they have the same bit pattern for the same value `123` and Chrome DevTools's heap snapshots "blindly" treats them as pointers even though they are invalid pointers due to pointer tagging. 
 
@@ -217,7 +217,7 @@ As to `HeapNumber`s, they are pointing to the different memory locations `@42791
 ## Put these together
 Here is a diagram that conceptually illustrates some **possible** memory layout in V8:
 
-![alt](/art/blog/javascript-memory/overview.jpg)
+![alt](/art/blog/javascript-memory/overview.png)
 
 
 
