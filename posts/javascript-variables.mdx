@@ -118,6 +118,8 @@ A Reference is a specification device used to represent a **location** at which 
 
 For example: when you write an assignment like `a = b`, it gets evaluated, and two References for variables `a` and `b` get constructed (to be precise, `a` and `b` are identifiers). The Reference of the right-hand side (RHS) of the equation gets passed to this abstract function called [GetValue](https://tc39.es/ecma262/#sec-getvalue), which fetches the value bound to/pointed by the Reference. That value and the Reference of the left-hand side (LHS) are then passed to the abstract [PutValue](https://tc39.es/ecma262/#sec-putvalue) function, setting a new binding via `SetMutableBinding`. Note that the LHS remains a Reference during the assignment since the engine needs to know **where** to store the value, while the RHS is always evaluated as a value via `GetValue`. You can't pass the Reference of RHS to `PutValue`. That's precisely why you cannot have a variable pointing to another variable in JavaScript- a wire only connects you to a value.
 
+![alt](/art/blog/javascript-variables/whatspecsays.png)
+
 One of the only two operators which can operate directly at a Reference is `delete`, (the other is `typeof`). When you use `delete` on a property in an object, you are not deleting the value pointed by the property. Instead, you are merely deleting the Reference, i.e. the location at which the value is stored.
 
 
@@ -169,9 +171,12 @@ The term Heap is a general, well-understood, computing term. In C++ they are ref
 
 The second table (blue) in the previous diagrams is always hidden in the JavaScript world, just like our Reference Record Specification Type. Within JavaScript, you cannot see or interact with a pointer (i.e. JavaScript variables) except for retrieving the actual values pointed by them, nor can you get the memory address of a pointer itself either. Mouthful right? Interacting with your memory in a low-level way can get really tricky, so the JavaScript engine manages that for you. 
 
-For example, when you place the assignment operator `=` between two variables as in `a = b`, you don’t really need to think about scenarios like this diagram below as it cannot happen in JavaScript:
+For example, unlike languages like Go, C or C++, in JavaScript you cannot use a reference operator `&` to retrieve the memory address of a variable e.g. `int* b = &a`.
+For that reason, this diagram below as it cannot happen in JavaScript:
 
 ![alt](/art/blog/javascript-variables/hiddenLayerInJS.png)
+
+> In languages like C, C++, and GO where the second table is visible, you can [dereference](https://en.cppreference.com/w/c/language/operator_member_access) a pointer to change the value pointed to by it.
 
 Now you know what JavaScript variables/object properties are made of - they are (directly) made of pointers, storing memory addresses and pointing to values you create and manipulate in your JavaScript program. But don't go overboard and use pointers to refer to every JavaScript variable you declared. Unlike C/C++, for JavaScript, a pointer is not a term that gets used in the language semantics. Calling variables pointers would not add any useful distinction.
 
@@ -231,17 +236,19 @@ At its core, for JavaScript to support pass-by-reference, we need to have a way 
 
 For example, we declare variable `a` in `let a = 1`, is there a way to change the number that `a` has from `1` to `2` without directly reassigning `2` to `a` as in `a = 2`?
 
+> [Postfix/Prefix Increment Operator](Prefix Increment Operator) as in `a++` or `++a` still count as a re-assignment on the variable `a` itself since they both use the abstract `PutValue` method internally.
+
 ```javascript
 let a = 1 
 //... doing anything another than `a = 2`, `a += 1`, `a++` or `++a`
 console.log(a) // if a can be changed to `2` then JavaScript can do pass-by-reference
 ```
 
-> Postfix/Prefix Increment Operator as in `a++` or `++a` still count as a re-assignment on the variable `a` itself since they both use the abstract `PutValue` method internally.
 
 You cannot. It is impossible in JavaScript:
-1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type. This prevents you from having a variable that has the **location** of another variable as its value. 
-2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b` and later dereference `b` to access and change data contained the memory block of variable `a`.
+1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type. This prevents you from having a variable that has the **location** (i.e. a Reference) of another variable as its value.
+2. going deeper into the implementation level, there is no way to get a variable’s memory address [due to the hidden layer](#the-hidden-layer-in-javascript) we discussed above. 
+            - For example, if variable `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b` and later dereference `b` to access and change data contained the memory block of variable `a`.
 ![alt](/art/blog/javascript-variables/jsPassbyreference.png)
 
 

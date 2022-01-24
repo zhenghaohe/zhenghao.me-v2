@@ -153,6 +153,8 @@ Take a heap snapshot for this script above we get:
 
 You see? Each `Oddball` type only has the same memory location on the heap even though the values are pointed by different objects' properties. 
 
+When we are creating JavaScript variables that "have" `Oddball` values, we should think as if they are summoned in our JavaScript program - we cannot create or destroy them.
+
 ## JavaScript variables are (mostly) pointers
 Digging deeper into the source code we can find that variables we create in our JavaScript program are just memory addresses that point to these C++ objects located on the heap.
 
