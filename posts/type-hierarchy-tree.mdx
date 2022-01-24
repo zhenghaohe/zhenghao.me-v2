@@ -61,7 +61,7 @@ The blog post is my attempt to introspect and rebuild the mental model of TypeSc
 
 ## It is a hierarchy tree
 Turns out all types in TypeScript take their place in a hierarchy. You can visualize it as a tree-like structure. Minimally, in a tree, we can a parent node and a child node. In a type system, for such a relationship, we call the parent node a supertype and the child node a subtype.
-![alt](/art/blog/type-hierarchy-tree/supertype-subtype.png)
+![alt](/art/blog/type-hierarchy-tree/supertype-subtype.jpg)
 You are probably familiar with inheritance, one of the well-known concepts in object-oriented programming. Inheritance establishes an `is-a` relationship between a child class and a parent class. If our parent class is `Vehicle`, and our child class is `Car`, the relationship is “`Car` is `Vehicle`”. However it doesn’t work the other way around - an instance of the child class logically is not an instance of the parent class. “`Vehicle` is not `Car`”.  This is the semantic meaning of inheritance, and it also applies to the type hierarchy in TypeScript. 
 
 According to [the Liskov substitution principle](https://en.wikipedia.org/wiki/Liskov_substitution_principle), instances of `Vehicle` (supertype) should be substitutable with instances of its child class (subtype) `Cars` without altering the correctness of the program. In other words, If we expect a certain behavior from a type (`Vehicle`), its subtypes (`Car`) should honor it.
@@ -76,7 +76,7 @@ Putting this together, in TypeScript, you can assign/substitute an instance of a
 There are two ways in which supertype/subtype relationships are enforced. The first one, which most mainstream statically-typed languages (such as Java) use, is called **nominal typing**, where we need to *explicitly* declare a type is the subtype of another type via syntax like `class Foo extends Bar`. The second one, which TypeScript uses is **structural typing**, which doesn’t require us to state the relationship *explicitly* in the code. An instance of `Foo` type is a subtype of `Bar` as long as it has all the members that `Bar` type has, even if `Foo` has some additional members.
 
 Another way to think about this supertype-subtype relationship is to check which type is more strict, type `{name: string, age: number}`  is more strict than the type `{name: string}` since the former requires more members defined in its instances. Therefore type `{name: string, age: number}`  is a subtype of type `{name: string}`.
-![alt](/art/blog/type-hierarchy-tree/supertype-subtype2.png)
+![alt](/art/blog/type-hierarchy-tree/supertype-subtype2.jpg)
 
 
 ## two ways of checking assignability/substitutability
@@ -95,13 +95,13 @@ Let's talk about the type hierarchy tree.
 In TypeScript, there are two types are that the supertypes of all other types: `any` and `unknown`.
 
 They accept any value of any type, encompassing all other types.
-![alt](/art/blog/type-hierarchy-tree/top.png)
+![alt](/art/blog/type-hierarchy-tree/top.jpg)
 
 > This graph is by no means an exhaustive list of all the types that TypeScript has. Check out [the source code](https://github.com/microsoft/TypeScript/blob/main/src/compiler/types.ts#L642) of TypeScript if you are interested to see all the types that it currently supports.
 
 ### upcast & downcast
 There are two types of type cast - **upcast** and **downcast**.
-![alt](/art/blog/type-hierarchy-tree/cast.png)
+![alt](/art/blog/type-hierarchy-tree/cast.jpg)
 
 Assigning a subtype to its supertype is called **upcast**. By the Liskov substitution principle, upcast is safe so the compiler lets you do it implicitly, no questions asked.
 
@@ -140,7 +140,7 @@ The exception here with `any` is because, in TypeScript the `any` type exists to
 ## the bottom of the tree
 
 The `never` type is the bottom for the tree, from which no further branches extend.
-![alt](/art/blog/type-hierarchy-tree/bottom.png)
+![alt](/art/blog/type-hierarchy-tree/bottom.jpg)
 
 Symmetrically, the `never` type behaves like the an anti-type of the top types - `any` and `unknow`, whereas `any` and `unknown` accept all values, `never` doesn’t accept any value (including values of the `any` type) at all since it is the subtype of all types. 
 
@@ -215,7 +215,7 @@ In many other languages, [such as C++](https://docs.microsoft.com/en-us/cpp/cpp/
 
 
 So what is the type `void` in TypeScript? `void` in TypeScript is a supertype of `undefined` - TypeScript allows you to assign `undefined` to `void` (upcaset) but again, not the other way around (downcast) 
-![alt](/art/blog/type-hierarchy-tree/void.png)
+![alt](/art/blog/type-hierarchy-tree/void.jpg)
 
 This can also be verified via the `extends` keyword:
 ```typescript
@@ -223,7 +223,7 @@ type A = undefined extends void ? true : false;  // true
 type B = void extends undefined ? true : false; // false
 ```
 
-> I specifically said in TypeScript because `void` is actually an operator in javascript -  `void` in JavaScript evaluates the expression next to `undefined` as in `void 2 === undefined // true`.
+> `void` is also an operator in javascript that evaluates the expression next to it to `undefined`, e.g. `void 2 === undefined // true`.
 
 In TypeScript, the type `void` is used to indicate that the implementer of a function is making no guarantees about the return type except that it won’t be useful to the callers. This opens the door for a `void` function at runtime to return something other than `undefined`, but whatever it returns shouldn’t be used by the caller.
 

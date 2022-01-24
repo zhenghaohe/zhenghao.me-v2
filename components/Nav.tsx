@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 
 import ThemeSwitch from './ThemeSwitch';
 
-const routes = [{route: '/posts', title: 'blog'}, {route: '/about', title: 'about'}]
+const routes = [{route: '/posts', title: 'blog'}]
 
 const Nav: React.FC = () => {
   const router = useRouter();
