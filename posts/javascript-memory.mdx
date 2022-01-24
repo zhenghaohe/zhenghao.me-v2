@@ -14,7 +14,7 @@ I admit this title is a little clickbaity. Maybe a more accurate title should be
 There are a wealth of resources online such as this claiming that in JavaScript primitive values are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future.
 
 ## TL;DR:
-1. All JavaScript values are allocated on the heap accessed by pointers no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` due to [pointer tagging]([https://v8.dev/blog/pointer-compression#value-tagging-in-v8](https://v8.dev/blog/pointer-compression#value-tagging-in-v8))).
+1. All JavaScript values are allocated on the heap accessed by pointers no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` in [V8](https://v8.dev/blog/react-cliff#value-representation) due to [pointer tagging]([https://v8.dev/blog/pointer-compression#value-tagging-in-v8](https://v8.dev/blog/pointer-compression#value-tagging-in-v8))).
 
 2. The stack only stores temporary, function-local and small variables (mostly pointers) and that's largely unrelated to JavaScript types.
 
@@ -26,12 +26,11 @@ These are considered implementation details. Asking how JavaScript handles memor
 
 However being an implementation detail doesn’t mean it is a myth. You can trivially check this yourself by doing memory profiling in Chrome DevTools. If you want the ground truth, you can always look up the source code for the VM - at least for V8 it is all open-sourced. 
 
+> All of the examples in this post are based on V8’s implementation. The V8 source code is from commit Id [a684fc4c927940a073e3859cbf91c301550f4318](https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318).
 
 ## Everything is on the heap
-> Again, all of the examples in this post are based on V8’s implementation. The V8 source code is from commit Id [a684fc4c927940a073e3859cbf91c301550f4318](https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318).
 
-Contrary to common belief, primitive values are also allocated on the heap, just like objects. I covered how JavaScript values are implemented in V8 in details [in this post](/posts/javascript-variables).
-
+Contrary to common belief, primitive values are also allocated on the heap, just like objects. 
 
 If you don’t want to really dig into V8’s source code, there is an easy way that I can prove this to you.
 
@@ -184,9 +183,9 @@ V8_INLINE static internal::Address* GetRoot(v8::Isolate* isolate, int index) {
 
 ### Numbers are complicated
 
-In V8, small integers (the term in V8 is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it.
+In V8, integers ranging from -2³¹ to 2³¹-1 on a 64-bit architecture (the V8 term is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it.
 
-So technically, a `smi` can exist on the stack since they don’t need additional storage allocated on the heap, depending how the variables:
+So technically, a `smi` can exist on the stack since they don’t need additional storage allocated on the heap, depending how the variables are declared:
 1. `const a = 123` **could** be on the stack
 2. `var a = 123` is on the heap, since it becomes a property of the global object
 
