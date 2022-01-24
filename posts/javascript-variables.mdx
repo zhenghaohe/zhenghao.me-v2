@@ -183,7 +183,7 @@ Now you know what JavaScript variables/object properties are made of - they are 
 ## Boxing
 
 You might be thinking: why do we have to add extra pointer indirections between values and variables/object properties? 
-This (mostly) has to do with the nature of the language being dynamically typed. In a dynamically typed programming language, the type checks are performed at runtime. However, the variables can hold any type of value at runtime. Therefore the types cannot be associated with a variable but with the underlying value pointed/referenced by a variable. To achieve that, we need a uniform memory representation for JavaScript variables - pointers. And the real values are allocated somewhere on the heap (dynamic memory), containing metadata such as the type and the size of the value, pointed by those pointers (i.e. JavaScript variables). 
+This (mostly) has to do with the nature of the language being dynamically typed. In a dynamically typed programming language, the type checks are performed at runtime. However JavaScript variables can hold any type of values at runtime. Therefore the types cannot be associated with a variable but with the underlying value pointed/referenced by a variable. To achieve that, we need a uniform memory representation for JavaScript variables - pointers. And the real values are allocated somewhere else on the heap (dynamic memory), containing metadata such as the type and the size of the value, pointed by those pointers (i.e. JavaScript variables). 
 
 Wrapping primitives types inside another data structure that records extra metadata about the value is known as [boxing](https://leonardschuetz.ch/blog/nan-boxing/).
 
@@ -236,7 +236,7 @@ At its core, for JavaScript to support pass-by-reference, we need to have a way 
 
 For example, we declare variable `a` in `let a = 1`, is there a way to change the number that `a` has from `1` to `2` without directly reassigning `2` to `a` as in `a = 2`?
 
-> [Postfix/Prefix Increment Operator](Prefix Increment Operator) as in `a++` or `++a` still count as a re-assignment on the variable `a` itself since they both use the abstract `PutValue` method internally.
+> [Postfix/Prefix Increment Operator](https://tc39.es/ecma262/#sec-prefix-increment-operator) as in `a++` or `++a` still count as a re-assignment on the variable `a` itself since they both use the abstract `PutValue` method internally.
 
 ```javascript
 let a = 1 
