@@ -182,7 +182,7 @@
   }
 
   article blockquote {
-    @apply relative py-1 pl-[2ch] pr-[1ch] my-8 italic bg-[#ada86314];
+    @apply relative py-1 pl-[2ch] pr-[1ch] my-8 italic bg-[#42828e14] dark:bg-[#2a2e31];
   }
 
   article blockquote::before {
