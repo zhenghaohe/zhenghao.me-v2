@@ -232,14 +232,16 @@ At its core, for JavaScript to support pass-by-reference, we need to have a way 
 For example, we declare variable `a` in `let a = 1`, is there a way to change the number that `a` has from `1` to `2` without directly reassigning `2` to `a` as in `a = 2`?
 
 ```javascript
-let a = 1
-//... doing anything another than `a = 2`
+let a = 1 
+//... doing anything another than `a = 2`, `a += 1`, `a++` or `++a`
 console.log(a) // if a can be changed to `2` then JavaScript can do pass-by-reference
 ```
 
+> Postfix/Prefix Increment Operator as in `a++` or `++a` still count as a re-assignment on the variable `a` itself since they both use the abstract `PutValue` method internally.
+
 You cannot. It is impossible in JavaScript:
-1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type.
-2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b`.
+1. if we stay at the JavaScript language specification level, [as I pointed out early](#what-does-the-spec-say), you cannot bind a variable identifier with a Reference Record Specification type. This prevents you from having a variable that has the **location** of another variable as its value. 
+2. Going deeper into the implementation level, there is no way to get a variable’s memory address. If `a` is loaded at `0x100`, we cannot get that address `0x100` and store it inside of another variable `b` and later dereference `b` to access and change data contained the memory block of variable `a`.
 ![alt](/art/blog/javascript-variables/jsPassbyreference.png)
 
 
