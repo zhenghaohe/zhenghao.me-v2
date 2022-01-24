@@ -191,7 +191,7 @@ This means, it is technically to say that `a` has the value `123` as in `const a
 Read this article from V8 if you are interested in how they distinguish between a `smi` vs. a pointer for an immediate value. This technique is called [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8), and it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
 
 So now let me revise the statements I made previously for completeness:
-1. The value of a JavaScript variable (or an object property) is either an immediate integer or a pointer to some other memory at which the real value is stored.
+1. The value of a JavaScript variable (or an object property) is **either an immediate integer or a pointer to some other memory at which the real value is stored**.
 2. Therefore, we can say a JavaScript variable or an object property has the value only when the value is a `smi`. Otherwise, they only point to values.
 
 
@@ -245,7 +245,7 @@ You cannot. It is impossible in JavaScript:
 
 You might argue things would change if `a` points to an object. For example, if we declare variable `a` as `const a = { val: 1 }`, there are indeed ways to modify the object to `{ val: 2 }` without directly reassigning `a` a new object value. 
 
-In fact a lot of people get the wrong impression when passing an object to a function: within that function, it is true we can mutate the object, and that mutation would reflect on the object value passed from the outside. An example would be:
+In fact a lot of people get the wrong impression when passing an object to a function: within that function, it is true we can mutate the object, and that mutation would indeed reflect on the object value passed from the outside. Here is an example:
 
 ```javascript
 const a = { val: 1 }
@@ -258,13 +258,13 @@ fn(a)
 console.log(a) // `{ val: 1 }' -> { val: 2 }' 
 ```
 
-But this has nothing to do with pass-by-reference - the variable a still points to the same object - [the identity of the object](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)) didn't change. 
+But this has nothing to do with pass-by-reference - the variable `a` still points to **the same object** - [the identity of the object](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)) didn't change. 
 
-In fact, this is exactly pass-by-value - the value that gets passed and copied is a pointer that has the memory address of the object `{ val: 1 }`.
+In fact, this is exactly **pass-by-value** - the value that gets passed and copied is a pointer that has the memory address of the object `{ val: 1 }`.
 
 ![alt](/art/blog/javascript-variables/passbyvalueExample.png)
 
-> Maybe another more fitting or intuitive name for how object arguments are passed and evaluated should be [pass-by-share](http://dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/#call-by-sharing)
+> JavaScript inventor Brendan Eich himself also confirmed that the reference/pointer of the object is copied in [an old email](https://groups.google.com/g/netscape.public.mozilla.jseng/c/bSNJUWKg1mI/m/NBc8-e71lX8J). Maybe another more fitting or intuitive name for how object arguments are passed and evaluated should be [pass-by-share](http://dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/#call-by-sharing).
 
 ## Notes on terminology
 For variables that point to objects, some people also like to refer to them as references to objects. In this context, a reference and a pointer is the same thing. A pointer and a reference both function to provide access to data stored somewhere else - an indirection to another value. In languages like Java and JavaScript that have only one or the other, the choice of terminology is largely an arbitrary decision. The terminology only matters for languages like C++, which is unusual in having both pointers and [references](https://en.cppreference.com/w/cpp/types/is_reference).
@@ -275,6 +275,10 @@ When it comes to learning a programming language, there are always two levels of
 
 2. the underlying implementation details, i.e., a specific virtual machine that implements the language.
 
-When discussing programming languages, always remember what level of abstraction you're operating at.
+When discussing programming languages, always remember **what level of abstraction** you're operating at.
 
 Lastly, this post is largely inspired by Dan Abramov's course [JustJavaScript](https://justjavascript.com/). He elegantly explained how JavaScript works in a poetic and allegorical way without going to any implementation details. Whether you are new to the language or you are already an experienced dev, I encourage you to check out his course.
+
+## Further Reading
+- [JavaScript memory model demystified](https://www.zhenghao.io/posts/javascript-memory)
+- [ECMA-262-3 in detail. Chapter 8. Evaluation strategy](http://dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/)
