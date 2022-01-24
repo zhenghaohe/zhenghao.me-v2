@@ -102,7 +102,7 @@ Given the JavaScript code snippet above, will we end up with two separate memory
 The answer is the latter. It is not much different than objects, except that objects are immutable and primitive types are not. 
 ![alt](/art/blog/javascript-variables/JSPrimitiveExample1.jpg)
 
-> Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are comlicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post]() on the topic of the memory model in V8.
+> Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are comlicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post](https://www.zhenghao.io/posts/javascript-memory) on the topic of the memory model in V8.
 
 
 ## What does the spec say
