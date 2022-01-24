@@ -119,7 +119,7 @@ explicit StringTable(Isolate* isolate);
   Handle<String> LookupKey(IsolateT* isolate, StringTableKey* key);
 ```
 
-## Oddballs
+### Oddballs
 
 There are a special subset of primitive values called [Oddball](https://chromium.googlesource.com/v8/v8/+/master/src/builtins/base.tq#500) in V8.
 ```c++
@@ -153,7 +153,34 @@ Take a heap snapshot for this script above we get:
 
 You see? Each `Oddball` type only has the same memory location on the heap even though the values are pointed by different objects' properties. 
 
-## Numbers are complicated
+## JavaScript variables are (mostly) pointers
+Digging deeper into the source code we can find that variables we create in our JavaScript program are just memory addresses that point to these C++ objects located on the heap.
+
+For example, for `undefined`, [the implementation in V8](https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318/include/v8-primitive.h#830) is:
+
+```c++
+V8_INLINE Local<Primitive> Undefined(Isolate* isolate) {
+  using S = internal::Address;
+  using I = internal::Internals;
+  I::CheckInitialized(isolate);
+  S* slot = I::GetRoot(isolate, I::kUndefinedValueRootIndex);
+  return Local<Primitive>(reinterpret_cast<Primitive*>(slot));
+}
+```
+
+And this is [the implementation in V8]((https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318/include/v8-internal.h#388)) of `GetRoot`, which returns a memory address.
+```c++
+V8_INLINE static internal::Address* GetRoot(v8::Isolate* isolate, int index) {
+    internal::Address addr = reinterpret_cast<internal::Address>(isolate) +
+                             kIsolateRootsOffset +
+                             index * kApiSystemPointerSize;
+    return reinterpret_cast<internal::Address*>(addr);
+  }
+```
+
+> I wrote [another post](https://www.zhenghao.io/posts/javascript-variables) covering how JavaScript variables are implemented in more details.
+
+### Numbers are complicated
 
 In V8, small integers (the term in V8 is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it.
 
@@ -166,7 +193,9 @@ Also it depends on what the rest of the script is doing, and the runtime environ
 Another comlication about numbers is, unlike other types of primitive values, they might not get reused.
 
 For `smi`, they are encoded as recognizably invalid pointers, which don't point to anything, so the whole concept of "reusing" doesn't really apply to them.
-For numbers that are not considered `smi`, they are called `HeapNumber`. When a `HeapNumber` is pointed by an object's property, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. Because of this optmization, mutable `HeapNumber`s are not reused.
+For numbers that are not considered `smi`, they are called `HeapNumber`. When a `HeapNumber` is pointed by an object's property, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. I believe this design decison is a beneficial tradeoff for the majority usage patterns at the cost of making `HeapNumber`s unshareable.
+
+To verify our theory, let's try this snippet:
 
 ```javascript
 function MyNumbers() {
@@ -177,12 +206,12 @@ const num1 = new MyNumbers()
 const num2 = new MyNumbers()
 ```
 
-Take a heap snapshot for this script above we get:
+Take a heap snapshot and we get:
 ![alt](/art/blog/javascript-memory/smi.png)
 
-You can tell that two `smi`s are "pointing" to the same memory location `@427911` - that is because they have the same bit pattern for the same value `123`, and Chrome DevTools still treats them as pointers even though they are invalid pointers due to pointer tagging. 
+If you look closely enough, you would find that it seems like two `smi`s are "pointing" to the same memory location `@427911`. `smi`s are immeidate integer values that point to nowhere. What caused this is the fact that they have the same bit pattern for the same value `123` and Chrome DevTools's heap snapshots "blindly" treats them as pointers even though they are invalid pointers due to pointer tagging. 
 
-As to `HeapNumber`s, they are pointing to the different memory locations `@427915` and `@427927`, meaning they are not reused.
+As to `HeapNumber`s, they are pointing to the different memory locations `@427915` and `@427927`, meaning they are not reused due to being a mutable `HeapNumber`.
 
 ## Put these together
 Here is a diagram that conceptually illustrates some **possible** memory layout in V8:
@@ -196,3 +225,6 @@ Here is a diagram that conceptually illustrates some **possible** memory layout 
 In preparation for writing this blog post, I pulled out my college textbook on operating system. It's almost 600 pages long, of which a discussion on memory takes about a third of it. 
 
 Computer memory is an incredibly complex topic. And nearly every answer to a question related to memory varies across compilers and processor architectures. For example, our variables are not always in memory (RAM) - they can be loaded directly in the destination registers, become part of instruction as an immediate value, or even get optimized entirely away into nothingness. The compiler can do whatever it wants as long as all the language semantics defined by the specification are preserved - the [as-if rule](https://stackoverflow.com/questions/15718262/what-exactly-is-the-as-if-rule).
+
+## Further Reading
+- [What are JavaScript variables made of](https://www.zhenghao.io/posts/javascript-variables)
