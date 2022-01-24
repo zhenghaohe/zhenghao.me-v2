@@ -191,10 +191,10 @@ So technically, a `smi` can exist on the stack since they don’t need additiona
 
 Also it depends on what the rest of the script is doing, and the runtime environment. The optimizing compiler keeps pointers held in registers as long as it can; it'll spill to the stack only when needed (e.g. registers run out).
 
-Another comlication about numbers is, unlike other types of primitive values, they might not get reused.
+Another complication about numbers is, unlike other types of primitive values, they might not get reused.
 
-For `smi`, they are encoded as recognizably invalid pointers, which don't point to anything, so the whole concept of "reusing" doesn't really apply to them.
-For numbers that are not considered `smi`, they are called `HeapNumber`. When a `HeapNumber` is pointed by an object's property, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. I believe this design decison is a beneficial tradeoff for the majority usage patterns at the cost of making `HeapNumber`s unshareable.
+For `smi`s, they are encoded as recognizably invalid pointers, which don't point to anything, so the whole concept of "reusing" doesn't really apply to them.
+When `HeapNumber`s (numbers that are not considered `smi`s) are pointed by object's properties, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. I believe this design decison is a beneficial tradeoff for the majority usage patterns at the cost of making `HeapNumber`s unshareable.
 
 To verify our theory, let's try this snippet:
 
