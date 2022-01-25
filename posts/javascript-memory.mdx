@@ -14,7 +14,7 @@ I admit this title is a little clickbaity. Maybe a more accurate title should be
 There are a wealth of resources online claiming that in JavaScript primitive values are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future.
 
 ## TL;DR:
-1. All JavaScript values are allocated on the heap accessed by pointers no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` in [V8](https://v8.dev/blog/react-cliff#value-representation) due to [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8).
+1. All JavaScript values are allocated on the heap accessed by pointers no matter if they are objects, arrays, strings or numbers (except for small integers i.e. `smi` in [V8](https://v8.dev/blog/react-cliff#value-representation) due to [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8)).
 
 2. The stack only stores temporary, function-local and small variables (mostly pointers) and that's largely unrelated to JavaScript types.
 
@@ -72,7 +72,7 @@ The difference between the before and after is precisely 10 MB. See the stack si
 
 A quick question: for our 10 MB string created by `'x'.repeat(10*1024*1024)`, does an assignment (e.g. `const anotherString = bigString`) duplicate the string in memory so that we end up with 20 MB in total allocated on the heap? 
 
-The answer is no - there will be no duplicate strings allocated. You can easily verify this by adding `const anotherString  = bigString` in the script above and check to see if the heap memory used increases or not. 
+The answer is no - there will be no duplicate strings allocated. In general, and you probably already know this, assignments of JavaScript variables do not incur costs proportional to the size of the actual values - that is the point of pointers and JavaScript variables are (mostly) pointers.
 
 You can also check this via memory profiling using Chrome DevTools.
 ![alt](/art/blog/javascript-memory/memoryProfile.png)
