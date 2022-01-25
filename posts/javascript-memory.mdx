@@ -169,7 +169,7 @@ V8_INLINE Local<Primitive> Undefined(Isolate* isolate) {
 }
 ```
 
-And this is [the implementation in V8]((https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318/include/v8-internal.h#388)) of `GetRoot`, which returns a memory address.
+And this is [the implementation in V8](https://chromium.googlesource.com/v8/v8/+/a684fc4c927940a073e3859cbf91c301550f4318/include/v8-internal.h#388) of `GetRoot`, which returns a memory address.
 ```c++
 V8_INLINE static internal::Address* GetRoot(v8::Isolate* isolate, int index) {
     internal::Address addr = reinterpret_cast<internal::Address>(isolate) +
