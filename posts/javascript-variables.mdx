@@ -192,7 +192,7 @@ Now you know what JavaScript variables/object properties are made of - they are 
 You might be thinking: why do we have to add extra pointer indirections between values and variables/object properties? 
 This (mostly) has to do with the nature of the language being dynamically typed. In a dynamically typed programming language, the type checks are performed at runtime. However JavaScript variables can hold any type of values at runtime. Therefore the types cannot be associated with a variable but with the underlying value pointed/referenced by a variable. To achieve that, we need a uniform memory representation for JavaScript variables - pointers. And the real values are allocated somewhere else on the heap (dynamic memory), containing metadata such as the type and the size of the value, pointed by those pointers (i.e. JavaScript variables). 
 
-Wrapping primitives types inside another data structure that records extra metadata about the value is known as [boxing](https://leonardschuetz.ch/blog/nan-boxing/).
+Wrapping primitives types inside another data structure that records extra metadata about the value is known as [boxing](https://leonardschuetz.ch/blog/nan-boxing).
 
 ## Small integers
 And I have been mentioning that small integers are an exception to this boxing rule. In V8, small integers (the term in V8 is `smi`) are heavily optimized so they can be encoded inside of a pointe. Unlike other types, a `smi` can be stored directly in the pointer without allocating additional storage for it.
