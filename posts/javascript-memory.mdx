@@ -189,7 +189,7 @@ So technically, a `smi` can exist on the stack since they don’t need additiona
 1. `const a = 123` **could** be on the stack
 2. `var a = 123` is on the heap, since it becomes a property of the global object
 
-Also it depends on what the rest of the script is doing, and the runtime environment. The optimizing compiler keeps pointers held in registers as long as it can; it'll spill to the stack only when needed (e.g. registers run out).
+Also it depends on what the rest of the script is doing, and the runtime environment. The optimizing compiler keeps pointers held in registers as many as it can and it only spills to the stack during situations like registers run out.
 
 Another complication about numbers is, unlike other types of primitive values, they might not get reused.
 
@@ -228,5 +228,3 @@ In preparation for writing this blog post, I pulled out my college textbook on o
 Computer memory is an incredibly complex topic. I am by no means an expert on this topic. Nearly every answer to a question related to memory varies across compilers and processor architectures. For example, our variables are not always in memory (RAM) - they can be loaded directly in the destination registers, become part of instruction as an immediate value, or even get optimized entirely away into nothingness. The compiler can do whatever it wants as long as all the language semantics defined by the specification are preserved - the [as-if rule](https://stackoverflow.com/questions/15718262/what-exactly-is-the-as-if-rule).
 
 If you are interested in learning low level details like memory layout, JavaScript is not a good tool for learning that because JavaScript engines like V8 are just too complicated and too powerful. Better start with `C` or `C++` and using [godbolt](https://godbolt.org/) to understand how source code becomes machine code.
-## Further Reading
-- [What are JavaScript variables made of](https://www.zhenghao.io/posts/javascript-variables)
