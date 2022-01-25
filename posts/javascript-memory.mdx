@@ -98,7 +98,7 @@ You will see that there is only one heap string allocated on the heap.
 
 > Chrome DevTools does not show where the pointers reside in memory but rather where they point to. Also the numbers you see e.g. `@206637` do not represent raw memory addresses. If you want to inspect the actual memory, you need to use a native debugger.
 
-This is called [string interning](https://en.wikipedia.org/wiki/String_interning). Inside V8, this is implemented via `StringTable`
+This is called [string interning](https://en.wikipedia.org/wiki/String_interning). [Inside V8](https://chromium.googlesource.com/v8/v8/+/fc0cbc144530662db5ef27406e1c7302760e8461/src/objects/string-table.h#70), this is implemented via `StringTable`
 
 ```c++
 explicit StringTable(Isolate* isolate);
