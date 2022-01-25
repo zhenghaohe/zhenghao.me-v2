@@ -9,7 +9,7 @@ description: Why primitive values are not allocated on the stack
 
 
 
-I admit this title is a little clickbaity. Maybe a more accurate title should be “the JavaScript memory model that is implemented in the current version of V8 demystified (with a lot of oversimplification)”. V8 is very complex, and it has multiple ways to run code, and its various parts and pipelines that have been rewritten many times over the years so what I described today might become outdated tomorrow. Also this is not going to be a hardcore memory-related topics which I am not really qualified to talk about.
+I admit this title is a little clickbaity. Maybe a more accurate title should be “the JavaScript memory model that is implemented in the current version of V8 demystified (with a lot of oversimplification)”. V8 is very complex, and it has multiple ways to run code, and its various parts and pipelines that have been rewritten many times over the years so what I described today might become outdated tomorrow. Also this is not going to be a hardcore memory-related post which I am not really qualified to talk about.
 
 There are a wealth of resources online claiming that in JavaScript primitive values are allocated on the stack while objects are allocated on the heap. This idea is false, at least this is not how the language is implemented in the majority of JavaScript engines I have seen. I am typing in this post so that I can link to it and save myself some time in the future.
 
