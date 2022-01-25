@@ -33,7 +33,7 @@
 
   body.dark {
     --theme: 'dark';
-    --color-text: #b0b0b0;
+    --color-text: #dadfe7;
     --color-text-secondary: #dbdada;
     --color-background: #0f0d0c;
     --color-nav-background: #00000063;
