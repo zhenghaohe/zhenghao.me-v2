@@ -183,7 +183,8 @@ V8_INLINE static internal::Address* GetRoot(v8::Isolate* isolate, int index) {
 
 ### Numbers are complicated
 
-In V8, integers ranging from -2³¹ to 2³¹-1 on a 64-bit architecture (the V8 term is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it.
+In V8, integers ranging from -2³¹ to 2³¹-1 on a 64-bit architecture (the V8 term is `smi`) are [heavily optimized](https://v8.dev/blog/pointer-compression#value-tagging-in-v8) so they can be encoded inside of a pointer directly without the need to allocate additional storage for it. And it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
+
 
 So technically, a `smi` can exist on the stack since they don’t need additional storage allocated on the heap, depending how the variables are declared:
 1. `const a = 123` **could** be on the stack
@@ -222,8 +223,6 @@ Here is a diagram that conceptually illustrates some **possible** memory layout 
 
 
 ## Closing thoughts
-
-In preparation for writing this blog post, I pulled out my college textbook on operating system. It's almost 600 pages long, of which a discussion on memory takes about a third of it. 
 
 Computer memory is an incredibly complex topic. I am by no means an expert on this topic. Nearly every answer to a question related to memory varies across compilers and processor architectures. For example, our variables are not always in memory (RAM) - they can be loaded directly in the destination registers, become part of instruction as an immediate value, or even get optimized entirely away into nothingness. The compiler can do whatever it wants as long as all the language semantics defined by the specification are preserved - the [as-if rule](https://stackoverflow.com/questions/15718262/what-exactly-is-the-as-if-rule).
 
