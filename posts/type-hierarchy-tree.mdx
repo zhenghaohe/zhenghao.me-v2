@@ -83,7 +83,7 @@ Another way to think about this supertype-subtype relationship is to check which
 One last thing before we dive into the type hierarchy tree in TypeScript:
 
 1. **type cast**: you can just assign a variable of one type to a variable of another type to see if it raises a type error. [More on that later](#upcast--downcast).
-2. `extends` keyword: you can extend one type to another: 
+2. the `extends` keyword -you can extend one type to another: 
     ```typescript
     type A = string extends unknown? true : false;  // true
     type B = unknown extends string? true : false; // false
