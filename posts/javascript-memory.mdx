@@ -35,7 +35,7 @@ Contrary to common belief, primitive values are also allocated on the heap, just
 If you don’t want to really dig into V8’s source code, there is an easy way that I can prove this to you.
 
 1. First use `node --v8-options | grep -B0 -A1 stack-size` to get the default size of stack in V8 on your machine. For me it outputs 864 KB.
-2. Create a JavaScript file. Create a giant string and use `process.memoryUsage().heapUsed` to get the size of the heap used.
+2. In a JavaScript file, create a giant string and use `process.memoryUsage().heapUsed` to get the size of the heap used.
 
 This is a script that does that:
 
@@ -56,10 +56,10 @@ console.log('after');
 memoryUsed()  
 ```
 
-The size of the heap memory used before we create the string was 3.78 MB.
+The size of the heap memory used before we created the string was 3.78 MB.
 ![alt](/art/blog/javascript-memory/before.png)
 
-After I create a string of a size of 10 MB, the heap memory used increases to 13.78 MB
+After I created a string of a size of 10 MB, the heap memory used increased to 13.78 MB
 ![alt](/art/blog/javascript-memory/after.png)
 
 The difference between the before and after is precisely 10 MB. See the stack size we printed out before, it was only 864 KB - there is no way the stack can store such a string.
@@ -72,7 +72,7 @@ The difference between the before and after is precisely 10 MB. See the stack si
 
 A quick question: for our 10 MB string created by `'x'.repeat(10*1024*1024)`, does an assignment (e.g. `const anotherString = bigString`) duplicate the string in memory so that we end up with 20 MB in total allocated on the heap? 
 
-The answer is no - there is no duplicate strings allocated. You can easily verify this by adding `const anotherString  = bigString` after the declaration of `bigString` and check to see if the heap memory size increases or not. 
+The answer is no - there will be no duplicate strings allocated. You can easily verify this by adding `const anotherString  = bigString` in the script above and check to see if the heap memory used increases or not. 
 
 You can also check this via memory profiling using Chrome DevTools.
 ![alt](/art/blog/javascript-memory/memoryProfile.png)
@@ -94,9 +94,9 @@ Create a html file with the following snippet:
 Run the memory profiling and click on the button to create two variables with the same string value `foo`.
 ![alt](/art/blog/javascript-memory/onlyOneString.png)
 
-You will see there is only one heap string allocated.
+You will see that there is only one heap string allocated on the heap.
 
-> Chrome DevTools do not show where the pointer resides in memory but rather where it points to. Also it does not represent the raw memory address. If you want to inspect the actual memory, you need to use a native debugger.
+> Chrome DevTools does not show where the pointers reside in memory but rather where they point to. Also the numbers you see e.g. `@206637` do not represent raw memory addresses. If you want to inspect the actual memory, you need to use a native debugger.
 
 This is called [string interning](https://en.wikipedia.org/wiki/String_interning). Inside V8, this is implemented via `StringTable`
 
@@ -132,7 +132,7 @@ type Boolean = True|False;
 ```
 They are pre-allocated on the heap by V8 before the first line of your script runs - it doesn’t matter if your JavaScript program actually uses them down the road or not.
 
-They are always reused - there is only one value of each `Oddball` type:
+They are always reused - there is only one value of each `Oddball` type.
 
 ```javascript
 function Oddballs() {
@@ -152,7 +152,7 @@ Take a heap snapshot for this script above we get:
 
 You see? Each `Oddball` type only has the same memory location on the heap even though the values are pointed by different objects' properties. 
 
-When we are creating JavaScript variables that "have" `Oddball` values, we should think as if they are summoned in our JavaScript program - we cannot create or destroy them.
+When we are creating JavaScript variables that "have" `Oddball` values, we should think as if they were **"summoned"** in our JavaScript program - we cannot create or destroy them.
 
 ## JavaScript variables are (mostly) pointers
 Digging deeper into the source code we can find that variables we create in our JavaScript program are just memory addresses that point to these C++ objects located on the heap.
