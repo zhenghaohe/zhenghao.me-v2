@@ -188,14 +188,17 @@ In V8, integers ranging from -2³¹ to 2³¹-1 on a 64-bit architecture (the V8 
 
 So technically, a `smi` can exist on the stack since they don’t need additional storage allocated on the heap, depending how the variables are declared:
 1. `const a = 123` **could** be on the stack
-2. `var a = 123` is on the heap, since it becomes a property of the global object
+2. `var a = 123` is on the heap, since it becomes a property of the global object, which is a fixed location in memory.
 
 Also it depends on what the rest of the script is doing, and the runtime environment. The optimizing compiler keeps pointers held in registers as many as it can and it only spills to the stack during situations like registers run out.
 
-Another complication about numbers is, unlike other types of primitive values, they might not get reused.
+Another complication about numbers is, unlike other types of primitive values, they might not get reused:
 
-For `smi`s, they are encoded as recognizably invalid pointers, which don't point to anything, so the whole concept of "reusing" doesn't really apply to them.
-When `HeapNumber`s (numbers that are not considered `smi`s) are pointed by object's properties, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. I believe this design decison is a beneficial tradeoff for the majority usage patterns at the cost of making `HeapNumber`s unshareable.
+1. For `smi`s, they are encoded as recognizably invalid pointers, which don't point to anything, so the whole concept of "reusing" doesn't really apply to them.
+
+2. For `HeapNumber`s (numbers that are not considered `smi`s):
+    - when they are pointed by object's properties, it becomes a mutable `HeapNumber`, which allows updating the value without allocating a new `HeapNumber` every time. I believe this design decison is a beneficial tradeoff for the majority usage patterns at the cost of making `HeapNumber`s unshareable.
+    - other times they **can** be reused but only when that doesn't incur extra performance overhead: for example, computations like `3 + 0.14` and `314/100` would result in two `HeapNumber`s of the value `3.14` allocated since checking if a `HeapNumber` of `3.14` already exists is not worth it.
 
 To verify our theory, let's try this snippet:
 
