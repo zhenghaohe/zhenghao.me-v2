@@ -64,7 +64,7 @@ According to [the precedence table](https://developer.mozilla.org/en-US/docs/Web
 
 
 
-## Past elemData vs. new elemData
+## Old elemData vs. new elemData
 
 Putting these together, let's revisit the mysterious jQuery code snippet:
 
@@ -80,7 +80,7 @@ Line 1 is pretty straightforward.
 
 There is a lot going on for line 2 - the first `elemData` and the second `elemData` are pointing to different values. 
 Here is a breakdown for line 2:
-1. First, (the past) `elemData` pointing to `initialValue` , and (the past) `elemData.events` property pointing to the value of the assignment expression `elemData = function(){}`
+1. First, (the old) `elemData` pointing to `initialValue` , and (the old) `elemData.events` property pointing to the value of the assignment expression `elemData = function(){}`
 2. Second, (the new) `elemData` gets rebound to `function (){}`
 
 
@@ -113,7 +113,7 @@ I don't recall seeing code written like this outside of jQuery's source code but
 let i = 0, root = { index: i }, node = root
 
 while (i < 10) {
-  node.next = node = {} // `node` in `node.next` is the past `node`
+  node.next = node = {} // `node` in `node.next` is the old `node`
   node.index = ++i  // `node` in `node.index` is the new `node`
 }
 
