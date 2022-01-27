@@ -9,7 +9,9 @@ description: A pattern I discovered in jQuery's source code
 
 You probably never heard of this pattern because I made the name up. 
 
-A few years ago, when I just started learning to program, I was looking at the source code of jQuery since it is the most mature JavaScript library out there - until this date, the frontend of amazon.com is still [powered by it](), and I wanted to learn from the best. In its source code, I distinctively remember there were code written like this (I omitted things for simplicity. You can check out its source code):
+A few years ago, when I just started learning to program, I was looking at the source code of jQuery since it is the most mature JavaScript library out there - until this date, the frontend of amazon.com is still [powered by jQuery 1.6.4](https://twitter.com/amilajack/status/1484970825568505856), and I wanted to learn from the best. 
+
+In its source code, I distinctively remember there were code written like this (I omitted a lot of code for simplicity. You can check out [its source code](http://code.jquery.com/jquery-1.4.3rc1.js) if you are interested):
 
 ```javascript
 var elemData = someInitialValue
@@ -74,7 +76,7 @@ elemData.events = elemData = function(){}; // 2
 elemData.events = {}; // 3
 ```
 
-Line 1 is pretty straighford. 
+Line 1 is pretty straightforward. 
 
 There is a lot going on for line 2 - the first `elemData` and the second `elemData` are pointing to different values. 
 Here is a breakdown for line 2:
