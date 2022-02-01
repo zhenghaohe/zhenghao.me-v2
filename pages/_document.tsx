@@ -14,6 +14,7 @@ class MyDocument extends Document {
           />
           <Main />
           <NextScript />
+          <script src="https://cdn.usefathom.com/script.js" data-site="ESNDEPHC" defer></script>
         </body>
       </Html>
     );
