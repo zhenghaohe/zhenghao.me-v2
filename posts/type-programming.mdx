@@ -9,7 +9,7 @@ tags: typescript
 ## Types are a complex language of their own
 I used to think of TypeScript as just JavaScript with type annotations sprinkled on top of it. With that mentality, I often found writing correct types tricky and daunting, to a point they got in the way of building the actual applications I wanted to build, and frequently, it led me to reach for `any`. And with `any`, I'd lose all type safety.
 
-Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language. For the JavaScript language, the world is made of JavaScript values; for the type language, the world is made of types. When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations; we can go in the other direction too: use the `typeof` operator on JavaScript variables/properties to retrieve the corresponding type.
+Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language. For the JavaScript language, the world is made of JavaScript values; for the type language, the world is made of types. When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations; we can go in the other direction too: use the `typeof` operator on JavaScript variables/properties to retrieve the corresponding types.
 
 ![alt](/art/blog/type-programming/twoworlds.png)
 
@@ -24,7 +24,7 @@ If we start to think of the type language in TypeScript as a full-fledged progra
     1. in [TypeScript 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#tailrec-conditional) we have tail call optimized recursion to some extent
 2. types (data) are immutable
 
-In this post, we will learn the type language by comparing it with JavaScript. 
+In this post, we will learn the type language in TypeScript by comparing it with JavaScript. 
 
 > This post assumes that readers have some familiarity with JavaScript and TypeScript. And if you want to learn TypeScript from scratch properly, you should start with [The TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html). I am not here to compete with the docs.
 
