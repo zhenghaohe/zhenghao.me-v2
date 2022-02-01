@@ -24,7 +24,7 @@ If we start to think of the type language in TypeScript as a full-fledged progra
     1. in [TypeScript 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#tailrec-conditional) we have tail call optimized recursion to some extent
 2. types (data) are immutable
 
-In this post, we will learn the type language in TypeScript by comparing it with JavaScript. 
+In this post, we will learn the type language in TypeScript by comparing it with JavaScript so that you can leverage your existing JavaScript knowledge to become a more effective TypeScript developer.
 
 > This post assumes that readers have some familiarity with JavaScript and TypeScript. And if you want to learn TypeScript from scratch properly, you should start with [The TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html). I am not here to compete with the docs.
 
@@ -41,9 +41,9 @@ In the type language, the world is made of types, and we declare type variables 
 type Obj = {name: string}
 ```
 
-> The idea of "type variables" is a made-up concept - a type variable is an alias to a type, analogous to a JavaScript variable being an alias to a value. I found drawing this analogy makes explaining concepts of the type language much easier.
+> The idea of "type variables" is a made-up concept - a type variable is an alias of a type, analogous to how a JavaScript variable references a value. I found drawing this analogy makes explaining concepts of the type language much easier.
 
-Types and values are very related. a type, at its core, represents the set of possible values. Sometimes the set is finite, e.g., `type Name = 'foo' | 'bar'`, a lot of times the set is infinite, e.g., `type Age = number`. In TypeScript we integrate types and values and make them work together to ensure that the runtime values match the compile-time types.
+Types and values are very related. A type, at its core, represents the set of possible values. Sometimes the set is finite, e.g., `type Name = 'foo' | 'bar'`, a lot of times the set is infinite, e.g., `type Age = number`. In TypeScript we integrate types and values and make them work together to ensure that the runtime values match the compile-time types.
 
 ### Local variable declaration 
 
