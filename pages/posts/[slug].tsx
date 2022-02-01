@@ -11,7 +11,7 @@ import { writeFileSync } from 'fs';
 const generateRSSFeed = (posts: PostMeta[]) => {
   const date = new Date();
 
-  const baseUrl = 'https://zhenghao.io/';
+  const baseUrl = 'https://zhenghao.io';
   const author = {
     name: 'Zhenghao He',
     email: 'zhenghaohe17@gmail.com',
