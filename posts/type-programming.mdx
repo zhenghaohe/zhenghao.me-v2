@@ -14,11 +14,11 @@ Indeed, types can get really complicated if you let them. After writing TypeScri
 ![alt](/art/blog/type-programming/twoworlds.png)
 
 
-The JavaScript language is very expressive, so is the type language - in fact, it is so expressive it has been proven to be Turing complete.
+The JavaScript language is very expressive, so is the type language - in fact, the type language is so expressive that it has been proven to be Turing complete.
 
 Here I don't make any value judgment of whether being Turing complete is good or bad, nor do I know if it is even by design or by accident (in fact, many times, Turing-completeness was achieved [by accident](http://beza1e1.tuxen.de/articles/accidentally_turing_complete.html)). My point is the type language itself, as innocuous as it seems, is certainly powerful, highly capable and can perform arbitrary computation at compile time.
 
-If we start to think of the type language in TypeScript as a full-fledged programming language, it even has a few characteristics of a functional programming language:
+When I started to think of the type language in TypeScript as a full-fledged programming language, I realized it even has a few characteristics of a functional programming language:
 
 1. use recursion instead of iteration
     1. in [TypeScript 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#tailrec-conditional) we have tail call optimized recursion to some extent
@@ -57,7 +57,7 @@ type B = A extends infer C ? (
 ```
 
 
-Although this particular way of creating scoped variables might seem strange to JavaScript developers but it actually finds its roots in some pure functional programming languages. For example, in Haskell, we can use the `let` keyword with `in` to perform scoped assignments as in `let {assignments} in {expression}`:
+Although this particular way of creating scoped variables might seem strange to JavaScript developers, it actually finds its roots in some pure functional programming languages. For example, in Haskell, we can use the `let` keyword with `in` to perform scoped assignments as in `let {assignments} in {expression}`:
 
 ```Haskell
 let two = 2; three = 3 in two * three 
