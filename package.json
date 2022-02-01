@@ -24,6 +24,7 @@
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc --ignore-path ./.gitignore"
   },
   "dependencies": {
+    "fathom-client": "^3.4.0",
     "feed": "^4.2.2",
     "light-date": "^1.2.0",
     "mdx-bundler": "^6.0.2",
