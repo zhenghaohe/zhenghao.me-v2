@@ -22,7 +22,7 @@ const generateRSSFeed = (posts: PostMeta[]) => {
   const feed = new Feed({
     title: "Zhenghao's blog",
     description:
-      "You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews ",
+      "You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews",
     id: baseUrl,
     link: baseUrl,
     language: 'en',
