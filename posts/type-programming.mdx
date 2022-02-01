@@ -149,7 +149,74 @@ type Fn  <A extends string, B extends string = 'world'>   =  [A, B]
 type Result = Fn<'hello'> // ["hello", "world"]
 ```
 
-However, generics are by no means a perfect analogy for functions. For one, unlike functions in JavaScript, Generics are not first-class citizens in the type language. That means we cannot pass a generic to another generic like we pass a function to another function as TypeScript doesn't allow [generics as type parameters](https://github.com/microsoft/TypeScript/issues/1213).
+> However, generics are by no means a perfect analogy for functions. For one, unlike functions in JavaScript, Generics are not first-class citizens in the type language. That means we cannot pass a generic to another generic like we pass a function to another function as TypeScript doesn't allow [generics as type parameters](https://github.com/microsoft/TypeScript/issues/1213).
+
+
+### Map and filter
+In our type language, types are immutable. If we want to modify a part of a type, we have to transform the existing ones into **new types**. In the type language, the details of iterating over a data structure (i.e. an object type) and applying transformations evenly are abstracted away by [Mapped Types](https://www.typescriptlang.org/docs/handbook/2/mapped-types.html). We can use it to implement operations that are conceptually similar to the map and filter array methods in JavaScript.
+
+In JavaScript, let's say we want to transform an object's properties from numbers to strings:
+
+```javascript
+const user = {
+    name: 'foo',
+    age: 28
+}
+
+function stringifyProp(object) {
+    return Object.fromEntries(Object.entries(object)
+		.map(([key, value]) => [key, String(value)]))
+}
+
+const userWithStringProps = stringifyProp(user) // {name:'foo', age: '28'}
+```
+
+In the type langauge, the mapping is done using this syntax `[K in keyof T]` where the `keyof` operator gives us property names as a string union type. 
+
+```typescript
+type User = {
+    name: string,
+    age: number
+}
+
+type StringifyProp<T> = {
+    [K in keyof T]: string
+}
+
+type UserWithStringProps = StringifyProp<User> // { name: string; age: string; }
+```
+
+In JavaScript, we can filter out the properties of an object based on some critiria. For example, we can filter out all non-string properties:
+```javascript
+const user = {
+    name: 'foo',
+    age: 28
+}
+
+function filterNonStringProp(object) {
+    return Object.fromEntries(Object.entries(object)
+        .filter(([key, value]) => typeof value === 'string' && [key, value]))
+}
+
+const filteredUser = filterNonStringProp(user) // {name: 'foo'}
+```
+
+In our type language, this can be achieved with the `as` operator and the `never` type:
+
+```typescript
+type User = {
+    name: string,
+    age: number
+}
+
+type FilterStringProp<T> = {
+    [K in keyof T as T[K] extends string ? K : never]: string
+}
+
+type FilteredUser = FilterStringProp<User> // { name: string }
+```
+
+There are a bunch of builtin [utility “functions”](https://www.typescriptlang.org/docs/handbook/utility-types.html) (generics) for transforming types in TypeScript so often times you don't have to re-invent the wheels.
 
 ## Pattern matching
 We can also use the `infer` keyword to perform pattern matching in the type language.
@@ -168,7 +235,7 @@ type Bar = Str extends `foo-${infer rest}` ? rest : never // 'bar'
 ```
 
 ## Recursion, instead of iteration
-In our type language, there is no syntactical construct for for loop to iterate over a list of data. But we get to use recursion to substitute iterations. 
+Just like many pure functional programming languages out there, in our type language, there is no syntactical construct for for loop to iterate over a list of data. Recursion take the place of loops.
 
 Let's say in JavaScript, we want to write a function to return an array with same item repeated multiple times. Here is one possible way you can do that:
 
