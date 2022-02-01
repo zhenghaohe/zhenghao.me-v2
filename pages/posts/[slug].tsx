@@ -42,7 +42,7 @@ const generateRSSFeed = (posts: PostMeta[]) => {
       description,
       tags,
     } = post;
-    const url = `${baseUrl}/${slug}`;
+    const url = `${baseUrl}/posts/${slug}`;
 
     feed.addItem({
       title,
@@ -75,7 +75,7 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context: GetStaticPropsContext) => {
   const slug = context.params?.slug as string;
   const post = await getPost(slug);
-
+  
   return { props: post };
 };
 
