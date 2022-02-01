@@ -8,6 +8,7 @@ import { formatTags } from 'pages/posts';
 type Props = { meta: PostMeta };
 
 export const PostPage: React.FC<Props> = ({ meta, children }) => {
+  
   return (
     <>
       <NextSeo

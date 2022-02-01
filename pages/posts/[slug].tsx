@@ -5,11 +5,67 @@ import { useMemo } from 'react';
 import { components } from '@/components/MDXComponents';
 import { PostPage } from '@/components/PostPage';
 import { getAllPostsMeta, getPost } from '@/utils/loadMDX';
+import {Feed} from 'feed'
+import { writeFileSync } from 'fs';
+
+const generateRSSFeed = (posts: PostMeta[]) => {
+  const date = new Date();
+
+  const baseUrl = 'https://zhenghao.io/';
+  const author = {
+    name: 'Zhenghao He',
+    email: 'zhenghaohe17@gmail.com',
+    link: 'https://twitter.com/he_zhenghao',
+  };
+
+  // Construct a new Feed object
+  const feed = new Feed({
+    title: "Zhenghao's blog",
+    description:
+      "You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews ",
+    id: baseUrl,
+    link: baseUrl,
+    language: 'en',
+    feedLinks: {
+      rss2: `${baseUrl}/rss.xml`,
+    },
+    updated: date,
+    author,
+    copyright: `All rights reserved ${new Date().getFullYear()}, Zhenghao He`,
+  });
+
+  posts.forEach((post) => {
+    const {
+      slug,
+      title,
+      date,
+      description,
+      tags,
+    } = post;
+    const url = `${baseUrl}/${slug}`;
+
+    feed.addItem({
+      title,
+      id: url,
+      link: url,
+      description,
+      content: description,
+      author: [author],
+      date: new Date(date),
+      category: tags.split(',').map(name => ({name}))
+    });
+  });
+
+  // Write the RSS output to a public file, making it
+  // accessible at ashleemboyer.com/rss.xml
+  writeFileSync('public/rss.xml', feed.rss2());
+};
 
 export const getStaticPaths = async () => {
   const posts = await getAllPostsMeta();
   const paths = posts.map(({ slug }) => ({ params: { slug } }));
-  
+  generateRSSFeed(posts)
+
   return {
     paths,
     fallback: false // 404
