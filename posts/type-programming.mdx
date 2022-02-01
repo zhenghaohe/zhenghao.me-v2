@@ -269,6 +269,8 @@ Putting these together, we have:
 type FillArray<Item, N extends number, Array extends Item[] = []> 
     = Array['length'] extends N 
         ? Array : FillArray<Item, N, [...Array, Item]>;
+
+type Foos = FillArray<'foo', 3> // ["foo", "foo", "foo"]        
 ```
 
 ### Limits for recursion depth
