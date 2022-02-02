@@ -5,7 +5,7 @@ export const SEO: React.FC = () => {
     <DefaultSeo
       title="Zhenghao He"
       description="Software Engineer"
-      canonical="https://zhenghao.io/"
+      // canonical="https://zhenghao.io/"
       openGraph={{
         url: 'https://zhenghao.io/',
         title: 'Zhenghao',
