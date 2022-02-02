@@ -38,7 +38,7 @@ export const getAllPostsMeta = async () => {
   return allPostPaths
     .map((postPath): PostMeta => {
       const post = fs.readFileSync(path.join(RootPath, postPath), 'utf-8');
-
+      
       const slug = path.basename(postPath).replace('.mdx', '');
       const meta = matter(post).data;
 

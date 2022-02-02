@@ -34,7 +34,7 @@ const generateRSSFeed = (posts: PostMeta[]) => {
     copyright: `All rights reserved ${new Date().getFullYear()}, Zhenghao He`,
   });
 
-  posts.forEach((post) => {
+  posts.forEach(async (post) => {
     const {
       slug,
       title,
@@ -42,6 +42,7 @@ const generateRSSFeed = (posts: PostMeta[]) => {
       description,
       tags,
     } = post;
+    const {code} = await getPost(slug);
     const url = `${baseUrl}/posts/${slug}`;
 
     feed.addItem({
@@ -49,7 +50,7 @@ const generateRSSFeed = (posts: PostMeta[]) => {
       id: url,
       link: url,
       description,
-      content: description,
+      content: code,
       author: [author],
       date: new Date(date),
       category: tags.split(',').map(name => ({name}))
