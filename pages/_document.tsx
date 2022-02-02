@@ -5,7 +5,9 @@ class MyDocument extends Document {
   render() {
     return (
       <Html lang="en">
-        <Head></Head>
+        <Head>
+          <script src="https://cdn.usefathom.com/script.js" data-site="ESNDEPHC" defer></script>
+        </Head>
         <body className="dark">
           <script
             dangerouslySetInnerHTML={{
@@ -14,7 +16,6 @@ class MyDocument extends Document {
           />
           <Main />
           <NextScript />
-          <script src="https://cdn.usefathom.com/script.js" data-site="ESNDEPHC" defer></script>
         </body>
       </Html>
     );
