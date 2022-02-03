@@ -6,7 +6,7 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <script src="https://cdn.usefathom.com/script.js" data-site="ESNDEPHC" defer></script>
+        <script src="https://phone-rejoice.zhenghao.io/script.js" data-site="ESNDEPHC" defer></script>
         </Head>
         <body className="dark">
           <script
