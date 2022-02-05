@@ -9,7 +9,7 @@ tags: technical interviews,musing
 
 ## Context
 
-As I mentioned in [my last post](zhenghao.io/posts/framework-for-coding-interview), I have been interviewing a lot for the past year - not conducting interviews, I was the candidate being interviewed. Most of the interview processes I had with big tech companies consisted of 1-2 system design rounds depending on the level of the role. Unlike traditional **backend-focused** system design questions, for which you can find lots of prep resources online such as the famous [grokking system design interview](https://www.educative.io/courses/grokking-the-system-design-interview) or [system design primer](https://github.com/donnemartin/system-design-primer), I didn’t know what to expect for a **frontend-focused** system design interview as there are very few resources out there talking about this type of interviews.
+As I mentioned in [my last post](/posts/framework-for-coding-interview), I have been interviewing a lot for the past year - not conducting interviews, I was the candidate being interviewed. Most of the interview processes I had with big tech companies consisted of 1-2 system design rounds depending on the level of the role. Unlike traditional **backend-focused** system design questions, for which you can find lots of prep resources online such as the famous [grokking system design interview](https://www.educative.io/courses/grokking-the-system-design-interview) or [system design primer](https://github.com/donnemartin/system-design-primer), I didn’t know what to expect for a **frontend-focused** system design interview as there are very few resources out there talking about this type of interviews.
 
 Now that I have done a fair amount of system design interviews of both types, I want to give you a summary of what to expect, especially for the frontend ones since I have been mostly working on the frontend side.
 
@@ -27,9 +27,9 @@ Both frontend-focused and backend-focused system design interviews share a lot o
 
 Other kinds of similarities include:
 
-1. The interviewer is relying on you to drive the presentation. You can't to rely on the interviewer to have your back.
+1. The interviewer is relying on you to drive the presentation. You can't rely on the interviewer to have your back.
 2. While the topics can be either micro or macro, you probably won’t need to actually write code - it is rare to jam some portion of coding in the middle of a system design interview
-3. Unlike scantron school exams, both types will consist of mainly open ended questions. There probably isn’t a checklist of things for you to cover one by one. Nor are you expected to drill deep into all of those. When you realize your interviewer is biased toward a particular part of the system, which they usually do, pivot your focus to that area. Other times you focus on your strengths and lead the converstation.
+3. Unlike scantron school exams, both types will consist of mainly open ended questions. There probably isn’t a checklist of things for you to cover one by one. Nor are you expected to drill deep into all of those. When you realize your interviewer is biased toward a particular part of the system, which they usually do, pivot your focus to that area. Other times you focus on your strengths and lead the conversation.
 
 <br />
 
@@ -43,7 +43,7 @@ During the backend-focused system design interviews, you would spend most of the
 
 3. designing SQL table schema
 
-4. choosing the right the cross-region strategy if your service has a global userbase
+4. choosing the right the cross-region strategy if your service has a global user base
 
 5. any other kinds of system characteristics like latency, availability, fault tolerance, etc.
 <br />
@@ -55,7 +55,7 @@ For frontend-focused system design interviews, you would spend most of the time 
 - Specifics about UI components
     - a newsfeed which has an infinite scroll behaviour with all the images lazily loaded while ensuring the client side has the aspect ratio of the images upfront to prevent layout shift.
     - an autocomplete UI component which fetches search result data incrementally in batches while receiving images from server pushes in parallel.
-    - a gallery page which pulles images and displays them in the correct order despite the asynchrony that comes with the network requests that might cause them to arrive out of order.
+    - a gallery page which pulls images and displays them in the correct order despite the asynchrony that comes with the network requests that might cause them to arrive out of order.
 - How do you leverage different layers of cache to decrease latency or support offline mode.
 - if they want to get framework-specific, which is totally possible, they might even ask you to define a particular React components’s props or manage complex state in a React app.
 
@@ -65,7 +65,7 @@ A lot times having one type of system design interviews means you can over simpl
 
 - In a backend system design interview, the client-side/frontend is reduced to an API layer - you don’t need to consider all the intricacies of the browser or the pesky rerenders your real-time updates would cause.
 
-- In a frontend system design interview, you can treat the backend as a black box and you don’t need to worry about how things like how to scale a database, or how your choice of using websockets might affect the load balancers because of the need for sticky sessions support.
+- In a frontend system design interview, you can treat the backend as a black box and you don’t need to worry about how things like how to scale a database, or how your choice of using web sockets might affect the load balancers because of the need for sticky sessions support.
 <br />
 
 > But again, this is a summary of my experience and depending on who your interviewers are (are they frontend, backend and/or fullstack devs), the scope of the role and which team it is (are you going to be on a frontend team or are you expected to work across the stack and stretch into the backend?) your front end system design interview might be a bit of a hybrid where some aspects of backend system design interviews might come up.
