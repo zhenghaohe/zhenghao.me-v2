@@ -315,14 +315,14 @@ function switch_overloaded(input: string): number
 function switch_overloaded(input: number): string
 function switch_overloaded(input: number | string): number | string {
      if (typeof input === 'string') {
-        return input // input is still a string when it should be number
+        return input // input is still a string when it should be converted to number
     } else {
-        return input // input is still a number when it should be string
+        return input // input is still a number when it should be converted to string
     } 
 }
 
 const num = switch_overloaded('1') // ❌ num's type is number but it is actually a string
-const str = switch_overloaded(1) // ❌ num's type is string but it is actually a number
+const str = switch_overloaded(1) // ❌ str's type is string but it is actually a number
 ```
 
 The TypeScript compiler only checks the function body’s code against the (overloaded) function signature but it cannot tell **which** if else branch is supposed to handle **which** individual overload. As a result, we can write code that contradicts the overloaded function signature and TypeScript can’t help us.
