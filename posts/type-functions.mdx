@@ -250,7 +250,7 @@ function switchIt_overloaded(input: number): string
 ```
 
 1. Write the overloaded function implementation.
-    1. Use union types to encompass types of each of the overloads. 
+    1. Use a union type to encompass types of each of the overloads. 
     2. Within the function body,  we check the types of the arguments and dispatch the execution to a proper code path:
     ```typescript
     function switchIt_overloaded(input: string): number
@@ -267,7 +267,7 @@ function switchIt_overloaded(input: number): string
 
 
 
-With **function overload**, you remove:
+With function overload, you remove:
     1. Generics and the conditional types.
     2. Type assertions.
 
@@ -362,7 +362,7 @@ interface F {
 }
 ```
 
-Flow is another popular JavaScript type system. But, it doesn’t (fully) support the function overload syntax in TypeScript. However, it does allow you to set overloading types for functions using intersection types, exactly like what we did above with `switchIt_intersection`.
+[Flow](https://flow.org/) is another popular JavaScript type system. But, it doesn’t (fully) support the function overload syntax in TypeScript. However, it does allow you to set overloading types for functions using intersection types, exactly like what we did above with `switchIt_intersection`.
 
 Interestingly, the usage of intersection types for function overload is a common source of confusion to people: when the overloaded function signature is written, union types are used, as opposed to intersection types.
 
