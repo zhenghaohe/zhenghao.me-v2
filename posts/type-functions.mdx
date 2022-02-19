@@ -182,7 +182,7 @@ function search<T extends Callback | undefined = undefined>(
 
   if (cb) {
     res.then((data) => cb(data));
-    return undefined as void & Promise<Result[]>; // need to use as
+    return undefined as void & Promise<Result[]>; // assertion needed for the same reason as `getRandom` above
   }
 
   return res as void & Promise<Result[]>;
