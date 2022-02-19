@@ -349,8 +349,8 @@ const switchIt_intersection: F = (input) => {
     }
 }
 
-const num = switchIt_intersection(1) // ✅ of the string type
-const str = switchIt_intersection('1') // ✅ of the number type
+const num = switchIt_intersection(1) // ✅ has the string type
+const str = switchIt_intersection('1') // ✅ has the number type
 ```
 
 And you can also write type `F` in the form of interface, since the interface definition automatically merges and is implicitly intersected by the compiler:
@@ -369,7 +369,7 @@ Interestingly, the usage of intersection types for function overload is a common
 ```typescript
 function switch_overloaded(input: string): number
 function switch_overloaded(input: number): string
-function switch_overloaded(input: number | string): number | string { // union, not intersection
+function switch_overloaded(input: number | string): number | string { // 🤔 union, not intersection
 	// ...
 }
 ```
@@ -386,3 +386,6 @@ For example:
 2. The `getRandom` function is not suitable for function overload since generic types with conditional types or indexed types are already a great tool to map input types to output types. Writing it using function overload would be extremely verbose. Functions with an excessive number of overloads can be confusing to people. 
 
 The bottom line is, whether you favour function overload or generic types with conditional types, we have to be very intentional about it and tread very carefully as neither of them is completely safe.
+
+## Further Reading
+- [On Understanding Types, Data Abstraction, and Polymorphism](http://lucacardelli.name/Papers/OnUnderstanding.A4.pdf)
