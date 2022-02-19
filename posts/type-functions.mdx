@@ -22,12 +22,12 @@ It’s been a running theme in my TypeScript career: I have to create and type f
  declare function foo(a: string | boolean)  
  ```
  
- The argument’s type could either be a `string` or `boolean`, so we use a union type to model this. Then, we use type guards inside the function body to narrow it down to its single type, i.e., `string` or `boolean`.
+The argument’s type could either be a `string` or `boolean`, so we use a union type to model this. Then, we use type guards inside the function body to narrow it down to its single type, i.e., `string` or `boolean`.
  
- Now, let’s say the return value’s type depends on which specific union member the argument’s type is. How should we then go about typing it?
+Now, let’s say the return value’s type depends on which specific union member the argument’s type is. How should we then go about typing it?
 We can represent the types of the arguments using generic types. Then, we pass them to conditional types to retrieve the right type of return value.
 
-Let’s say we want to write a function that generates a random integer from 0-9 when called with the string `int`. Or, it generates a random English letter from a - z when called with the string `char`.
+Let’s consider a function that generates a random integer from 0-9 when called with the string `int`. Or, it generates a random English letter from a - z when called with the string `char`.
 
 Here’s how I would write it in JavaScript:
 
@@ -44,9 +44,9 @@ function getRandom(str){
 ```
 
 To properly type this in TypeScript, follow these steps:
-1. The argument `str` has the string union type `"int" | "char"` , and to make the return value’s type depend on the argument type, we must use a generic type T to represent it.
+1. The argument `str` has the string union type `"int" | "char"` , and to make the return value’s type depend on the argument type, we must use a generic type `T` to represent it.
     1. `function getRandom<T extends'char' | 'int'>(str: T)`
-2. 1. Pass `T` to a generic conditional type `GetReturnType` to get the respective type for the return value.
+2. Pass `T` to a generic conditional type `GetReturnType` to get the respective type for the return value.
     1. `type GetReturnType<T> = T extends 'char' ? string : T extends 'int' ? number : never`
 
 
