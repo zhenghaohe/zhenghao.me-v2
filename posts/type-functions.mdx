@@ -84,14 +84,14 @@ function getRandom<T extends 'char' | 'int' | 'bool'>(
 ): GetReturnType<T> {
   if (str === 'int') {
     // generate a random number
-    return Math.floor(Math.random() * 10) as GetReturnType1<T>
+    return Math.floor(Math.random() * 10) as GetReturnType<T>
   } else if (str === 'char') {
     // generate a random char
     return String.fromCharCode(
       97 + Math.floor(Math.random() * 26)
-    ) as GetReturnType1<T>
+    ) as GetReturnType<T>
   } else {
-    return Boolean(Math.round(Math.random())) as GetReturnType1<T>
+    return Boolean(Math.round(Math.random())) as GetReturnType<T>
   }
 }
 ```
@@ -150,21 +150,18 @@ It’s also common for such functions to return different types of values if opt
 Let’s say we have a function `search` that fetches search results asynchronously. It accepts an optional callback function as the arguments. If the callback function is supplied, it passes the search results to it. Otherwise, it returns a promise that resolves to the search results. Here’s how you might write the function in JavaScript:
 
 ```javascript
-function search(
-  query,
-  cb
-){
-  const res = api(query);
+function search(query, cb) {
+  const res = api(query)
   if (cb) {
-    res.then((data) => cb(data));
+    res.then((data) => cb(data))
     return
   }
 
   return res
 }
 
-const promise = search("foo"); // return a promise
-search("foo", (data) => render(data)); // void (return undefined)
+const p = search('foo') // return a promise
+const v = search('foo', (data) => {}) // void
 ```
 
 In TypeScript, we can follow these steps to type the function:
@@ -283,23 +280,26 @@ And you gain benefits like:
 Rewind to our initial `search` function. Following the same steps, you can re-write it using function overload:
 
 ```typescript
-type Callback = (results: Result[]) => void;
+type Callback = (results: Result[]) => void
 
 function search_overloaded(term: string): Promise<Result[]>
 function search_overloaded(term: string, cb: Callback): void
-function search_overloaded(term: string, cb?: Callback): void | Promise<Result[]> {
-     const res = api(term)
+function search_overloaded(
+  term: string,
+  cb?: Callback
+): void | Promise<Result[]> {
+  const res = api(term)
 
-    if(cb) {
-	        res.then(data => cb(data))
-					return 
-    } 
+  if (cb) {
+    res.then((data) => cb(data))
+    return
+  }
 
-    return res 
+  return res
 }
 
 const p = search_overloaded('key') // ✅ Promise<Result[]>
-const v = search_overloaded('key', (data) => {}) // ✅ void 
+const v = search_overloaded('key', (data) => {}) // ✅ void
 ```
 
 Again, no convoluted conditional types and generic types, and no annoying type assertions.
