@@ -102,7 +102,7 @@ Given the JavaScript code snippet above, will we end up with two separate memory
 The answer is the latter. It is not much different than objects, except that objects are immutable and primitive types are not. 
 ![alt](/art/blog/javascript-variables/JSPrimitiveExample1.png)
 
-> Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are comlicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post](https://www.zhenghao.io/posts/javascript-memory) on the topic of the memory model in V8.
+> Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are complicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post](https://www.zhenghao.io/posts/javascript-memory) on the topic of the memory model in V8.
 
 
 ## What does the spec say
@@ -128,7 +128,7 @@ The topics discussed from this point forward are all considered “implementatio
 
 > I am going to explain what JavaScript variables really are from the perspective of the JavaScript engine - V8. There are different JavaScript engines in the wild. And even just for V8 along, it is very complex, and it has multiple ways to run code, and its various parts and pipelines have been rewritten many times over the years. What I describe today might become outdated tomorrow. Don't rely on the implementation details.
 
-Let’s step back for a second. At its simplest, think of a variable as an identifier, an alias to the chunk of memory at which its immediate value is stored. At compile time, Your variables are all turned into the memory addresses. Wherever a variable is used in the code, its (immediate) value will be accessed via that memory address. 
+Let’s step back for a second. At its simplest, think of a variable as an identifier, an alias to the chunk of memory at which its immediate value is stored. At compile time, your variables are all turned into the memory addresses. Wherever a variable is used in the code, its (immediate) value will be accessed via that memory address. 
 
 As we have discussed, the values we create in our JavaScript program are not directly stored in JavaScript variables. At a low level, that means the bits from the memory block of which a JavaScript variable is an alias does not make up its value directly. Then what exactly is stored in a JavaScript variable? The answer, it stores a memory address of some other memory block. Starting at that address, there is a separate chunk of memory, at which a "real JavaScript" value, the value we see, manipulate and pass around in our JavaScript program, is stored.
 
@@ -197,7 +197,7 @@ Wrapping primitives types inside another data structure that records extra metad
 ## Small integers
 And I have been mentioning that small integers are an exception to this boxing rule. In V8, small integers (the term in V8 is `smi`) are heavily optimized so they can be encoded inside of a pointe. Unlike other types, a `smi` can be stored directly in the pointer without allocating additional storage for it.
 
-This means, it is technically to say that `a` has the value `123` as in `const a = 123`:
+This means, it is technically correct to say that `a` has the value `123` as in `const a = 123`:
 ![alt](/art/blog/javascript-variables/smiExample.png)
 
 Read this article from V8 if you are interested in how they distinguish between a `smi` vs. a pointer for an immediate value. This technique is called [pointer tagging](https://v8.dev/blog/pointer-compression#value-tagging-in-v8), and it is not unique to V8 or JavaScript. A bunch of other languages like [OCaml](https://dev.realworldocaml.org/runtime-memory-layout.html) and [Ruby](https://brandur.org/ruby-memory#value) does this too.
