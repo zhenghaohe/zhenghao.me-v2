@@ -91,6 +91,7 @@ function getRandom<T extends 'char' | 'int' | 'bool'>(
       97 + Math.floor(Math.random() * 26)
     ) as GetReturnType<T>
   } else {
+    // generate a random boolean
     return Boolean(Math.round(Math.random())) as GetReturnType<T>
   }
 }
@@ -130,7 +131,7 @@ Think about the DOM API `documnet.querySelector`—it accepts an html element ta
 ### A note on the type assertions
 You might’ve have noticed that I added a type assertion as `ReturnTypeByInputType[T]` for every return statement. This is because after TypeScript 3.5, to give a return value an indexed access type (such as `ReturnTypeByInputType[T]`), the return type must be checked against the intersection of all possibilities of the properties (types) selected by that index. In the above example, every return value must be asserted as either `ReturnTypeByInputType[T]`, or an explicit intersection type of every type in `ReturnTypeByInputType` , which is `number & string & boolean`
 
-This is to improve the soundness of the type system. See [this](https://github.com/microsoft/TypeScript/pull/30769) if you are interested in learning more about it. 
+This is to improve the soundness of the type system. See [this PR](https://github.com/microsoft/TypeScript/pull/30769) if you are interested in learning more about it. 
 
 Type assertions are inherently unsafe. Later on, I’ll show you how to get rid of them using function overload. But unfortunately, function overload is just as unsafe as type assertion. For now though, just consider this as a technical limitation of TypeScript.
 
