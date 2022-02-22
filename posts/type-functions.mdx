@@ -204,7 +204,7 @@ All of these added a lot of noise to our types. So, there might be a better alte
 
 ## Function overload
 
-It turns out that TypeScript supports function overload, and surprisingly, it might actually be the oldest part of TypeScript. You can trace it back to [TypeScript 1.1](https://github.com/microsoft/TypeScript/blob/release-1.1/tests/cases/compiler/overload2.ts).
+It turns out that TypeScript supports function overload, and surprisingly, it might actually be the **oldest** part of TypeScript. You can trace it back to [TypeScript 1.1](https://github.com/microsoft/TypeScript/blob/release-1.1/tests/cases/compiler/overload2.ts).
 But unlike other features added during TypeScript’s early development—enums and namespaces come to mind, which tend to get overused (especially enums) and should be replaced by other features—from my observations, function overload is actually underused and still remains useful when needed.
 
 I think part of the reason why function overload is so underused, is because the idea of function overload just feels unnatural to many JavaScript developers. In JavaScript, we don’t have function overload—JavaScript only allows one function with a specific name within a specific scope.
@@ -252,7 +252,7 @@ function switchIt_overloaded(input: number): string
 
 1. Write the overloaded function implementation.
     1. Use a union type to encompass types of each of the overloads. 
-    2. Within the function body,  we check the types of the arguments and dispatch the execution to a proper code path:
+    2. Within the function body,  we check the types of the arguments and **manually** dispatch the execution to a proper code path:
     ```typescript
     function switchIt_overloaded(input: string): number
     function switchIt_overloaded(input: number): string
