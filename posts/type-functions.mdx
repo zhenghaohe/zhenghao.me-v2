@@ -379,7 +379,7 @@ This is because parameter types are [contravariant](https://stackoverflow.com/qu
 
 ## My rule of thumb
 
-When it comes to type polymorphic functions in TypeScript, I normally default to using generic types (constrained to a union type) along with conditional types. I only reach for function overload when I realize the function signature’s shapes for all its variants are different enough to be defined separately and explicitly.
+When it comes to typing polymorphic functions in TypeScript, I normally default to using generic types (constrained to a union type) along with conditional types. I only reach for function overload when I realize the function signature’s shapes for all its variants are different enough to be defined separately and explicitly.
 
 For example:
 
