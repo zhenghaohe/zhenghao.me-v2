@@ -83,7 +83,6 @@ type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
 export const Post: React.FC<Props> = ({ meta, code }) => {
   const Component = useMemo(() => getMDXComponent(code), [code]);
-
   return (
     <PostPage meta={meta}>
       <Component components={components} />

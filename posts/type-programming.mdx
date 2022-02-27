@@ -3,6 +3,7 @@ title: An introduction to type programming in TypeScript
 published: true
 listed: true
 date: '01/31/2022'
+lastUpdateDate: '02/26/2022'
 description: Learn to write types using the type language and leverage your existing javascript knowledge to master TypeScript quicker
 tags: typescript
 ---
@@ -67,6 +68,32 @@ let two = 2; three = 3 in two * three
 //                         ↑       ↑
 // two and three are only in scope for the expression `two * three` 
 ```
+
+This is useful to cache some intermediate types to avoid duplicate calculations:
+
+```typescript
+type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
+type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
+
+type ConvertFooToBaz<T> = ConvertFooToBar<T> extends infer Bar ? 
+        Bar extends 'bar' ? ConvertBarToBaz<Bar> : never 
+    : never
+
+type Baz = ConvertFooToBaz<'foo'>
+```
+
+Without `infer` to create a local type variable `Bar`, we have to calculate `Bar` twice:
+
+```typescript
+type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
+type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
+
+type ConvertFooToBaz<T> = ConvertFooToBar<T> extends 'bar' ? 
+    ConvertBarToBaz<ConvertFooToBar<T> > : never // call `ConvertFooToBar` twice
+
+type Baz = ConvertFooToBaz<'foo'>
+```
+
 
 ## Equality comparisons and conditional branching
 
