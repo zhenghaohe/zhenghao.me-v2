@@ -3,6 +3,7 @@ title: The type hierarchy tree
 published: true
 listed: true
 date: '12/28/2021'
+lastUpdateDate: '02/26/2022'
 description: A reflection on my mental model of TypeScript’s type system
 tags: typescript
 ---
@@ -237,7 +238,17 @@ fn(() => 'string')
 
 At first blush this might seem like a violation for the Liskov substitution principle since the type `string` is not a subtype of `void` so it shouldn’t be able to be substitutable for `void`. However, if we view it from the perspective of whether or not it alters the correctness of the program, then it becomes apparent that as long as the caller function has no business with the returned value from the `void` function (which is exactly the intended outcome of the `void` type), it is pretty harmless to substitute that with a function that returns something different.
 
-This is where TypeScript is trying to be pragmatic and complements the way JS works with functions. In JavaScript it is pretty common when we reuse functions in different situations with the return values being ignored.
+This is where TypeScript is trying to be pragmatic and complements the way JavaScript works with functions. In JavaScript it is pretty common when we reuse functions in different situations with the return values being ignored.
+
+Another cool tip about `void` type (credit to [@simey](https://twitter.com/simey/status/1497739267786694660)) is that you can annotate `this` with `void` when declaring a function:
+
+```typescript
+function doSomething(this: void, value: string) {
+    this // void
+}
+```
+This prevents you from using `this` inside the function.
+
 
 ## situations where TypeScript disallows implicit upcast
 
