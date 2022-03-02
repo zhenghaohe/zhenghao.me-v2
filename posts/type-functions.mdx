@@ -3,6 +3,7 @@ title: Type polymorphic functions in TypeScript
 published: true
 listed: true
 date: '02/19/2022'
+lastUpdateDate: '03/01/2022'
 description: you might or might not need to use function overload
 tags: typescript
 ---
@@ -65,7 +66,7 @@ function getRandom<T extends'char' | 'int'>(str: T): GetReturnType<T> {
 }
 ```
 
-> You might be wondering about the type assertion after each return statement. I’ll explain this [later](#a-note-on-the-type-assertions).
+> You might be wondering about the type assertion after each return statement. I’ll explain this later.
 
 Now, let’s say we must expand our `getRandom` function to also support random boolean generation.
 
@@ -128,12 +129,14 @@ function getRandom<T extends 'char' | 'int' | 'bool'>(
 
 Think about the DOM API `documnet.querySelector`—it accepts an html element tag name and returns the respective html element. It is typed in [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/ca00b3248b1af2263d0223d68e792b7ca39abcab/lib/lib.dom.d.ts#L11050) in the exact same way. 
 
-### A note on the type assertions
-You might’ve have noticed that I added a type assertion as `ReturnTypeByInputType[T]` for every return statement. This is because after TypeScript 3.5, to give a return value an indexed access type (such as `ReturnTypeByInputType[T]`), the return type must be checked against the intersection of all possibilities of the properties (types) selected by that index. In the above example, every return value must be asserted as either `ReturnTypeByInputType[T]`, or an explicit intersection type of every type in `ReturnTypeByInputType` , which is `number & string & boolean`
+<details>
+    <summary><b>notes on the type assertions</b></summary>
+    <p>You might’ve have noticed that I added a type assertion as `ReturnTypeByInputType[T]` for every return statement. This is because after TypeScript 3.5, to give a return value an indexed access type (such as `ReturnTypeByInputType[T]`), the return type must be checked against the intersection of all possibilities of the properties (types) selected by that index. In the above example, every return value must be asserted as either `ReturnTypeByInputType[T]`, or an explicit intersection type of every type in `ReturnTypeByInputType` , which is `number & string & boolean`</p>
+    <p>This is to improve the soundness of the type system. See [this PR](https://github.com/microsoft/TypeScript/pull/30769) if you are interested in learning more about it.</p>
+    <p>Type assertions are inherently unsafe. Later on, I’ll show you how to get rid of them using function overload. But unfortunately, function overload is just as unsafe as type assertion. For now though, just consider this as a technical limitation of TypeScript.</p>
 
-This is to improve the soundness of the type system. See [this PR](https://github.com/microsoft/TypeScript/pull/30769) if you are interested in learning more about it. 
+</details>
 
-Type assertions are inherently unsafe. Later on, I’ll show you how to get rid of them using function overload. But unfortunately, function overload is just as unsafe as type assertion. For now though, just consider this as a technical limitation of TypeScript.
 
 ## Optional parameters
 What about functions that take a variable number of arguments? They’re extremely common, and in JavaScript you don’t really need to do anything other than just define parameters as you normally would and check them against `undefined` inside the function body.
@@ -268,11 +271,11 @@ function switchIt_overloaded(input: number): string
 
 
 
-With function overload, you remove:
+With function overload, you **remove**:
     1. Generics and the conditional types.
     2. Type assertions.
 
-And you gain benefits like:
+And you gain **benefits** like:
     1. Readability, since you can clearly distinguish the possible variant of the overloaded function. The types of arguments and return values are separately and explicitly written out.
     2. IDE support for overloaded functions is better.
 
