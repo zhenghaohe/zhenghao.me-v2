@@ -13,7 +13,11 @@ tags: typescript
 ## Types are a complex language of their own
 I used to think of TypeScript as just JavaScript with type annotations sprinkled on top of it. With that mindset, I often found writing correct types tricky and daunting, to a point they got in the way of building the actual applications I wanted to build, and frequently, it led me to reach for `any`. And with `any`, I lose all type safety.
 
-Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language. For the JavaScript language, the world is made of JavaScript values; for the type language, the world is made of types. When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations (or have them implicitly inferred by the compiler); we can go in the other direction too: use TypeScript's [typeof operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#the-typeof-type-operator) on JavaScript variables/properties to retrieve the corresponding types (not the `typeof` operator JavaScript provides to check runtime values' types).
+Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language:
+- for the JavaScript language, the world is made of JavaScript values
+- for the type language, the world is made of types
+
+When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations (or have them implicitly inferred by the compiler); we can go in the other direction too: use TypeScript's [typeof operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#the-typeof-type-operator) on JavaScript variables/properties to retrieve the corresponding types (not the `typeof` operator JavaScript provides to check runtime values' types).
 
 ![alt](/art/blog/type-programming/twoworlds.png)
 
@@ -45,7 +49,7 @@ In the type language, the world is made of types, and we declare type variables 
 type Obj = {name: string}
 ```
 
-> A more accurate name for the idea of “type variables” is type synonyms or type alias. I use the word "type variables" to draw an analogy to how a JavaScript variable references a value. 
+> A more accurate name for “type variables” is type synonyms or type alias. I use the word "type variables" to draw an analogy to how a JavaScript variable references a value. 
 >
 > It is not a perfect analogy though, a type alias doesn’t create or introduce a new type—they are only a new name for existing types. But I hope drawing this analogy makes explaining concepts of the type language much easier.
 
@@ -144,7 +148,7 @@ function getUserName<T extends {name: string}>(user: T) {
 }
 ```
 
-By adding the generic constraints, `<T extends {name: string}>` we ensure the parameter our function takes always consist of a `name` property of the type `string`.
+By adding the generic constraints, `<T extends {name: string}>` we ensure the argument our function takes always consist of a `name` property of the type `string`.
 
 ## Retrieve types of properties by indexing into object types
 
