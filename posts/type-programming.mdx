@@ -72,7 +72,7 @@ let two = 2; three = 3 in two * three
 ```
 
 <details>
-    <summary>`infer` is useful for caching some intermediate types</summary>
+    <summary><b>`infer` is useful for caching some intermediate types</b></summary>
     <p>Here is an example:</p>
         ```typescript
         type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
@@ -188,7 +188,7 @@ type Result = Fn<'hello'> // ["hello", "world"]
 ```
 
 <details>
-    <summary>Though this is not a perfect analogy...</summary>
+    <summary><b>this is still not a perfect analogy though...</b></summary>
     <p>Generics are by no means exactly the same as JavaScript's functions. For one, unlike functions in JavaScript, Generics are not first-class citizens in the type language. That means we cannot pass a generic to another generic like we pass a function to another function as TypeScript doesn't allow [generics as type parameters](https://github.com/microsoft/TypeScript/issues/1213).</p>
 </details>
 
