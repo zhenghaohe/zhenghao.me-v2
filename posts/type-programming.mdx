@@ -3,7 +3,7 @@ title: An introduction to type programming in TypeScript
 published: true
 listed: true
 date: '01/31/2022'
-lastUpdateDate: '02/26/2022'
+lastUpdateDate: '03/01/2022'
 description: Learn to write types using the type language and leverage your existing javascript knowledge to master TypeScript quicker
 tags: typescript
 ---
@@ -13,7 +13,7 @@ tags: typescript
 ## Types are a complex language of their own
 I used to think of TypeScript as just JavaScript with type annotations sprinkled on top of it. With that mindset, I often found writing correct types tricky and daunting, to a point they got in the way of building the actual applications I wanted to build, and frequently, it led me to reach for `any`. And with `any`, I lose all type safety.
 
-Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language. For the JavaScript language, the world is made of JavaScript values; for the type language, the world is made of types. When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations; we can go in the other direction too: use the [typeof operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#the-typeof-type-operator) on JavaScript variables/properties to retrieve the corresponding types.
+Indeed, types can get really complicated if you let them. After writing TypeScript for a while, it occurred to me that the TypeScript language actually consists of two sub-languages - one is JavaScript, and the other is the type language. For the JavaScript language, the world is made of JavaScript values; for the type language, the world is made of types. When we write TypeScript code, we are constantly dancing between these two worlds: we create types in our type world and "summon" them in our JavaScript world using type annotations (or have them implicitly inferred by the compiler); we can go in the other direction too: use TypeScript's [typeof operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#the-typeof-type-operator) on JavaScript variables/properties to retrieve the corresponding types (not the `typeof` operator JavaScript provides to check runtime values' types).
 
 ![alt](/art/blog/type-programming/twoworlds.png)
 
@@ -25,7 +25,7 @@ Here I don't make any value judgment of whether being Turing complete is good or
 When I started to think of the type language in TypeScript as a full-fledged programming language, I realized it even has a few characteristics of a functional programming language:
 
 1. use recursion instead of iteration
-    1. in [TypeScript 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#tailrec-conditional) we have tail call optimized recursion to some extent
+    1. in [TypeScript 4.5](https://devblogs.microsoft.com/typescript/announcing-typescript-4-5/#tailrec-conditional) we have tail call optimized recursion (to some extent)
 2. types (data) are immutable
 
 In this post, we will learn the type language in TypeScript by comparing it with JavaScript so that you can leverage your existing JavaScript knowledge to master TypeScript quicker.
@@ -45,9 +45,11 @@ In the type language, the world is made of types, and we declare type variables 
 type Obj = {name: string}
 ```
 
-> The idea of "type variables" is a made-up concept - a type variable is an alias of a type, analogous to how a JavaScript variable references a value. I found drawing this analogy makes explaining concepts of the type language much easier.
+> A more accurate name for the idea of “type variables” is type synonyms or type alias. I use the word "type variables" to draw an analogy to how a JavaScript variable references a value. 
+>
+> It is not a perfect analogy though, a type alias doesn’t create or introduce a new type—they are only a new name for existing types. But I hope drawing this analogy makes explaining concepts of the type language much easier.
 
-Types and values are very related. A type, at its core, represents the set of possible values. Sometimes the set is finite, e.g., `type Name = 'foo' | 'bar'`, a lot of times the set is infinite, e.g., `type Age = number`. In TypeScript we integrate types and values and make them work together to ensure that the runtime values match the compile-time types.
+Types and values are very related. A type, at its core, represents the set of possible values and the valid operations that can be done on the values. Sometimes the set is finite, e.g., `type Name = 'foo' | 'bar'`, a lot of times the set is infinite, e.g., `type Age = number`. In TypeScript we integrate types and values and make them work together to ensure that the runtime values match the compile-time types.
 
 ### Local variable declaration 
 
@@ -69,30 +71,36 @@ let two = 2; three = 3 in two * three
 // two and three are only in scope for the expression `two * three` 
 ```
 
-This is useful to cache some intermediate types to avoid duplicate calculations:
+<details>
+    <summary>`infer` is useful for caching some intermediate types</summary>
+    <p>Here is an example:</p>
+        ```typescript
+        type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
+        type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
 
-```typescript
-type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
-type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
+        type ConvertFooToBaz<T> = ConvertFooToBar<T> extends infer Bar ? 
+                Bar extends 'bar' ? ConvertBarToBaz<Bar> : never 
+            : never
 
-type ConvertFooToBaz<T> = ConvertFooToBar<T> extends infer Bar ? 
-        Bar extends 'bar' ? ConvertBarToBaz<Bar> : never 
-    : never
+        type Baz = ConvertFooToBaz<'foo'>
+        ```
+        
+        Without `infer` to create a local type variable `Bar`, we have to calculate `Bar` twice:
 
-type Baz = ConvertFooToBaz<'foo'>
-```
+        ```typescript
+        type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
+        type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
 
-Without `infer` to create a local type variable `Bar`, we have to calculate `Bar` twice:
+        type ConvertFooToBaz<T> = ConvertFooToBar<T> extends 'bar' ? 
+            ConvertBarToBaz<ConvertFooToBar<T> > : never // call `ConvertFooToBar` twice
 
-```typescript
-type ConvertFooToBar<G> = G extends 'foo' ? 'bar' : never
-type ConvertBarToBaz<G> = G extends 'bar' ? 'baz' : never
+        type Baz = ConvertFooToBaz<'foo'>
+        ```
 
-type ConvertFooToBaz<T> = ConvertFooToBar<T> extends 'bar' ? 
-    ConvertBarToBaz<ConvertFooToBar<T> > : never // call `ConvertFooToBar` twice
+</details>
 
-type Baz = ConvertFooToBaz<'foo'>
-```
+
+
 
 
 ## Equality comparisons and conditional branching
@@ -174,12 +182,15 @@ For our type language, we have:
 ```typescript
 type Fn  <A extends string, B extends string = 'world'>   =  [A, B]
 //   ↑    ↑           ↑                          ↑              ↑
-// name parameter parameter type          default value   function body
+// name parameter parameter type          default value   function body/return statement
 
 type Result = Fn<'hello'> // ["hello", "world"]
 ```
 
-> However, generics are by no means a perfect analogy for functions. For one, unlike functions in JavaScript, Generics are not first-class citizens in the type language. That means we cannot pass a generic to another generic like we pass a function to another function as TypeScript doesn't allow [generics as type parameters](https://github.com/microsoft/TypeScript/issues/1213).
+<details>
+    <summary>Though this is not a perfect analogy...</summary>
+    <p>Generics are by no means exactly the same as JavaScript's functions. For one, unlike functions in JavaScript, Generics are not first-class citizens in the type language. That means we cannot pass a generic to another generic like we pass a function to another function as TypeScript doesn't allow [generics as type parameters](https://github.com/microsoft/TypeScript/issues/1213).</p>
+</details>
 
 
 ### Map and filter
