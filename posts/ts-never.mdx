@@ -1,0 +1,388 @@
+---
+title: A complete guide to TypeScript’s never type
+published: true
+listed: true
+date: '03/04/2022'
+tags: typescript
+---
+
+
+TypeScript’s never type is very under-discussed. It’s not nearly as ubiquitous or inescapable as other types. A TypeScript beginner can probably ignore never type. It only features when dealing with advanced types, such as conditional types, or reading their cryptic type error messages.
+
+Actually, `never` type has quite a few good uses in TypeScript; however, it also has its own pitfalls you need to be careful of.
+
+In this blog post, I will cover:
+- The meaning of `never` type and why we need it.
+- Practical applications and pitfalls of `never`.
+
+## What is never type
+To fully understand never type and its purposes, we must first understand what a type is, and what role it plays in a type system.
+
+A type is a **set** of possible values. For example, string type represents an infinite set of possible strings. When we annotate a variable with type `string`, such a variable can only have values from within that set, i.e. strings:
+```typescript
+let foo: string = 'foo'
+foo = 3 // ❌ number is not in the set of strings
+```
+In TypeScript, `never` is an **empty set** of values. In fact, in Flow, another popular JavaScript type system, the equivalent type is called exactly [Empty](https://github.com/facebook/flow/commit/c603505583993aa953904005f91c350f4b65d6bd)
+
+Since there’s no values in the set, never type can’t have any value, including values of any type. That’s why never is also sometimes referred to as an [uninhabitable type](https://cs.stackexchange.com/questions/134215/what-is-an-uninhabited-type).
+
+```typescript
+declare const any: any
+const never: never = any // ❌ type 'any' is not assignable to type 'never'
+```
+
+Because of this attribute, `never` type also denotes **impossibility**.
+
+## What is “impossibility”?
+
+The word “impossibility” is vague. In TypeScript, “impossibility” manifests itself in various ways, namely:
+- An empty type that can’t have any value, which can be used to represent the following:
+    - Inadmissible type parameters passed to a generic type, or unwanted argument types passed to functions.
+    - Intersection of incompatible types.
+    - An empty union (a union type of nothingness).
+- The return type of a function that never returns control to the caller when it finishes executing, e.g., `process.exit` in Node
+    - Not to confuse it with `void`, as `void` means a function doesn’t return anything useful to the caller.
+- An else branch that should never be entered in a condition type
+- The fulfilled value's type for a rejected `promise`
+    ```typescript
+        const p = Promise.reject('foo') // const p: Promise<never>
+    ```
+
+
+## How to use never type
+While you probably wouldn’t find yourself use `never` a lot, there are quite a few legit use cases for it:
+
+### Ensure Exhaustive matching within switch and if-else statement
+Since we can never (pun-intended) assign a value to `never` type, we can use it as default to ensure that all cases are covered, since what remains must be of `type` never. If we accidentally leave out a possible match, we get a type error:
+
+```typescript
+function unknownColor(x: never): never {
+    throw new Error("unknown color");
+}
+
+
+type Color = 'red' | 'green' | 'blue'
+
+function getColorName(c: Color): string {
+    switch(c) {
+        case 'red':
+            return 'is red';
+        case 'green':
+            return 'is green';
+        default:
+            return unknownColor(c); // Argument of type 'string' is not assignable to parameter of type 'never'
+    }
+}
+
+```
+
+> TkDodo also wrote a great and detailed [blog post](https://tkdodo.eu/blog/exhaustive-matching-in-type-script) about implementing exhaustive matching in TypeScript with `never`.
+
+### Annotate inadmissible function arguments or type parameters
+Let’s say we have a function that takes an argument of either the type `VariantA` or `VariantB`. But, the user mustn’t pass a type encompassing all properties from both types, i.e., a [subtype](https://en.wikipedia.org/wiki/Subtyping) of both types.
+
+We can leverage a union type `VariantA | VariantB` for the argument. However, since TypeScript uses structural typing, passing a type that’s a subtype to the argument’s type is allowed (unless you pass object literals):
+
+```typescript
+type VariantA = {
+    a: string,
+}
+
+type VariantB = {
+    b: number,
+}
+
+declare function fn(arg: VariantA | VariantB): void
+
+
+const input = {a: 'foo', b: 123 }
+fn(input) // TypeScript doens't complain but this shouldn't be allowed for our use case
+```
+
+The above code snippet doesn’t give us a type error, which is not ideal for our use case since we don’t want users passing an object value with both `a` and `b` properties.
+By using `never`, we can prevent users from passing object values with both properties:
+
+```typescript
+type VariantA = {
+    a: string,
+} & {
+    b?: never
+}
+
+type VariantB = {
+    b: number,
+} & {
+    a?: never
+}
+
+declare function fn(arg: VariantA | VariantB): void
+
+
+const input = {a: 'foo', b: 123 }
+fn(input) // ❌ Types of property 'a' are incompatible
+```
+Granted, the above example might seem contrived since normally it’s pretty harmless to pass object values with more properties than what a function actually uses.
+
+Here’s another, slightly more realistic, example where never can help us signal unwanted function calls. Let’s say we want to create a `Cache` instance to read and store data from/to it:
+
+```typescript
+type Read = {}
+type Write = {}
+declare const toWrite: Write
+
+declare class MyCache<T, R> {
+  put(val: T): boolean;
+  get(): R;
+}
+
+const cache = new MyCache<Write, Read>()
+cache.put(toWrite) // ✅ allowed
+```
+
+Now, for some reason we want to have a read-only cache only allowing for reading data via the `get` method. We can type the argument of the `put` method as `never` so it can’t accept any value passed in it:
+
+```typescript
+declare class ReadOnlyCache<R> extends MyCache<never, R> {} 
+                        // Now type parameter `T` inside MyCache becomes `never`
+
+const readonlyCache = new ReadOnlyCache<Read>()
+readonlyCache.put(data) // ❌ Argument of type 'Data' is not assignable to parameter of type 'never'.
+```
+
+### Be the return type in else branch of conditional types
+In TypeScript, we use the `extends` keyword and the conditional/ternary operator `?` for conditional branching on the type level:
+
+```typescript
+TypeC = TypeA extends TypeB ? TrueExpression : FalseExpression
+```
+
+If `TypeA` is assignable or substitutable to `TypeB`, then we enter the first branch and get the resultant type from `TrueExpression`; otherwise we get the resultant type from `FalseExpression`.
+
+#### Invalid, yet reachable conditional branches
+A lot times we use `never` for the false expression, i.e., the else branch in a conditional expression. If our condition type users choose not to provide a valid type that meets the condition, then the resultant type is `never`, a type they can’t do anything meaningful with. This is a safer alternative to `any` type.
+
+Let’s say we want to implement a util type called `MapStringToBoolean` , that’s going to create a map/record that maps strings to booleans:
+
+```typescript
+type FeatureFlag = 'foo' | 'bar' | 'baz'
+type MapStringToBoolean<Flag> = [Flag] extends [string] ? {[key in Flag]: boolean} : never;
+
+type FeatureFlagMap = MapStringToBoolean<FeatureFlag> 
+// FeatureFlagMap is { foo: boolean; bar: boolean; baz: boolean; }
+
+const featureFlagMap: FeatureFlagMap = {foo: true, bar: false, baz: false}
+```
+
+<details>
+    <summary>Why I added square brackets to `Flag` and `string` in `MapStringToBoolean`</summary>
+    <p>Because by adding square brackets to the type parameter Flag, I could opt out of the implicit distribution for union types, otherwise the resultant type will be a union of three object types</p>
+
+    ```typescript
+        type MapStringToBoolean<Flag> = Flag extends string ? {[key in Flag]: boolean} : never;
+        type FeatureFlagMap = MapStringToBoolean<FeatureFlag>
+        // FeatureFlagMap is { foo: boolean; } | { bar: boolean; } | { baz: boolean; }
+    ```
+    <p>Check out the [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types) if you want to learn more about Distributive Conditional Types</p>
+</details>
+
+
+If the user passes any type other than `string` or a union of `string`, then they only get `never` as the result.
+
+```typescript
+type FeatureFlagMap2 = MapStringToBoolean<123> // never
+```
+#### Theoretically unreachable conditional branches
+When using `infer` to create an additional type variable inside a conditional type, we must add an else branch for every `infer` keyword:
+
+```typescript
+type A = 'foo';
+type B = A extends infer C ? (
+    C extends 'foo' ? true : false// inside this expression, C represents A
+) : never // this branch is unreachable but we cannot omit it
+```
+
+<details>
+    <summary>Why is this `extends infer` combo useful?</summary>
+    <p>In my previous post I mentioned how you can create declare “local (type) variable” together with `extends infer`. Check it out [here]() if you haven’t seen it.</p>
+</details>
+
+
+
+#### `never` also gets dropped in union types automatically
+Another benefit of using `never` for an else branch, is that `never` in a union type gets dropped automatically, since it means an empty union. For example, a type `type A =  never | 1` becomes type `A =  1`. This benefit is not evident in the previous example because we disabled the distributivity. So, let’s look at another example that explicitly shows the benefit.
+Let’s say we want to write another util type that extracts the union members with `name` property being a string literal type `foo` from a union type:
+
+```typescript
+type Foo = {
+    name: 'foo'
+    id: number
+}
+
+type Bar = {
+    name: 'bar'
+    id: number
+}
+
+type All = Foo | Bar
+
+type ExtractType<T, G> = T extends {name: G} ? T : never
+
+type ExtractedType = ExtractType<All, 'foo' | 'non-exsitence'> // the result type is Foo
+
+```
+
+In the util type `ExtractType` every union member in `All` gets checked against type `{name: 'foo'}` and `{name: 'non-exsitence'}` to see if they match. As a result, `ExtractedType` is `Foo`, as opposed to `Foo | never` because `never` gets dropped automatically.
+
+### Filter out keys in mapped types
+In TypeScript, types are immutable. If we want to delete a property from an object type, we must create a new one by transforming and filtering the existing one. When we re-map keys in mapped types to `never`, those keys get filtered out.
+
+Here’s an example for a `Filter` type that filters out object type properties based on their value types.
+
+```typescript
+type Filter<Obj extends Object, ValueType> = {
+    [Key in keyof Obj 
+        as ValueType extends Obj[Key] ? Key : never]
+        : Obj[Key]
+}
+
+
+
+interface Foo {
+    name: string;
+    id: number;
+}
+
+
+type Filtered = Filter<Foo, string>; // {name: string;}
+```
+
+### Narrow types in control flow analysis
+
+When we type a function’s return value as `never`, that means the function never returns.
+A function can never return for several reasons: it might throw an exception on all code paths, it might loop forever, or it exits from the program e.g. `process.exit`. This means such a function doesn't return control to the caller when it finishes executing. This information is invaluable for control flow analysis to narrow down types. 
+
+In the following code snippet, we use a function that returns `never` type to strip away undefined from the union type for `foo`:
+
+```typescript
+function throwError(): never {
+    throw new Error();
+}
+
+let foo: string | undefined;
+
+if (!foo) {
+    throwError();
+}
+
+foo; // string
+```
+
+Or invoke `throwError` after `||` or `??` operator:
+
+```typescript
+
+let foo: string | undefined;
+
+const guaranteedFoo = foo ?? throwError(); // string
+```
+
+### Denote impossible intersections of incompatible types
+
+This one might feel more like a behavior/characteristic of the TypeScript language than a practical application for `never`. Nevertheless, it’s vital for understanding some of the cryptic error messages you might come across.
+
+You can get `never` type by intersecting incompatible types
+
+```typescript
+type Never = number & string // never
+```
+And you get `never` type by intersecting any types with `never`
+
+```typescript
+type Never = number & never // never
+```
+
+
+## How to read never type (from error messages)
+You might have gotten error messages involving an unexpected `never` type from code you didn’t annotate with `never` explicitly. That’s usually because the TypeScript compiler intersects the types. It does this implicitly for you to retain type safety and to ensure soundness.
+Here’s an example that I used in my previous blog post on type functions:
+
+```typescript
+type ReturnTypeByInputType = {
+  int: number
+  char: string
+  bool: boolean
+}
+
+function getRandom<T extends 'char' | 'int' | 'bool'>(
+  str: T
+): ReturnTypeByInputType[T] {
+  if (str === 'int') {
+    // generate a random number
+    return Math.floor(Math.random() * 10) 
+  } else if (str === 'char') {
+    // generate a random char
+    return String.fromCharCode(
+      97 + Math.floor(Math.random() * 26)
+    )
+  } else {
+    // generate a random boolean
+    return Boolean(Math.round(Math.random()))
+  }
+}
+```
+The function returns either a number, a string, or a boolean depending on the type of argument we pass. We use an indexes access `ReturnTypeByInputType[T]` to retrieve the corresponding return type.
+
+It looks correct. But if you copy and paste it into [TypeScript playground](https://www.typescriptlang.org/play?#code/C4TwDgpgBAShwFcBOA7AKuCAhEBJFYCwGkUAvFAN4BQUUAlisAFxQoIC2ARhErVAGMAFgEMkrAM7AkjAOb8uAe0UAbVktUQRKagF9q1AGYIUA4PUUoos+DG0ATRRwA8aKBAAewCCnsSoAOTCYgFQAD6BjMChEQEaKgEAfAAU-FLiUGjUAJSscIioJNh4BERFANpoALpU-PSGUMnp5GQUAVEB2bV0dAD0vdY+vCLeUCJQSA5ObJw8fD0T8MhWALIjQgB0hirKSMlrwJuTvk7JXQBUUACMAAxd-LruKhLQ9Y3NrW3BSJ3dPf2DFDDUbjY6ODiCUTzHpIJaoKAAZWkci2SCcAGEoejFPYIKkFnQAJwAdigAGooAdNttdvt1hswacLlAAEwANmy-DonLojwgz2gNAWAJsQMmIImUwh8S0OgWsIKViwyhUsrphwZihM9nVRylZ2yPKg+l0QA) you’d see that for every return statement we have a type error, namely: `Type X is not assignable to type 'never'` where `X` is string or number or boolean, depending on the branch.
+
+This is where TypeScript tries to help us narrow down the possibility of problematic states in our program: each return value should be assignable to the type `ReturnTypeByInputType[T]` (as we annotated in the example) where `ReturnTypeByInputType[T]` at runtime could end up being either a number, a string, or a boolean. 
+
+Type safety can only be achieved if we make sure that the return type is assignable to all possible `ReturnTypeByInputType[T]`, i.e. the **intersection** of number , string, and boolean.
+And what’s the intersection of these 3 types? It’s exactly `never` as they are incompatible with each other. That’s why we are seeing `never` in the error messages.
+
+To work around this, you must use type assertions (or function overloads):
+ - `return Math.floor(Math.random() * 10) as ReturnTypeByInputType[T]`
+ - `return Math.floor(Math.random() * 10) as never`
+
+Another more obvious example:
+```typescript
+function f1(obj: { a: number, b: string }, key: 'a' | 'b') {
+    obj[key] = 1;    // Type 'number' is not assignable to type 'never'.
+    obj[key] = 'x';  // Type 'string' is not assignable to type 'never'.
+}
+
+```
+
+`obj[key]` could end up being either a string or a number depending on the value of key at runtime. Therefore, TypeScript added this constraint, i.e., any values we write to `obj[key]` must be compatible with both types, string and number, just to be safe. So, it intersects both types and gives us `never` type.
+
+## How to check for never
+
+Checking if a type is `never` is harder than it should be.
+
+
+Consider the following code snippet:
+
+```typescript
+type IsNever<T> = T extends never ? true : false
+
+type T = IsNever<never> // 'never' 🧐
+```
+
+Is `T` `true` or `false`? It might surprise you that the answer is neither: `T` is actually `never`.
+
+It definitely threw me off the first time I came across this. [@TitianCernicova](https://twitter.com/TitianCernicova) from Twitter has a [thread](https://twitter.com/TitianCernicova/status/1495784001323290627) explaining this quite well from the perspective of `never` being an empty union semantically:
+- TypeScript distributes union types in conditional types automatically
+- `never` is an empty union
+- Therefore, when distribution happens there’s nothing to distribute over, so the conditional type resolves to `never` again.
+
+The only workaround here is to opt out of the implicit distribution and to wrap the type parameter in a tuple:
+
+```typescript
+type IsNever<T> = [T] extends [never] ? true : false;
+type T = IsNever<never> // 'true' ✅
+type T = IsNever<number> // 'false' ✅
+```
+This is actually straight out of [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/main/tests/cases/conformance/types/conditional/conditionalTypes1.ts#L212) and TypeScript should’ve exposed this externally in my opinion.
+
+
+
