@@ -3,14 +3,14 @@ title: Type polymorphic functions in TypeScript
 published: true
 listed: true
 date: '02/19/2022'
-lastUpdateDate: '03/01/2022'
+lastUpdateDate: '03/05/2022'
 description: you might or might not need to use function overload
 tags: typescript
 ---
 
 Admittedly, the title might be bit broad. Polymorphism is a theoretical concept that’s deeply rooted in programming language theory, and it has many varieties. I am by no means an expert in programming language theory. So, I won’t use the term “polymorphic functions” in this blog post in a strict, academic sense. Rather, I will use it mainly to refer to functions in two ways: those that behave differently depending on their applied argument types (i.e. [ad-hoc polymorphisms](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism)) and those that take a variable number of arguments (i.e. [variadic functions](https://en.wikipedia.org/wiki/Variadic_function)).
 
-JavaScript commonly allows functions to work flexibly when the arguments passed are of different types and/or at different positions:
+JavaScript allows functions to work flexibly when the arguments passed are of different types and/or at different positions:
 - The [query API](https://node-postgres.com/features/queries) from `node-postgres` accepts an optional callback function and returns a promise when the callback function isn’t provided.
 - The `write` function of [the file system API](https://nodejs.org/api/fs.html#filehandlewritebuffer-offset-length-position) in Node.js defines the first argument to be either a buffer of data or a string that we write to a file. 
 - The `extend` API from [the package node-extend](https://www.npmjs.com/package/extend) enables deep copying by allowing you to pass an optional boolean flag as the first argument to the function call.
@@ -130,11 +130,10 @@ function getRandom<T extends 'char' | 'int' | 'bool'>(
 Think about the DOM API `documnet.querySelector`—it accepts an html element tag name and returns the respective html element. It is typed in [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/ca00b3248b1af2263d0223d68e792b7ca39abcab/lib/lib.dom.d.ts#L11050) in the exact same way. 
 
 <details>
-    <summary><b>notes on the type assertions</b></summary>
-    <p>You might’ve have noticed that I added a type assertion as `ReturnTypeByInputType[T]` for every return statement. This is because after TypeScript 3.5, to give a return value an indexed access type (such as `ReturnTypeByInputType[T]`), the return type must be checked against the intersection of all possibilities of the properties (types) selected by that index. In the above example, every return value must be asserted as either `ReturnTypeByInputType[T]`, or an explicit intersection type of every type in `ReturnTypeByInputType` , which is `number & string & boolean`</p>
+    <summary>Why use type assertions</summary>
+    <p>You might’ve have noticed that I added a type assertion as `ReturnTypeByInputType[T]` for every return statement. This is because after TypeScript 3.5, to give a return value an indexed access type (such as `ReturnTypeByInputType[T]`), the return type must be checked against the intersection of all possibilities of the properties (types) selected by that index. In the above example, every return value must be asserted as either `ReturnTypeByInputType[T]`, or an explicit intersection type of every type in `ReturnTypeByInputType` , which is `number & string & boolean`. Note that the resultant type of the intersection is `never`. Therefore type assertion with `as never` works too</p>
     <p>This is to improve the soundness of the type system. See [this PR](https://github.com/microsoft/TypeScript/pull/30769) if you are interested in learning more about it.</p>
     <p>Type assertions are inherently unsafe. Later on, I’ll show you how to get rid of them using function overload. But unfortunately, function overload is just as unsafe as type assertion. For now though, just consider this as a technical limitation of TypeScript.</p>
-
 </details>
 
 
@@ -196,7 +195,12 @@ const p = search("key"); // ✅ Promise<Result[]>
 const v = search("key", (data) => {} ); // ✅ void
 ```
 
-> We have to add `undefined` as a type parameter default for `T` so that the compiler can properly infer the type `T` when `cb` is not provided.
+
+<details>
+    <summary>Why use type parameter default</summary>
+    <p>You might noticed that I added `undefined` as a type parameter default for `T`, i.e. `function search<T extends Callback | undefined = undefined>`.</p>
+    <p>The reason is that with the `undefined` default, the compiler can properly infer the type `T` when `cb` is not provided.</p>
+</details>
 
 As you might’ve noticed, there are some common themes:
 
@@ -214,7 +218,12 @@ I think part of the reason why function overload is so underused, is because the
 
 However, as a dynamically typed language, JavaScript performs type checks during runtime. This means arguments are as dynamic as we need them to be and allows us to achieve the same effect as function overload—namely, having different function implementations depending on the types and number of arguments that are invoked.
 
-> Note that in TypeScript function overload is resolved at runtime by the implementer (the TypeScript programmer) by **manually** examining the arguments’ types. And TypeScript could’ve implemented the traditional compile-time function overload available from statically-typed languages like C++, C# and Java etc. In fact, multiple proposals, like [this one](https://github.com/Microsoft/TypeScript/issues/3442), have asked for such a “proper” function overload feature, but they all ended up only being close as they all violate multiple TypeScript design goals.
+<details>
+    <summary>Notes on TypeScript's function overload</summary>
+    <p>Depending on your background, TypeScript's function overload might feel a little weird to you since it is resolved at runtime by the implementer (the TypeScript programmer) by **manually** examining the arguments’ types. </p>
+    <p>TypeScript could’ve implemented the traditional compile-time function overload available from statically-typed languages like C++, C# and Java etc. In fact, multiple proposals, like [this one](https://github.com/Microsoft/TypeScript/issues/3442), have asked for such a “proper” function overload feature, but they all ended up only being close as they all violate multiple TypeScript design goals.</p>
+</details>
+
 
 ### A simple example of function overload
 
@@ -368,7 +377,9 @@ interface F {
 
 [Flow](https://flow.org/) is another popular JavaScript type system. But, it doesn’t (fully) support the function overload syntax in TypeScript. However, it does allow you to set overloading types for functions using intersection types, exactly like what we did above with `switchIt_intersection`.
 
-Interestingly, the usage of intersection types for function overload is a common source of confusion to people: when the overloaded function signature is written, union types are used, as opposed to intersection types.
+<details>
+    <summary>Why use intersection types as opposed to union types for type `F`</summary>
+    <p>Interestingly, the usage of intersection types for function overload (i.e. `type F = ((input: string) => string) & ((input: number) => number)`) is a common source of confusion to people: when the overloaded function signature is written, **union types** are used, as opposed to intersection types.</p>
 
 ```typescript
 function switch_overloaded(input: string): number
@@ -379,6 +390,9 @@ function switch_overloaded(input: number | string): number | string { // 🤔 un
 ```
 
 This is because parameter types are [contravariant](https://stackoverflow.com/questions/1962629/contravariance-explained)—you must reverse the type relationship (i.e. flip the ands and ors) inside the function body. For example, if the function has a type of `string => X` and `number => X`, then you have to handle an input that is a `string` or a `number` when working inside the function body.
+
+</details>
+
 
 ## My rule of thumb
 
