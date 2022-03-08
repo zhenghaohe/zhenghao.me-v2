@@ -37,7 +37,7 @@ The bottom type is how [the TypeScript Handbook](https://www.typescriptlang.org/
 
 The next logical question is, why do we need `never` type? 
 ## Why we need never type
-Just like we have **zero** in our number system to denote the quantity of nothing, we needs a type to denote **impossibility** in our type system. 
+Just like we have **zero** in our number system to denote the quantity of nothing, we need a type to denote **impossibility** in our type system. 
 
 The word "impossibility" itself is vague. In TypeScript, “impossibility” manifests itself in various ways, namely:
 - An empty type that can't have any value, which can be used to represent the following:
@@ -194,7 +194,7 @@ As we have discussed this before, when used as a union member, `never` type is r
 
 When we are writing a utility type to select union members from a union type based on certain criteria, `never` type's uselessness in union types makes it the perfect type to be placed in else branches. 
 
-Let's say we want a utility type `ExtractTypeByName` to extracts the union members with the `name` property being string literal `foo` and filter out those that don't match:
+Let's say we want a utility type `ExtractTypeByName` to extract the union members with the `name` property being string literal `foo` and filter out those that don't match:
 
 ```typescript
 type Foo = {
@@ -309,6 +309,41 @@ And you get `never` type by intersecting any types with `never`
 type Res = number & never // never
 ```
 
+
+<details>
+    <summary>It gets complicated for object types...</summary>
+    <p>When intersecting object types, depending on whether or not the disjoint properties are considered as discriminant properties (basically literal types or unions of literal types), you might or might not get the whole type reduced to `never`</p>
+    <p>In this example only `name` property becames `never` since `string` and `number` are not discriminant properties</p>
+            ```typescript
+                type Foo = {
+                name: string,
+                age: number
+                }
+                type Bar = {
+                    name: number,
+                    age: number
+                }
+
+                type Baz = Foo & Bar // {name: never, age: number}  
+            ```
+       <p>In the following example, the whole type `Baz` is reduced to `never` because a boolean is a discriminant property (a union of `true | false`)</p>
+            ```typescript
+                type Foo = {
+                name: boolean,
+                age: number
+                }
+
+                type Bar = {
+                    name: number,
+                    age: number
+                }
+
+                type Baz = Foo & Bar // never
+            ```
+        <p>Check out this [PR](https://github.com/microsoft/TypeScript/pull/36696) to learn more.</p>
+</details>
+
+
 ## How to read never type (from error messages)
 You might have gotten error messages involving an unexpected `never` type from code you didn’t annotate with `never` explicitly. That’s usually because the TypeScript compiler intersects the types. It does this implicitly for you to retain type safety and to ensure soundness.
 
@@ -388,8 +423,8 @@ The only workaround here is to opt out of the implicit distribution and to wrap 
 
 ```typescript
 type IsNever<T> = [T] extends [never] ? true : false;
-type T = IsNever<never> // 'true' ✅
-type T = IsNever<number> // 'false' ✅
+type Res1 = IsNever<never> // 'true' ✅
+type Res2 = IsNever<number> // 'false' ✅
 ```
 This is actually straight out of [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/main/tests/cases/conformance/types/conditional/conditionalTypes1.ts#L212) and TypeScript should’ve exposed this externally in my opinion.
 
