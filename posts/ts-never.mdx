@@ -201,6 +201,8 @@ type B = A extends infer C ? (
 
 
 ### Filter out union members from union types
+Beside denoting impossible branches, `never` can be used to filter out unwanted types in conditional types.
+
 As we have discussed this before, when used as a union member, `never` type is removed automatically. In other words, the `never` type is useless in a union type.
 
 When we are writing a utility type to select union members from a union type based on certain criteria, `never` type's uselessness in union types makes it the perfect type to be placed in else branches. 
@@ -437,7 +439,7 @@ type IsNever<T> = [T] extends [never] ? true : false;
 type Res1 = IsNever<never> // 'true' ✅
 type Res2 = IsNever<number> // 'false' ✅
 ```
-This is actually straight out of [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/main/tests/cases/conformance/types/conditional/conditionalTypes1.ts#L212) and TypeScript should’ve exposed this externally in my opinion.
+This is actually straight out of [TypeScript’s source code](https://github.com/microsoft/TypeScript/blob/main/tests/cases/conformance/types/conditional/conditionalTypes1.ts#L212) and it would be nice if TypeScript could expose this externally.
 
 
 
