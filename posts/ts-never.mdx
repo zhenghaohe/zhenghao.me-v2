@@ -9,7 +9,7 @@ tags: typescript
 
 TypeScript’s `never` type is very under-discussed, because it’s not nearly as ubiquitous or inescapable as other types. A TypeScript beginner can probably ignore `never` type as it only appears when dealing with advanced types, such as conditional types, or reading their cryptic type error messages.
 
-Actually, `never` type has quite a few good uses in TypeScript; however, it also has its own pitfalls you need to be careful of.
+The `never` type does have quite a few good use cases in TypeScript. However, it also has its own pitfalls you need to be careful of.
 
 In this blog post, I will cover:
 - The meaning of `never` type and why we need it.
@@ -68,14 +68,25 @@ While you probably wouldn’t find yourself use `never` a lot, there are quite a
 ### Annotate inadmissible function parameters to impose restrictions
 Since we can never assign a value to `never` type, we can use it to impose restrictions on functions for various use cases.
 
-#### Ensure Exhaustive matching within switch and if-else statement
+#### Ensure exhaustive matching within switch and if-else statement
 
-If a function can only take one argument of `never` type, that function can never be called (without the TypeScript compiler yelling at us):
+If a function can only take one argument of `never` type, that function can never be called with any non-`never` value (without the TypeScript compiler yelling at us):
 
 ```typescript
 function fn(input: never) {}
 
-fn() // ❌ passing anything (or nothing) to `fn` causes a type error 
+// it only accepts `never` 
+declare let myNever: never
+fn(myNever) // ✅
+
+// passing anything else (or nothing) causes a type error 
+fn() // ❌  An argument for 'input' was not provided.
+fn(1) // ❌ Argument of type 'number' is not assignable to parameter of type 'never'.
+fn('foo') // ❌ Argument of type 'string' is not assignable to parameter of type 'never'.
+
+// cannot even pass `any` 
+declare let myAny: any
+fn(myAny) // ❌ Argument of type 'any' is not assignable to parameter of type 'never'.
 ```
 
 We can use such a function to ensure exhaustive matching within switch and if-else statement: by using it as the default case, we ensure that all cases are covered, since what remains must be of type `never`. If we accidentally leave out a possible match, we get a type error. For example:
