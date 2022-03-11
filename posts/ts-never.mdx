@@ -3,7 +3,7 @@ title: A complete guide to TypeScript’s never type
 published: true
 listed: true
 date: '03/04/2022'
-lastUpdateDate: '03/07/2022'
+lastUpdateDate: '03/11/2022'
 tags: typescript
 ---
 
@@ -26,7 +26,7 @@ foo = 3 // ❌ number is not in the set of strings
 ```
 In TypeScript, `never` is an **empty set** of values. In fact, in [Flow](https://flow.org/), another popular JavaScript type system, the equivalent type is called exactly [empty](https://github.com/facebook/flow/commit/c603505583993aa953904005f91c350f4b65d6bd)
 
-Since there’s no values in the set, `never` type can’t never (pun-intended) have any value, including values of `any` type. That’s why `never` is also sometimes referred to as an [uninhabitable type](https://cs.stackexchange.com/questions/134215/what-is-an-uninhabited-type) or a [bottom type](https://en.wikipedia.org/wiki/Bottom_type). 
+Since there’s no values in the set, `never` type can never (pun-intended) have any value, including values of `any` type. That’s why `never` is also sometimes referred to as an [uninhabitable type](https://cs.stackexchange.com/questions/134215/what-is-an-uninhabited-type) or a [bottom type](https://en.wikipedia.org/wiki/Bottom_type). 
 
 ```typescript
 declare const any: any
