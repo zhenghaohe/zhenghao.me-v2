@@ -3,7 +3,7 @@ title: Type polymorphic functions in TypeScript
 published: true
 listed: true
 date: '02/19/2022'
-lastUpdateDate: '03/05/2022'
+lastUpdateDate: '03/14/2022'
 description: you might or might not need to use function overload
 tags: typescript
 ---
@@ -11,6 +11,7 @@ tags: typescript
 Admittedly, the title might be bit broad. Polymorphism is a theoretical concept that’s deeply rooted in programming language theory, and it has many varieties. I am by no means an expert in programming language theory. So, I won’t use the term “polymorphic functions” in this blog post in a strict, academic sense. Rather, I will use it mainly to refer to functions in two ways: those that behave differently depending on their applied argument types (i.e. [ad-hoc polymorphisms](https://en.wikipedia.org/wiki/Ad_hoc_polymorphism)) and those that take a variable number of arguments (i.e. [variadic functions](https://en.wikipedia.org/wiki/Variadic_function)).
 
 JavaScript allows functions to work flexibly when the arguments passed are of different types and/or at different positions:
+- The [useState](https://beta.reactjs.org/apis/usestate#reference) Hook lets you pass an initial value or a function for lazy initialization, or you can skip it altogether and pass nothing to it.
 - The [query API](https://node-postgres.com/features/queries) from `node-postgres` accepts an optional callback function and returns a promise when the callback function isn’t provided.
 - The `write` function of [the file system API](https://nodejs.org/api/fs.html#filehandlewritebuffer-offset-length-position) in Node.js defines the first argument to be either a buffer of data or a string that we write to a file. 
 - The `extend` API from [the package node-extend](https://www.npmjs.com/package/extend) enables deep copying by allowing you to pass an optional boolean flag as the first argument to the function call.
@@ -316,6 +317,39 @@ const v = search_overloaded('key', (data) => {}) // ✅ void
 ```
 
 Again, no convoluted conditional types and generic types, and no annoying type assertions.
+
+### One last example of function overload in React
+React's `useState` hook is also overloaded to make it easier to use.
+
+If you have an initial value or a function that returns a value then the state is going to be of the type of that value:
+
+```typescript
+const [state] = useState(1) // number
+```
+
+You can also skip passing an initial value to it, and instead specify a type. Then the state ends up being of the union type:
+
+```typescript
+const [state] = useState<number>() // number | undefined
+```
+
+If you don't even specify a type, you will get a `undefined` state
+```typescript
+const [state] = useState() // undefined
+```
+
+This is also done via function overload.
+
+```typescript
+function useState<S = undefined>(): [S | undefined, Dispatch<SetStateAction<S | undefined>>]
+function useState<S>(initialState: S | (() => S)): [S , Dispatch<SetStateAction<S | undefined>>]
+function useState<S>(initialState?: S | (() => S)): [S | undefined , Dispatch<SetStateAction<S | undefined>>] {
+   // ...implementation  
+}
+```
+
+Check out [the source code](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/7a0d9c019f2b48b36b88691247870e6885b97a02/types/react/v16/index.d.ts#L921-L928) if you are interested.
+
 
 ### Overloaded functions are just as unsafe (even without type assertions)
 
