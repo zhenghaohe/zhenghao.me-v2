@@ -1,4 +1,4 @@
 module.exports = {
-  siteUrl: 'https://zhenghao.io',
+  siteUrl: 'https://www.zhenghao.io',
   generateRobotsTxt: true
 };
