@@ -1,0 +1,412 @@
+---
+title: Understand when React renders your component from the inside
+published: true
+listed: true
+date: '03/18/2022'
+tags: react
+---
+
+> This is an unfinished draft
+
+This post is my version of Mark Erikson's essay *[A (Mostly) Complete Guide to React Rendering Behavior](https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/#rendering-process-overview)* where I tried to answer one of the most commonly asked questions in this  React community – "when or why does React render my component?" – with a tiny amount of React source code walkthrough. 
+
+Normally I am not a big fan of drilling down to the implementation details and you certainly don't need to know that in order to be productive in React. However, when it comes to understand the rendering behaviour and rules for bailing out of re-renders, [The React docs](https://beta.reactjs.org/learn/render-and-commit#step-1-trigger-a-render) haven’t provided an thorough explanation. Therefore to adequately answer those questions, I had to peek into the source code. That being said, this is not going to be a post about hard-core source code walkthrough. If you are interested in that, here are a [great series](https://jser.dev/) made by [JSer](https://twitter.com/JSer_ZANP) that you should check out. 
+
+## Tl;dr
+
+- React (re)renders your component when:
+    - there is a state update scheduled by your component
+        - including updates scheduled by custom hooks your component consumes
+    - the parent component got rendered **and** your component doesn’t meet the criteria for bailing out on re-rendering
+    - the bail out criteria include:
+        1. Your component has been rendered before i.e. it already mounted
+        2. No props (referentially) changed
+        3. No any context value consumed by your component (referentially) changed
+        4. Your component itself didn’t schedule an update 
+- You probably shouldn’t need to worry about seemingly unnecessary re-renders until it really becomes a performance issue. Check out this flow chart I made to see the solutions you can adopt when a performance issue occurs.
+
+## What does the word “render” mean?
+
+I don’t know if you have noticed this – I kept saying “React renders your component”, as opposed to “your component renders”. People use them interchangeably. It is largely an arbitrary decision. However, call me pedant but I do want to use the former exclusively in this post because it describes how React works more accurately: Your components – functions augmented by React with the ability to schedule an update on the UI – are called by React, not the other way around, regardless of whether or not that render was a result of your component proactively changing its own state.
+
+As [one](https://reactjs.org/docs/design-principles.html#scheduling) of its core design principle, React has the full control over scheduling and updating the UI. This means a few things to us:
+
+1. One state update made by our component doesn’t necessarily translate into one render (one invocation of your component by React) as:
+    1. React doesn’t think there is not meaningful changes to your component’s state (compared by `object.is`)
+    2. React tries to batch state updates into one render pass.
+    3. React might split the work in chunks across different render passes (a concurrent React feature)
+2. Rendering to your component doesn’t necessarily translate into visual updates on the UI because React could decide to render your component (i.e. call your function) for a variety of reasons. 
+
+<details>
+    <summary>Sometimes React cannot auto-batch the updates...</summary>
+    <p>At least for React 17, it cannot batch state updates in promises, because React has no control over when they are resolved, same thing with native event handlers, `setTimeout`, `setInterval`, and `requestAnimationFrame`, all of which are running much later in a totally separate event loop call stack</p>
+</details>
+
+
+However, having React in control of rendering doesn’t mean you shouldn’t care about when or why it decides to render your component. Understadning the underlying mechanism React uses to render your components comes in handy when we face performance issues.
+
+
+<details>
+    <summary>Let's also define what "update" means in different contexts...</summary>
+    <p>Alongside the word “render”, the word “update” is going to be used a lot. It means different things in different contexts.</p>
+    <p>When used in “your component schedules an update”, it means the component wants to change its own state and ask React to reflect that change on the UI. Here the update is the reason that React would render (call) your component. Note that at the end whether React decides to render your component, how many times React decides to render your component and in how long a delay it decides to render depends on a variety of factors.</p>
+    <p>When used in “React makes an update to the UI”, it means it either React mutates an existing DOM node or creates a new DON node to match its internal representation of the DOM tree. Here the update is the result of rendering your components</p>
+</details>
+
+## So when does React render your component exactly?
+
+There are two types of rendering that can happen to your component:
+
+1. proactive rendering: 
+    1. Your component (or the custom hooks it consumes) proactively schedules updates to change its own state.
+    2. You call `ReactDOM.render` directly.
+2. passive rendering: The parent components schedule state updates **and** your component doesn’t meet the bail out criteria
+
+### Proactive rendering
+
+
+There are two ways that your component can proactively make changes to its own state to schedule updates via:
+1. [Component.prototype.setState](https://github.com/facebook/react/blob/v17.0.2/packages/react/src/ReactBaseClasses.js#L57-L66) (i.e. `this.setState`) if it is a class components.
+2. [dispatchAction](https://github.com/facebook/react/blob/v17.0.2/packages/react-reconciler/src/ReactFiberHooks.old.js#L1645-L1753) exposed by Hooks if it is a function components:
+    1. Both the `dispatch` function from the `useReducer` Hook and the state updater function from the `useState` Hook use `dispatchAction` underlying.
+
+
+Another way to proactively schedule an update is to call `ReactDOM.render` directly. Here is an example in [React official docs](https://reactjs.org/docs/rendering-elements.html#react-only-updates-whats-necessary):
+
+```jsx
+function tick() {
+  const element = (
+    <div>
+      <h1>Hello, world!</h1>
+      <h2>It is {new Date().toLocaleTimeString()}.</h2>
+    </div>
+  );
+  ReactDOM.render(element, document.getElementById('root'));
+}
+setInterval(tick, 1000);
+```
+
+<details>
+    <summary>More implementation details for the rendering phase...</summary>
+    <p>Regardless of which exact function you used to schedule the update, all the them use the `scheduleUpdateOnFiber` in the reconciler, which–you can probably tell by its self-explanatory name–schedules updates on Fiber.</p>
+    <p>But what is a [Fiber](https://github.com/acdlite/react-fiber-architecture)? Fiber was introduced in React 16. It is the new reconciliation algorithm and also a new data structure to present a unit of work internal to React. A fiber node is created from a `ReactElement` by the reconciler. Normally every `ReactElement` has a corresponding fiber node but there are some exceptions. For example, a `Fragment` type of ReactElement doesn’t have a corresponding fiber node. </p>
+    <p>One major distinction between a fiber node and a `ReactElement` is that a `ReactElement` is immutable, getting re-created all the time while a fiber node is mutable and can be reused. When React bails out on rendering a component, it reuses its current corresponding fiber node in the fiber tree it constructs as opposed to create a new one. </p>
+    <p>This is not a post about React internals. You can check out this [article](https://indepth.dev/posts/1008/inside-fiber-in-depth-overview-of-the-new-reconciliation-algorithm-in-react) if you want to learn more about fiber nodes and the whole reconciliation process.</p>
+</details>
+
+
+
+### Passive rendering
+Passive rendering happens to your component because React renders some parent components and your component does not meet the bail out criteria. 
+
+```jsx
+function Parent() {
+  return (
+    <div>
+      <Child />
+    </div>
+  );
+}
+```
+
+
+In the example above, if `Parent` gets rendered by React, `Child` also gets rendered even though its props has no meaningful changes other than its reference changed. (More on this later)
+
+As you probably already know, during the render phase, React [recursively](https://overreacted.io/react-as-a-ui-runtime/#recursion) traverses down the component tree to render your components. As a result, if `Child` has other children components, they would get rendered too (again, if they don’t meet the bail out criteria)
+
+```jsx
+function Child() {
+  return <GrandChild /> // if `Child` gets rendered, `GrandChild` is rendered too
+}
+```
+
+However, if one of these components meets the bail out criteria, React will not render that component.
+
+> The bail-out behavior is on individual-component level, as opposed to component-tree level. React would still proceed to check if there are any updates needed for the children of the bailed-out component.
+
+
+The next logical question is, what are the bail out criteria?
+
+To answer that, let’s us take a look at two examples.
+
+### Not every child component is created equal
+
+Let’s first a look at an example:
+
+```jsx
+default function App() {
+  return (
+    <Parent lastChild={<ChildC />}>
+      <ChildB />
+    </Parent>
+  );
+}
+
+function Parent({ children, lastChild }) {
+  return (
+    <div className="parent">
+      <ChildA />
+      {children}
+      {lastChild}
+    </div>
+  );
+}
+
+function ChildA() {
+  return <div className="childA"></div>;
+}
+
+function ChildB() {
+  return <div className="childB"></div>;
+}
+
+function ChildC() {
+  return <div className="childC"></div>;
+}
+
+```
+
+If `Parent` schedules an update, which component(s) will get re-rendered?
+
+Obviously `Parent` itself will get re-rendered by React since it is the component that schedules the update. But will all the children `ChildA`, `ChildB` and `ChildC` get re-rendered as well?
+
+To answer that question, I prepared a Hook called `useForceRender`  to schedule re-renders at some interval via `setInterval`
+
+```jsx
+function useForceRender(interval) {
+  const render = useReducer(() => ({}))[1];
+  useEffect(() => {
+    const id = setInterval(render, interval);
+    return () => clearInterval(id);
+  }, [interval]);
+}
+```
+
+I use it inside `Parent` and see which child gets re-rendered:
+
+```javascript
+function Parent({ children, lastChild }) {
+  useForceRender(2000);
+  console.log("Parent is rendered");
+  return (
+    <div className="parent">
+      <ChildA />
+      {children}
+      {lastChild}
+    </div>
+  );
+}
+```
+
+[*Try it on codesandbox*](https://codesandbox.io/s/re-render-examples-eiq8ng?file=/src/App.js)
+
+
+![alt](/art/blog/react-rerender/recording1.gif)
+
+
+`ChildA` got re-rendered, which shouldn’t be surprising to us since we know that its parent scheduled the updates and got re-rendered as a result.
+
+However, unlike `ChildA`, `ChildB` and `ChildC` didn’t get re-rendered. Because `ChildB` and `ChildC` met the bail out criteria, so React skipped rendering them.
+
+
+
+
+> This might not be news to you. Kent C. Dodds, Dan Abramov and Mark all have written about this optimization technique in [their](https://kentcdodds.com/blog/optimize-react-re-renders) [blog](https://overreacted.io/before-you-memo/#solution-2-lift-content-up) [posts](https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/#component-render-optimization-techniques). 
+
+
+### Context consumers get rendered whenever the provider get rendered
+
+Let’s tweak our previous example to make `Parent` a context provider and `ChildC` a context consumer. 
+
+```jsx
+const Context = createContext();
+
+export default function App() {
+  return (
+    <Parent lastChild={<ChildC />}>
+      <ChildB />
+    </Parent>
+  );
+}
+
+function Parent({ children, lastChild }) {
+  useForceRender(2000);
+  const contextValue = {};
+  console.log("Parent is rendered");
+  return (
+    <div className="parent">
+      <Context.Provider value={contextValue}>
+        <ChildA />
+        {children}
+        {lastChild}
+      </Context.Provider>
+    </div>
+  );
+}
+
+function ChildA() {
+  console.log("ChildA is rendered");
+  return <div className="childA"></div>;
+}
+
+function ChildB() {
+  console.log("ChildB is rendered");
+  return <div className="childB"></div>;
+}
+
+function ChildC() {
+  console.log("ChildC is rendered");
+  const value = useContext(Context)
+  return <div className="childC"></div>;
+}
+```
+
+[*Try it on codesandbox*](https://codesandbox.io/s/re-render-examples-with-context-4kehti?file=/src/App.js)
+
+
+Here is the result:
+![alt](/art/blog/react-rerender/recording2.gif)
+
+
+Every time `Parent` get rendered (called) by React, it creates a new `contextValue`, which is different referentially compared to the previous `contextValue`. As a result, the context consumer `ChildC` gets a different context value, and React go ahead and re-render `ChildC` to reflect that change.
+
+Of course, if `contextVlaue` were a primitive value, e.g. number or string, then its equality wouldn’t change between re-renders, and as a result, ChildC wouldn't get re-rendered.
+
+## Bail out criteria
+
+We have seen enough examples, so let’s talk about what the bail out criteria really are. 
+
+To get the ground truth, we have to dig into the source. But where do we even start?
+
+We can profile the app in the performance tab to see the call stack during the runtime.
+
+![alt](/art/blog/react-rerender/profile.jpeg)
+
+
+The above screenshot is a snapshot of the call stack when our App first mounted. 
+
+Our app was mounted by `ReactDOM.render`, resulting an update scheduled via `scheduleUpdateOnFiber`. This is the entry point for React to update fiber nodes, regardless if React renders the component for the first time or not. 
+
+There are too many details involved but a pattern we can recognize is that for every component React renders, it needs to call `beginWork`. It seems like the place where the secrete about the bail-out behaviour would lie.
+
+Let’s take a look at its [source code](https://github.com/facebook/react/blob/v17.0.2/packages/react-reconciler/src/ReactFiberBeginWork.old.js#L3083-L3494):
+
+It is a long function. It accepts three arguments: `current`, `workInProgress` and `renderLanes`. `Current` is a pointer to the existing fiber node, `workInProgress` is a pointer to the new fiber node being constructed to reflect the update. Why are there two fiber nodes involved for each update? This is called [double buffering](https://twitter.com/acdlite/status/978696799757086720?lang=en), an optimization technique to improve perceived performance.
+
+Although there is a lot going on in this function (as well as in this file), it is not hard to find where exactly React enters the bail-out logic:
+
+```jsx
+// ...omitted for brevity 
+// No pending updates or context. Bail out now.
+     didReceiveUpdate = false;
+        return attemptEarlyBailoutIfNoScheduledUpdate(
+          current,
+          workInProgress,
+          renderLanes,
+);
+```
+
+
+In order for us to reach this line, these conditions have to be satisfied:
+
+1. `(current !== null)` 
+2. `oldProps === newProps` 
+3. `hasLegacyContextChanged() === false`
+4. `hasScheduledUpdateOrContext === false`
+
+This roughly translates to:
+1. Your component has been rendered before i.e. it already mounted
+2. No props changed
+3. No any context value consumed by your component changed
+4. Your component itself didn’t schedule an update
+
+
+Rule 1 and rule 4 are easy to understand. 
+
+Let’s focus on Rule 2 and Rule 3.
+
+### How to not change props
+The `props` for our component is part its corresponding `ReactElement`, created by `React.createElement`. Because `ReactElement`s are immutable, every time React renders (calls) your component, `React.createElement` is used to produce new `ReactElement`s . As a result, `props` is created from scratch for every re-render.
+
+Look back on our first example:
+```jsx
+function Parent() {
+  return (
+    <div>
+      <Child />
+    </div>
+  );
+}
+```
+
+The `<Child />` returned from `Parent` gets compiled to `React.createElement(Child, null)`, which creates a `ReactElement` of this shape `{type: Child, props: {}}`
+
+Since `props` is an JavaScript object, so its reference is different every time it is created. 
+
+That’s why in this example, even though `Child` receives nothing from `Parent` as part of its props, it still gets re-rendered whenever `Parent` gets re-rendered – `React.createElement` is called for `Child` to creates a new `props` object every time its parent gets re-rendered (called) by React.
+
+However, if we can lift `Child` up and pass it down via `Parent`’s `props` , then whenever `Parent` gets rendered by React, there is no additional `React.createElement` invoked for `Child`
+
+as a result, no new `props` created for `Child` , and that makes it meet all the criteria of all four bail-out rules.
+
+```jsx
+function Parent({ children, lastChild }) {
+  return (
+    <div className="parent">
+      <ChildA />
+      {children} // bailed out
+      {lastChild} // bailed out
+    </div>
+  );
+}
+```
+
+### How to change the rule React uses to detect props changes
+
+By default, [React](https://github.com/facebook/react/blob/main/packages/react-reconciler/src/ReactFiberBeginWork.old.js#L3738) uses `===` to compare the previous props and the current props. As a result, two referentially different objects with exactly the same properties are still considered different.
+
+```jsx
+const oldProps = {name: 'foo'}
+const newProps = {name: 'foo'}
+ 
+oldProps === newProps // false
+```
+
+
+Luckily, React provides an alternative way to detect props change if we make our component a `PureComponent` or wrap it in `React.memo`. In those cases, instead of using `===` to check if the reference changed, React would shallow compare every property in the props, conceptually similar to `Object.keys(prevProps).some(key => prevProps[key] !== nextProps[key])`.
+
+However such optimization should not be abused and there are reasons why React didn’t make it the default rendering behaviour. Dan Abramov has repeatedly pointed out that we should not ignore [the cost](https://twitter.com/dan_abramov/status/1095661142477811717) of comparing props and a lot of times there are [better alternatives](https://overreacted.io/before-you-memo/).
+
+
+### How to not change context values 
+
+If your component is a consumer of some context value, then when the provider gets re-rendered and the context value is changed (even only referentially), your component gets re-rendered too. 
+
+This is not bad per se. [The compound component pattern]() relies on this exact rendering behaviour of `Context`. However it can becomes a performance issue when a provider has too many consumers or consumers that are too expensive to get re-rendered unnecessarily. In which case, the easiest fix is to wrap your non-primitive context values into `useMemo` so they stay referentially the same between re-renders of the provider component. 
+
+There are many other techniques you can employ to optimize context consumption. Vladimir has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
+
+## It is all based on one implicit premise...
+
+My confession to you is that the whole bail out thing is based on the premise that your component is always rendered in the same place in the component tree. The reason I didn’t state that upfront is because normally that is the case. However if you:
+
+1. switch between different component types at the same position
+2. render the same component at the different position
+3. deliberately change its `key`
+
+...then react will destroy the entire subtree and re-build it from scratch. Not only will your component get re-rendered, but also its state will be lost.
+
+
+Check out the [Preserving and Resetting State](https://beta.reactjs.org/learn/preserving-and-resetting-state) section from new React docs to learn more about this.
+
+## What’s the moral?
+
+Whether you found the bail out rules complex or not, one simple idea I would like you to walk away with is that, React could re-render your component for a variety of reasons. And it is necessary for React to do so because two of the [hardest problems in UI engineering](https://overreacted.io/the-elements-of-ui-engineering/) is to avoid inconsistency and staleness of your app’s states. 
+
+Therefore, make sure your component is ready for re-renders and be resilient to a lot of them. You can stress-test your component with the hook I made (an idea I stole from Dan). Furthermore, make your component **[idempotent](https://en.wikipedia.org/wiki/Idempotence)** so rendering your component one time or multiple times shouldn’t cause any differences on the actual UI (except for the performance drop it incurred).
+
+However, when excessive re-rendering causes two other hardest problems in UI engineering – responsiveness and latency, hopefully you already know where to investigate and how to optimize.
+
+I made a flow chart that might be helpful to you.
+
+![alt](/art/blog/react-rerender/flowchart.jpeg)

@@ -4,11 +4,19 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Mon, 14 Mar 2022 22:42:17 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 19 Mar 2022 21:04:11 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Understand when React renders your component from the inside]]></title>
+            <link>https://zhenghao.io/posts/react-rerender</link>
+            <guid>https://zhenghao.io/posts/react-rerender</guid>
+            <pubDate>Fri, 18 Mar 2022 07:00:00 GMT</pubDate>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>react</category>
+        </item>
         <item>
             <title><![CDATA[A complete guide to TypeScript’s never type]]></title>
             <link>https://zhenghao.io/posts/ts-never</link>
