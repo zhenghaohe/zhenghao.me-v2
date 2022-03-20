@@ -66,6 +66,7 @@ Despite the title of this blog post, there is a lesser-known alternative to memo
 
 This is what [Tanner Linsley](https://twitter.com/tannerlinsley) has been doing for his hook-based libraries such as [React Table](https://github.com/TanStack/react-table/blob/alpha/packages/react-table/src/createTable.tsx#L165-L177).
 
+
 ```javascript
 if (!instanceRef.current) {
         instanceRef.current = createTableInstance<
@@ -80,14 +81,16 @@ if (!instanceRef.current) {
 return instanceRef.current
 ```
 
-And by combining `useRef` and `useMemo`, you can even create a [solid.js-like version of React](https://twitter.com/tannerlinsley/status/1502116674689925123) with no manual dependency tracking needed.
-
 <details>
     <summary>Wait... How does this work exactly?</summary>
     <p>This reason why this approach works is that, just like your component’s state, values stored inside a `ref` is actually sitting outside of your component. In fact, think of `useRef` as a watered down version of `useState` – you only change the state by mutating it directly other than calling the state updater function like you normally would. As [Dan Abramov once said](https://twitter.com/dan_abramov/status/1099842565631819776), a `useRef` is basically `useState({current: initialValue })[0]`</p>
     <p>Because values stored in a `ref` become [part of React](https://beta.reactjs.org/learn/state-as-a-snapshot#rendering-takes-a-snapshot-in-time), as opposed to be owned by your component – just like any other state – they won’t get destroyed and re-recreated every time React renders (calls) your component.</p>
 </details>
 
+
+
+
+> By combining `useRef` and `useMemo`, you can even create a [solid.js-like version](https://twitter.com/tannerlinsley/status/1502116674689925123) of React with no manual dependency tracking needed.
 
 
 ## Better ways to address the mismatch
