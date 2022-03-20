@@ -25,6 +25,8 @@ Normally I am not a big fan of drilling down to the implementation details and y
         4. Your component itself didn’t schedule an update 
 - You probably shouldn’t need to worry about seemingly unnecessary re-renders until it really becomes a performance issue. Check out this flow chart I made to see the solutions you can adopt when a performance issue occurs.
 
+> Disclaimer: I haven't used React's concurrent mode so some parts of this post might not be applicable in concurrent React.
+
 ## What does the word “render” mean?
 
 I don’t know if you have noticed this – I kept saying “React renders your component”, as opposed to “your component renders”. People use them interchangeably. It is largely an arbitrary decision. However, call me pedant but I do want to use the former exclusively in this post because it describes how React works more accurately: Your components – functions augmented by React with the ability to schedule an update on the UI – are called by React, not the other way around, regardless of whether or not that render was a result of your component proactively changing its own state.
@@ -64,8 +66,7 @@ There are two types of rendering that can happen to your component:
 
 ### Proactive rendering
 
-
-There are two ways that your component can proactively make changes to its own state to schedule updates via:
+"proactive rendering" is a made-up word. By "proactive", I mean the component itself proactively makes changes to its own state to schedule updates via:
 1. [Component.prototype.setState](https://github.com/facebook/react/blob/v17.0.2/packages/react/src/ReactBaseClasses.js#L57-L66) (i.e. `this.setState`) if it is a class components.
 2. [dispatchAction](https://github.com/facebook/react/blob/v17.0.2/packages/react-reconciler/src/ReactFiberHooks.old.js#L1645-L1753) exposed by Hooks if it is a function components:
     1. Both the `dispatch` function from the `useReducer` Hook and the state updater function from the `useState` Hook use `dispatchAction` underlying.
@@ -384,7 +385,7 @@ If your component is a consumer of some context value, then when the provider ge
 
 This is not bad per se. [The compound component pattern]() relies on this exact rendering behaviour of `Context`. However it can becomes a performance issue when a provider has too many consumers or consumers that are too expensive to get re-rendered unnecessarily. In which case, the easiest fix is to wrap your non-primitive context values into `useMemo` so they stay referentially the same between re-renders of the provider component. 
 
-There are many other techniques you can employ to optimize context consumption. Vladimir has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
+There are many other techniques you can employ to optimize context consumption. My friend [Vladimir](https://twitter.com/thoughtspile) has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
 
 ## It is all based on one implicit premise...
 
