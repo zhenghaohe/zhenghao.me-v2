@@ -38,11 +38,11 @@ However, when you are creating a reusable abstraction such as a **custom hook**,
 
 Ideally the identities of the values your hook/API/library produces should only change when there are meaningful changes happened to them, as opposed to to merely reflect the fact that they are getting re-created for every re-render. Unless you want to bother your users to look into the implementation details of your abstraction to figure out which changes to the values they get from your APIs are meaningful and which are not (and thus can be safely ignored as a dependency by turning off `exhaustive-deps` lint rule), you need to account for the possilities and stabilize the values for your users beforehand.
 
-The next logical question is, how do we stabilize references?
+The next logical question is, how do we stabilize non-primitive values in React?
 
 ## How to stabilize values
 
-Stabilized references (currently) can be arrived at in two ways:
+Stabilized values (currently) can be arrived at in two ways in React:
 
 1. memoize all local, non-primitive variables via `useMemo`/`useCallback`
 2. “lift” them out of your component/hook/API and make them live inside React via `useRef`
