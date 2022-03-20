@@ -95,8 +95,8 @@ Both of the solutions are just workarounds and cannot fix the fundamental mismat
 
 
 Luckily we haven’t reached our endgame yet – we might fix this mismatch once for all from both the language side and React side:
-- the JavaScript language is getting native support for immutable data strcutures – [Records & Tuples]((https://github.com/tc39/proposal-record-tuple)), which are compared by **value/contents** instead of identity/reference. No need to slap `useMemo` and `useCallback` everywhere just for the sake of referential stability.
-- React is likely to get a compiler called [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) that automates memoization – it memoizes the results of every intermediate expression in your component at the compilation level.
+- the JavaScript language is getting native support for immutable data strcutures – [Records & Tuples]((https://github.com/tc39/proposal-record-tuple)), which are compared by **value/contents** instead of identity/reference. No need to slap `useMemo` everywhere just for the sake of referential stability. However, even with Records & Tuples, **function equality** is still undecidable. As a result, `useCallback` will still stick around in some form.
+- React is likely to get a **compiler** called [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) that automates memoization – it memoizes the results of every intermediate expression in your component at the compilation level.
 
 
 ## Acknowledgements and Further Reading
