@@ -4,13 +4,23 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sat, 19 Mar 2022 21:04:11 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 20 Mar 2022 20:40:33 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
         <item>
-            <title><![CDATA[Understand when React renders your component from the inside]]></title>
+            <title><![CDATA[Preemptive memoization in React is probably not Evil (yet)]]></title>
+            <link>https://zhenghao.io/posts/memo-or-not</link>
+            <guid>https://zhenghao.io/posts/memo-or-not</guid>
+            <pubDate>Sun, 20 Mar 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget]]></description>
+            <content:encoded><![CDATA[...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>react</category>
+        </item>
+        <item>
+            <title><![CDATA[When does React render your component?]]></title>
             <link>https://zhenghao.io/posts/react-rerender</link>
             <guid>https://zhenghao.io/posts/react-rerender</guid>
             <pubDate>Fri, 18 Mar 2022 07:00:00 GMT</pubDate>

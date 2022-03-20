@@ -1,0 +1,105 @@
+---
+title: Preemptive memoization in React is probably not Evil (yet)
+published: true
+listed: true
+date: '03/20/2022'
+description: ...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget
+tags: react
+---
+
+
+Whether or not you should use memoize values in React using `useMemo` or `useCallback` is one of most commonly discussed topics in the React community. 
+
+There are two use cases for memoization in React:
+
+1. optimize away repeated computations/calculations
+2. stabilize (the referneces/identities of) non-primitive values between re-renders
+
+The majority of the times when people warn against abusing `useMemo` and `useCallback`, they only refer to the first use case – memoization as a performance optimization technique. There is a simple and straightforward answer to it – don’t prematurely optimize. Just don’t. If your still don’t agree with this, please check out the post [*Death by a thousand useCallbacks*](https://royi-codes.vercel.app/thousand-usecallbacks/) by [Royi Hagigi](https://twitter.com/rhagigi).
+
+So that’s it for whether or not you should apply memoization from the performance angle. 
+
+However, what’s more interesting to me is the second use case about stabilizing non-primitive values between re-renders. It reveals a **mismatch** between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and the impure JavaScript language.
+
+But first, why do we want stable referneces/identities for values?
+
+## The danger of leaking out unstable values
+
+You probably have understand how React’s function components work already – every time React renders your (function) component, every local variable, defined in it and in the custom hooks it consumes, gets **thrown away and re-created from scratch**. Although this won’t likely cause any measurable performance issues for modern browsers, for non-primitive values, i.e. objects and functions (yea I know functions are also objects), their identities/references change between re-renders–they are considered different every time.
+
+If those non-primitive variables are only local variables within a particular component and not passed down to any memoized descendent components, then being referentially unstable and re-created between re-renders is usually not a problem.
+
+However, when you are creating a reusable abstraction such as a **custom hook**, returning unstable values can be potentially dangerous – because you don’t know if ultimately the users of your hook/API/library would end up putting any unstable values in a **dependency list**, such as:
+
+1. including them inside  `useEffect` to synchronize the changes from them
+2. including them in `useMemo` and `useCallback` as a dependency for other memoizations
+3. passing them down as a `prop` to a child component is wrapped by `React.memo`, or extends `React.PureComponent`
+
+Ideally the identities of the values your hook/API/library produces should only change when there are meaningful changes happened to them, as opposed to to merely reflect the fact that they are getting re-created for every re-render. Unless you want to bother your users to look into the implementation details of your abstraction to figure out which changes to the values they get from your APIs are meaningful and which are not (and thus can be safely ignored as a dependency by turning off `exhaustive-deps` lint rule), you need to account for the possilities and stabilize the values for your users beforehand.
+
+The next logical question is, how do we stabilize references?
+
+## How to stabilize values
+
+Stabilized references (currently) can be arrived at in two ways:
+
+1. memoize all local, non-primitive variables via `useMemo`/`useCallback`
+2. “lift” them out of your component/hook/API and make them live inside React via `useRef`
+
+### Memoize everything
+
+The most obvious solution is to just wrap everything in `useMemo` and `useCallback` so the memoized value will be re-used between re-renders unless one of the dependencies has changed. 
+
+I have seen people end up memoizing everything even though they are well-aware of not to premature optimize. They understand that memoizing everything can even [hurt performance](https://kentcdodds.com/blog/usememo-and-usecallback#why-is-usecallback-worse) but it is way worse if an unstable referential identity busts out other memoizations unexpectedly. That can cause some major bugs.
+
+![alt](/art/blog/memo-or-not/meme.jpeg)
+
+A similar argument has been made by [Stefano](https://twitter.com/steadicat) in his blog post [*Why We Memo All the Things*](https://attardi.org/why-we-memo-all-the-things/) – but to be fair, his reasoning about memoizing everything also has a lot to do with avoiding the accumulative cognitive load.
+
+> I should mention that `useMemo` and `useCallback` might get recycled by React when memory gets tight. They are not guaranteed to be instantiated only once, even if your dependencies don’t change. 
+
+
+### Stored in a ref
+
+Despite the title of this blog post, there is a lesser-known alternative to memoization that can stabilize local variables – use `useRef` to store an instance of your APIs on initialization in a `ref`, and reuse their identities across re-renders.
+
+This is what [Tanner Linsley](https://twitter.com/tannerlinsley) has been doing for his hook-based libraries such as [React Table](https://github.com/TanStack/react-table/blob/alpha/packages/react-table/src/createTable.tsx#L165-L177).
+
+```javascript
+if (!instanceRef.current) {
+        instanceRef.current = createTableInstance<
+          TData,
+          TValue,
+          TFilterFns,
+          TSortingFns,
+          TAggregationFns
+        >(options, rerender)
+      }
+
+return instanceRef.current
+```
+
+And by combining `useRef` and `useMemo`, you can even create a [solid.js-like version of React](https://twitter.com/tannerlinsley/status/1502116674689925123) with no manual dependency tracking needed.
+
+<details>
+    <summary>Wait... How does this work exactly?</summary>
+    <p>This reason why this approach works is that, just like your component’s state, values stored inside a `ref` is actually sitting outside of your component. In fact, think of `useRef` as a watered down version of `useState` – you only change the state by mutating it directly other than calling the state updater function like you normally would. As [Dan Abramov once said](https://twitter.com/dan_abramov/status/1099842565631819776), a `useRef` is basically `useState({current: initialValue })[0]`</p>
+    <p>Because values stored in a `ref` become [part of React](https://beta.reactjs.org/learn/state-as-a-snapshot#rendering-takes-a-snapshot-in-time), as opposed to be owned by your component – just like any other state – they won’t get destroyed and re-recreated every time React renders (calls) your component.</p>
+</details>
+
+
+
+## Better ways to address the mismatch
+Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s programming model and an impure language like JavaScript. The mismatch exists because React throw away and re-create local variables inside function components for every re-render and the JavaScript language doesn’t have native support for **immutable data structures** so we can only compare objects by identity/reference, and thus they are always different between re-renders, regardless of if there were any actual meaningful changes happened.
+
+
+Luckily we haven’t reached our endgame yet – we might fix this mismatch once for all from both the language side and React side:
+- the JavaScript language is getting native support for immutable data strcutures – [Records & Tuples]((https://github.com/tc39/proposal-record-tuple)), which are compared by **value/contents** instead of identity/reference. No need to slap `useMemo` and `useCallback` everywhere just for the sake of referential stability.
+- React is likely to get a compiler called [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) that automates memoization – it memoizes the results of every intermediate expression in your component at the compilation level.
+
+
+## Acknowledgements and Further Reading
+
+- I plagiarized the title from the post *[Preemptive Pluralization is (Probably) Not Evil](https://www.swyx.io/preemptive-pluralization)* by [Swyx](https://twitter.com/swyx). 🤣
+- If you’d like to know more about how Records & Tuples can help us write better & cleaner React code, [Sébastien Lorber](https://twitter.com/sebastienlorber) has written a great post on this [Records & Tuples for React](https://sebastienlorber.com/records-and-tuples-for-react) that you should check out.
+- There have been [some concerns](https://www.reddit.com/r/reactjs/comments/rcn5ks/react_forget_compiler_automated_memoization_react/) in the React community about introducing another compilation step by React Forget.
