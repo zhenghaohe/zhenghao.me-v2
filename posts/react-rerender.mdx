@@ -8,7 +8,7 @@ tags: react
 
 > This is an unfinished draft
 
-This post is my version of Mark Erikson's essay *[A (Mostly) Complete Guide to React Rendering Behavior](https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/#rendering-process-overview)* where I tried to answer one of the most commonly asked questions in this  React community – "when or why does React render my component?" – with a tiny amount of React source code walkthrough. 
+This post is my version of Mark Erikson's essay *[A (Mostly) Complete Guide to React Rendering Behavior](https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior)* where I tried to answer one of the most commonly asked questions in this  React community – "when or why does React render my component?" – with a tiny amount of React source code walkthrough. 
 
 Normally I am not a big fan of drilling down to the implementation details and you certainly don't need to know that in order to be productive in React. However, when it comes to understand the rendering behaviour and rules for bailing out of re-renders, [The React docs](https://beta.reactjs.org/learn/render-and-commit#step-1-trigger-a-render) haven’t provided an thorough explanation. Therefore to adequately answer those questions, I had to peek into the source code. That being said, this is not going to be a post about hard-core source code walkthrough. If you are interested in that, here are a [great series](https://jser.dev/) made by [JSer](https://twitter.com/JSer_ZANP) that you should check out. 
 
@@ -22,7 +22,7 @@ Normally I am not a big fan of drilling down to the implementation details and y
         1. Your component has been rendered before i.e. it already mounted
         2. No props (referentially) changed
         3. No any context value consumed by your component (referentially) changed
-        4. Your component itself didn’t schedule an update 
+ Your component itself didn’t schedule an update 
 - You probably shouldn’t need to worry about seemingly unnecessary re-renders until it really becomes a performance issue. Check out this flow chart I made to see the solutions you can adopt when a performance issue occurs.
 
 > Disclaimer: I haven't used React's concurrent mode so some parts of this post might not be applicable in concurrent React.
