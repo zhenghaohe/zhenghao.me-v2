@@ -122,7 +122,7 @@ return instanceRef.current
 
 
 ## Better ways to address the mismatch
-Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and an impure, non-functional language like JavaScript. The mismatch exists because React throws away and re-creates local objects inside function components for every re-render and the JavaScript language doesn’t have native support for **functional immutable data structures** which are compared by value, not identity/reference.
+Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s semi-functional programming model and an impure, non-functional language like JavaScript. The mismatch exists because React throws away and re-creates local objects inside function components for every re-render and the JavaScript language doesn’t have native support for **functional immutable data structures** which are compared by value, not identity/reference.
 
 <details>
     <summary>What about `Object.freeze`?</summary>
