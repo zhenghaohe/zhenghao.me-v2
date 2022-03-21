@@ -127,8 +127,8 @@ Both of the solutions are just workarounds and cannot fix the fundamental mismat
 <details>
     <summary>What about `Object.freeze`?</summary>
     <p>I should have mentioned that JavaScript does have a way to make objects immutable – `Object.freeze`.</p>
-    <p>But even with that, immutable objects are still objects in a object-oriented programming sense. In object-oriented programming, objects have [identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references), as opposed to being **values** in a pure functional programming sense.</p>
-     <p>For example, in Haskell, there are no objects. It only has values. Objects have identity, while values only have equality.</p>
+    <p>But even with that, immutable objects are still **objects** in a object-oriented programming sense. In object-oriented programming, objects have [identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references), as opposed to being **values** in a pure functional programming sense.</p>
+     <p>For example, in Haskell, there are no objects. It only has values, and values only have equality, no identities.</p>
 </details>
 
 
@@ -137,7 +137,7 @@ Luckily we haven’t reached our endgame yet – we might fix this mismatch once
     - However, even with Records & Tuples, **function equality** is still undecidable. As a result, `useCallback` will still stick around in some form.
 - React is likely to get a **compiler** called [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) that automates memoization – it memoizes the results of every intermediate expression in your component at the compilation level.
 
-> As a side note, another example of a tool that bridges the gap JavaScript between the Functional Programming model brought by React is [Immer](https://github.com/immerjs/immer), which has [seen a meteoric rise](https://www.swyx.io/rise-of-immer) in adoption in the React community.
+> As a side note, another example of a tool that bridged the gap between JavaScript and the Functional Programming model brought by React is [Immer](https://github.com/immerjs/immer), which has [seen a meteoric rise](https://www.swyx.io/rise-of-immer) in adoption in the React community.
 
 
 
