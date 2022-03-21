@@ -14,7 +14,7 @@ Whether or not you should use memoize values in React using `useMemo` or `useCal
 There are two use cases for memoization in React:
 
 1. optimize away repeated computations/calculations
-2. stabilize (the referneces/identities of) non-primitive values between re-renders
+2. stabilize (the references/identities of) non-primitive values between re-renders
 
 The majority of the times when people warn against abusing `useMemo` and `useCallback`, they only refer to the first use case – memoization as a performance optimization technique. There is a simple and straightforward answer to it – don’t prematurely optimize. Just don’t. If your still don’t agree with this, please check out the post [*Death by a thousand useCallbacks*](https://royi-codes.vercel.app/thousand-usecallbacks/) by [Royi Hagigi](https://twitter.com/rhagigi).
 
@@ -22,7 +22,7 @@ So that’s it for whether or not you should apply memoization from the performa
 
 However, what’s more interesting to me is the second use case about stabilizing non-primitive values between re-renders. It reveals a **mismatch** between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and the impure JavaScript language.
 
-But first, why do we want stable referneces/identities for values?
+But first, why do we want stable references/identities for values?
 
 ## The danger of leaking out unstable values
 
