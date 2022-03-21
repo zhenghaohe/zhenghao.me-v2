@@ -76,11 +76,11 @@ Another popular hook library [ahooks](https://github.com/alibaba/hooks), made it
 > A similar argument has been made by [Stefano](https://twitter.com/steadicat) in his blog post [*Why We Memo All the Things*](https://attardi.org/why-we-memo-all-the-things/) – but to be fair, his reasoning about memoizing everything also has a lot to do with avoiding the accumulative cognitive load.
 
 <details>
-    <summary>There is a catch though...</summary>
+    <summary>`useMemo` and `useCallback` are subject to cache purging</summary>
     <p>I should mention that `useMemo` and `useCallback` might get recycled by React when memory gets tight. They are not guaranteed to be instantiated only once, even if your dependencies don’t change.</p>
     <p>According to [the React docs](https://reactjs.org/docs/hooks-reference.html#usememo):</p>
     <quote>*"You may rely on useMemo as a performance optimization, not as a semantic guarantee."*</quote>
-    <p>A safer alternative is to use `useRef`, which I will talk about in the next section</p>
+    <p>In practice though, this shouldn't be a problem – your code probably isn't that critical. However, if you really want to avoid cache purging, use `useRef` as an alternative, which I will discuss in the next section.</p>
 </details>
 
 
@@ -117,9 +117,7 @@ return instanceRef.current
 
 
 
-
 > By combining `useRef` and `useMemo`, you can even create a [solid.js-like version](https://twitter.com/tannerlinsley/status/1502116674689925123) of React with no manual dependency tracking needed.
-
 
 ## Better ways to address the mismatch
 Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s semi-functional programming model and an impure, non-functional language like JavaScript. The mismatch exists because React throws away and re-creates local objects inside function components for every re-render and the JavaScript language doesn’t have native support for **functional immutable data structures** which are compared by value, not identity/reference.
