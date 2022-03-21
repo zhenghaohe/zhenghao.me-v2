@@ -3,14 +3,10 @@ title: Preemptive memoization in React is probably not Evil (yet)
 published: true
 listed: true
 date: '03/20/2022'
-description: ...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget
 tags: react
 ---
 
-Whether or not you should use memoize values in React using `useMemo` or `useCallback` is one of most commonly discussed topics in the React community. 
-
-There are two use cases for memoization in React:
-
+Whether or not you should memoize values in React with `useMemo` or `useCallback` is one of most commonly discussed topics in the community, and there are two use cases for memoization:
 1. optimize away repeated computations/calculations
 2. stabilize (the [references/identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references) of) objects (including functions) between re-renders
 

@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Mon, 21 Mar 2022 20:05:58 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 21 Mar 2022 20:16:12 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -14,8 +14,6 @@
             <link>https://zhenghao.io/posts/memo-or-not</link>
             <guid>https://zhenghao.io/posts/memo-or-not</guid>
             <pubDate>Sun, 20 Mar 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget]]></description>
-            <content:encoded><![CDATA[...until we have native support for immutable data structures in JavaScript or a compiler in React, e.g. React Forget]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>react</category>
         </item>
