@@ -36,7 +36,7 @@ However, when you are creating a reusable abstraction such as a **custom hook**,
 2. including them in `useMemo` and `useCallback` as a dependency for other memoizations
 3. passing them down as a `prop` to a child component is wrapped by `React.memo`, or extends `React.PureComponent`
 
-Ideally the identities of the values your hook/API/library produces should only change when there are meaningful changes happened to them, as opposed to to merely reflect the fact that they are getting re-created for every re-render. Unless you want to bother your users to look into the implementation details of your abstraction to figure out which changes to the values they get from your APIs are meaningful and which are not (and thus can be safely ignored as a dependency by turning off `exhaustive-deps` lint rule), you need to account for the possilities and stabilize the values for your users beforehand.
+Ideally the identities of the values your hook/API/library produces should only change when there are **meaningful changes** happened to them, as opposed to to merely reflect the fact that they are getting re-created for every re-render. **Unless** you want to bother your users to look into the **implementation details** of your abstraction to figure out which changes to the values they get from your APIs are meaningful and which are not (and thus can be safely ignored as a dependency by turning off `exhaustive-deps` lint rule), you need to account for the possilities and **stabilize the values** for your users beforehand.
 
 The next logical question is, how do we stabilize non-primitive values in React?
 
@@ -54,10 +54,42 @@ The most obvious solution is to just wrap everything in `useMemo` and `useCallba
 I have seen people end up memoizing everything even though they are well-aware of not to premature optimize. They understand that memoizing everything can even [hurt performance](https://kentcdodds.com/blog/usememo-and-usecallback#why-is-usecallback-worse) but it is way worse if an unstable referential identity busts out other memoizations unexpectedly. That can cause some major bugs.
 
 ![alt](/art/blog/memo-or-not/meme.jpeg)
+Don’t just take my word for it – let's take a look at a Hook-based library such as [React Hook Form](https://react-hook-form.com/). It does [memoize everything](https://github.com/react-hook-form/react-hook-form/blob/master/src/useFieldArray.ts#L332-L348):
 
-A similar argument has been made by [Stefano](https://twitter.com/steadicat) in his blog post [*Why We Memo All the Things*](https://attardi.org/why-we-memo-all-the-things/) – but to be fair, his reasoning about memoizing everything also has a lot to do with avoiding the accumulative cognitive load.
+```javascript
+    //...
+    return {
+        swap: React.useCallback(swap, [updateValues, name, control]),
+        move: React.useCallback(move, [updateValues, name, control]),
+        prepend: React.useCallback(prepend, [updateValues, name, control]),
+        append: React.useCallback(append, [updateValues, name, control]),
+        remove: React.useCallback(remove, [updateValues, name, control]),
+        insert: React.useCallback(insert, [updateValues, name, control]),
+        update: React.useCallback(update, [updateValues, name, control]),
+        replace: React.useCallback(replace, [updateValues, name, control]),
+        fields: React.useMemo(
+        () =>
+            fields.map((field, index) => ({
+            ...field,
+            [keyName]: ids.current[index] || generateId(),
+            })) as FieldArrayWithId<TFieldValues, TFieldArrayName, TKeyName>[],
+        [fields, keyName],
+    )
+```
 
-> I should mention that `useMemo` and `useCallback` might get recycled by React when memory gets tight. They are not guaranteed to be instantiated only once, even if your dependencies don’t change. 
+Another popular hook library [ahooks](https://github.com/alibaba/hooks), made it [one of its principes](https://github.com/alibaba/hooks/blob/master/docs/guide/blog/function.en-US.md#principle) to memoize every function that gets returned from the hooks.  
+
+> A similar argument has been made by [Stefano](https://twitter.com/steadicat) in his blog post [*Why We Memo All the Things*](https://attardi.org/why-we-memo-all-the-things/) – but to be fair, his reasoning about memoizing everything also has a lot to do with avoiding the accumulative cognitive load.
+
+<details>
+    <summary>There is a catch though...</summary>
+    <p>I should mention that `useMemo` and `useCallback` might get recycled by React when memory gets tight. They are not guaranteed to be instantiated only once, even if your dependencies don’t change.</p>
+    <p>According to [the React docs](https://reactjs.org/docs/hooks-reference.html#usememo):</p>
+    <quote>*"You may rely on useMemo as a performance optimization, not as a semantic guarantee."*</quote>
+    <p>A safer alternative is to use `useRef`, which I will talk about in the next section</p>
+</details>
+
+
 
 
 ### Stored in a ref
@@ -107,6 +139,6 @@ Luckily we haven’t reached our endgame yet – we might fix this mismatch once
 
 ## Acknowledgements and Further Reading
 
-- I plagiarized the title from the post *[Preemptive Pluralization is (Probably) Not Evil](https://www.swyx.io/preemptive-pluralization)* by [Swyx](https://twitter.com/swyx). 🤣
+- I stole the title from the post *[Preemptive Pluralization is (Probably) Not Evil](https://www.swyx.io/preemptive-pluralization)* by [Swyx](https://twitter.com/swyx).
 - If you’d like to know more about how Records & Tuples can help us write better & cleaner React code, [Sébastien Lorber](https://twitter.com/sebastienlorber) has written a great post on this [Records & Tuples for React](https://sebastienlorber.com/records-and-tuples-for-react) that you should check out.
 - There have been [some concerns](https://www.reddit.com/r/reactjs/comments/rcn5ks/react_forget_compiler_automated_memoization_react/) in the React community about introducing another compilation step by React Forget.
