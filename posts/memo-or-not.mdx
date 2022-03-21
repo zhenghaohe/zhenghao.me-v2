@@ -14,21 +14,21 @@ Whether or not you should use memoize values in React using `useMemo` or `useCal
 There are two use cases for memoization in React:
 
 1. optimize away repeated computations/calculations
-2. stabilize (the references/identities of) non-primitive values between re-renders
+2. stabilize (the [references/identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references) of) objects (including functions) between re-renders
 
 The majority of the times when people warn against abusing `useMemo` and `useCallback`, they only refer to the first use case – memoization as a performance optimization technique. There is a simple and straightforward answer to it – don’t prematurely optimize. Just don’t. If your still don’t agree with this, please check out the post [*Death by a thousand useCallbacks*](https://royi-codes.vercel.app/thousand-usecallbacks/) by [Royi Hagigi](https://twitter.com/rhagigi).
 
 So that’s it for whether or not you should apply memoization from the performance angle. 
 
-However, what’s more interesting to me is the second use case about stabilizing non-primitive values between re-renders. It reveals a **mismatch** between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and the impure JavaScript language.
+However, what’s more interesting to me is the second use case about stabilizing objects between re-renders. It reveals a **mismatch** between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and the impure JavaScript language.
 
-But first, why do we want stable references/identities for values?
+But first, why do we want stable references/identities for objects?
 
-## The danger of leaking out unstable values
+## The danger of leaking out unstable objects
 
-You probably have understand how React’s function components work already – every time React renders your (function) component, every local variable, defined in it and in the custom hooks it consumes, gets **thrown away and re-created from scratch**. Although this won’t likely cause any measurable performance issues for modern browsers, for non-primitive values, i.e. objects and functions (yea I know functions are also objects), their identities/references change between re-renders–they are considered different every time.
+You probably have understand how React’s function components work already – every time React renders your (function) component, every local variable, defined in it and in the custom hooks it consumes, gets **thrown away and re-created from scratch**. Although this won’t likely cause any measurable performance issues for modern browsers, objects with ever-changing identities are considered **different** between re-renders.
 
-If those non-primitive variables are only local variables within a particular component and not passed down to any memoized descendent components, then being referentially unstable and re-created between re-renders is usually not a problem.
+If those objects are only local variables within a particular component and not passed down to any memoized descendent components, then being referentially unstable and re-created between re-renders is usually not a problem.
 
 However, when you are creating a reusable abstraction such as a **custom hook**, returning unstable values can be potentially dangerous – because you don’t know if ultimately the users of your hook/API/library would end up putting any unstable values in a **dependency list**, such as:
 
@@ -38,13 +38,13 @@ However, when you are creating a reusable abstraction such as a **custom hook**,
 
 Ideally the identities of the values your hook/API/library produces should only change when there are **meaningful changes** happened to them, as opposed to to merely reflect the fact that they are getting re-created for every re-render. **Unless** you want to bother your users to look into the **implementation details** of your abstraction to figure out which changes to the values they get from your APIs are meaningful and which are not (and thus can be safely ignored as a dependency by turning off `exhaustive-deps` lint rule), you need to account for the possilities and **stabilize the values** for your users beforehand.
 
-The next logical question is, how do we stabilize non-primitive values in React?
+The next logical question is, how do we stabilize objects in React?
 
 ## How to stabilize values
 
 Stabilized values (currently) can be arrived at in two ways in React:
 
-1. memoize all local, non-primitive variables via `useMemo`/`useCallback`
+1. memoize all objects via `useMemo`/`useCallback`
 2. “lift” them out of your component/hook/API and make them live inside React via `useRef`
 
 ### Memoize everything
@@ -128,14 +128,24 @@ return instanceRef.current
 
 
 ## Better ways to address the mismatch
-Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s programming model and an impure language like JavaScript. The mismatch exists because React throw away and re-create local variables inside function components for every re-render and the JavaScript language doesn’t have native support for **immutable data structures** so we can only compare objects by identity/reference, and thus they are always different between re-renders, regardless of if there were any actual meaningful changes happened.
+Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s [semi-functional programming model](https://overreacted.io/react-as-a-ui-runtime/#purity) and an impure, non-functional language like JavaScript. The mismatch exists because React throws away and re-creates local objects inside function components for every re-render and the JavaScript language doesn’t have native support for **functional immutable data structures** which are compared by value, not identity/reference.
+
+<details>
+    <summary>What about `Object.freeze`?</summary>
+    <p>I should have mentioned that JavaScript does have a way to make objects immutable – `Object.freeze`.</p>
+    <p>But even with that, immutable objects are still objects in a object-oriented programming sense. In object-oriented programming, objects have [identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references), as opposed to being **values** in a pure functional programming sense.</p>
+     <p>For example, in Haskell, there are no objects. It only has values. Objects have identity, while values only have equality.</p>
+</details>
 
 
 Luckily we haven’t reached our endgame yet – we might fix this mismatch once for all from both the language side and React side:
-- the JavaScript language is getting native support for immutable data strcutures – [Records & Tuples]((https://github.com/tc39/proposal-record-tuple)), which are compared by **value/contents** instead of identity/reference. No need to slap `useMemo` everywhere just for the sake of referential stability. However, even with Records & Tuples, **function equality** is still undecidable. As a result, `useCallback` will still stick around in some form.
+- the JavaScript language is getting native support for immutable data strcutures – [Records & Tuples]((https://github.com/tc39/proposal-record-tuple)), which are compared by **value/contents** instead of identity/reference. No need to slap `useMemo` everywhere just for the sake of referential stability. 
+    - However, even with Records & Tuples, **function equality** is still undecidable. As a result, `useCallback` will still stick around in some form.
 - React is likely to get a **compiler** called [React Forget](https://www.youtube.com/watch?v=lGEMwh32soc) that automates memoization – it memoizes the results of every intermediate expression in your component at the compilation level.
 
 > As a side note, another example of a tool that bridges the gap JavaScript between the Functional Programming model brought by React is [Immer](https://github.com/immerjs/immer), which has [seen a meteoric rise](https://www.swyx.io/rise-of-immer) in adoption in the React community.
+
+
 
 ## Acknowledgements and Further Reading
 
