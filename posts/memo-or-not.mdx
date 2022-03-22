@@ -6,11 +6,11 @@ date: '03/20/2022'
 tags: react
 ---
 
-Whether or not you should memoize values in React with `useMemo` or `useCallback` is one of most commonly discussed topics in the community, and there are two use cases for memoization:
+Whether you should memoize values in React with `useMemo` or `useCallback` is one of the most commonly discussed topics in the community, and there are two common use cases for memoization:
 1. optimize away repeated computations/calculations
 2. stabilize (the [references/identities](https://en.wikipedia.org/wiki/Identity_(object-oriented_programming)#Identity_and_references) of) objects (including functions) between re-renders
 
-The majority of the times when people warn against abusing `useMemo` and `useCallback`, they only refer to the first use case – memoization as a performance optimization technique. There is a simple and straightforward answer to it – don’t prematurely optimize. Just don’t. If your still don’t agree with this, please check out the post [*Death by a thousand useCallbacks*](https://royi-codes.vercel.app/thousand-usecallbacks/) by [Royi Hagigi](https://twitter.com/rhagigi).
+The majority of the times when people warn against abusing `useMemo` and `useCallback`, they only refer to the first use case – memoization as a performance optimization technique. There is a simple and straightforward answer to it: don’t prematurely optimize. Just don’t. If your don’t agree with this, please check out the post [*Death by a thousand useCallbacks*](https://royi-codes.vercel.app/thousand-usecallbacks/) by [Royi Hagigi](https://twitter.com/rhagigi).
 
 That’s it for whether or not you should apply memoization from the performance angle. 
 
