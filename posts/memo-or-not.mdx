@@ -81,6 +81,7 @@ Another popular hook library [ahooks](https://github.com/alibaba/hooks), which m
     <p>According to [the React docs](https://reactjs.org/docs/hooks-reference.html#usememo):</p>
     <quote>*"You may rely on useMemo as a performance optimization, not as a semantic guarantee."*</quote>
     <p>In practice though, this shouldn't be a problem – your code probably isn't that critical. However, if you really want to avoid cache purging, use `useRef` as an alternative, which I will discuss in the next section.</p>
+    <p>However, if you have seen any empirical data or anecdotes that the unexpectedly recycling behaviour of `useMemo` and `useCallback` caused any performance issues or bugs, ping me. I’ll be happy to update this post based on new information!</p>
 </details>
 
 
