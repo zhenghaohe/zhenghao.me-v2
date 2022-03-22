@@ -119,7 +119,8 @@ return instanceRef.current
 
 
 
-> By combining `useRef` and `useMemo`, you can even create a [solid.js-like version](https://twitter.com/tannerlinsley/status/1502116674689925123) of React with no manual dependency tracking needed.
+> By combining `useRef` and `useMemo`, you can even create a [solid.js-like version](https://twitter.com/tannerlinsley/status/1502116674689925123) of React with no manual dependency tracking needed. 
+> By the way you should check out [Solid](https://www.solidjs.com/). It has a granular reactivity model that doesn't rely on top-down memoization to detect immutable changes.
 
 ## Better ways to address the mismatch
 Both of the solutions are just workarounds and cannot fix the fundamental mismatch between React’s semi-functional programming model and an impure, non-functional language like JavaScript. The mismatch exists because React throws away and re-creates local objects inside function components for every re-render and the JavaScript language doesn’t have native support for **functional immutable data structures** which are compared by value, not identity/reference.
