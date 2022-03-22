@@ -3,6 +3,7 @@ title: Preemptive memoization in React is probably not Evil (yet)
 published: true
 listed: true
 date: '03/20/2022'
+lastUpdateDate: '03/22/2022'
 tags: react
 ---
 
@@ -145,3 +146,5 @@ Luckily we haven’t reached our endgame yet – we might fix this mismatch once
 - I stole the title from the post *[Preemptive Pluralization is (Probably) Not Evil](https://www.swyx.io/preemptive-pluralization)* by [Swyx](https://twitter.com/swyx).
 - If you’d like to know more about how Records & Tuples can help us write better & cleaner React code, [Sébastien Lorber](https://twitter.com/sebastienlorber) has written a great post on this [Records & Tuples for React](https://sebastienlorber.com/records-and-tuples-for-react) that you should check out.
 - There have been [some concerns](https://www.reddit.com/r/reactjs/comments/rcn5ks/react_forget_compiler_automated_memoization_react/) in the React community about introducing another compilation step by React Forget.
+- [Alex Reardon](https://twitter.com/alexandereardon) made a library called [useMemoOne](https://github.com/alexreardon/use-memo-one) to provide semantic guarantee for `useMemo` and `useCallback` (no cache purging) and it is concurrent mode safe.
+- [Dominik](https://twitter.com/TkDodo) made [a good point](https://twitter.com/TkDodo/status/1506157026812084224) about the differences between app code and library code: for library code, it is meant to be reused and it should be resilient how they are being used; as to app code, they might be a one-off thing and used within a much more limited scoped so memoizing them might not be worth the cost.
