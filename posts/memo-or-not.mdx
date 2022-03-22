@@ -20,7 +20,7 @@ But first, why do we want stable references/identities for objects?
 
 ## The danger of leaking out unstable objects
 
-You probably have understand how React’s function components work already – every time React renders your (function) component, every local variable – both those defined in it and in the custom hooks it consumes – gets **thrown away and re-created from scratch**. Although this won’t likely cause any measurable performance issues for modern browsers, objects with ever-changing identities are considered **different** between re-renders.
+You probably understand how React’s function components work already – every time React renders your (function) component, every local variable – both those defined in it and in the custom hooks it consumes – gets **thrown away and re-created from scratch**. Although this won’t likely cause any measurable performance issues for modern browsers, objects with ever-changing identities are considered **different** between re-renders.
 
 If those objects are only local variables within a particular component and not passed down to any memoized descendent components, then being referentially unstable and re-created between re-renders is usually not a problem.
 
@@ -76,7 +76,7 @@ Another popular hook library [ahooks](https://github.com/alibaba/hooks), which m
 > A similar argument has been made by [Stefano](https://twitter.com/steadicat) in his blog post [*Why We Memo All the Things*](https://attardi.org/why-we-memo-all-the-things/) – but to be fair, his reasoning about memoizing everything also has a lot to do with avoiding the accumulative cognitive load.
 
 <details>
-    <summary>`useMemo` and `useCallback` are subject to cache purging</summary>
+    <summary>Caution: `useMemo` and `useCallback` are subject to **cache purging**</summary>
     <p>I should mention that `useMemo` and `useCallback` might get recycled by React when memory gets tight. They are not guaranteed to be instantiated only once, even if your dependencies don’t change.</p>
     <p>According to [the React docs](https://reactjs.org/docs/hooks-reference.html#usememo):</p>
     <quote>*"You may rely on useMemo as a performance optimization, not as a semantic guarantee."*</quote>
