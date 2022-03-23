@@ -49,7 +49,7 @@ The most direct solution is to just wrap everything in `useMemo` and `useCallbac
 I have seen people end up memoizing everything even though they are well-aware of the good practice to not premature optimize. They understand that memoizing everything can even [hurt performance](https://kentcdodds.com/blog/usememo-and-usecallback#why-is-usecallback-worse) but it is way worse if an unstable referential identity busts out other memoizations unexpectedly. That can cause some major bugs.
 
 ![alt](/art/blog/memo-or-not/meme.jpeg)
-Don’t just take my word for it – let's take a look at a Hook-based library such as [React Hook Form](https://react-hook-form.com/). It does [memoize everything](https://github.com/react-hook-form/react-hook-form/blob/master/src/useFieldArray.ts#L332-L348):
+Don’t just take my word for it – let's take a look at a Hook-based library such as [React Hook Form](https://react-hook-form.com/). It does [memoize everything](https://github.com/react-hook-form/react-hook-form/blob/e4d87b865c32b0eb86fbf47127d18345e998b1fd/src/useFieldArray.ts#L332-L348):
 
 ```javascript
     //...
@@ -92,7 +92,7 @@ Another popular hook library [ahooks](https://github.com/alibaba/hooks), which m
 
 Despite the title of this blog post, there is a lesser-known alternative to memoization that can stabilize local variables – use `useRef` to store an instance of your APIs on initialization in a `ref`, and reuse their identities across re-renders.
 
-This is what [Tanner Linsley](https://twitter.com/tannerlinsley) has been doing for his hook-based libraries such as [React Table](https://github.com/TanStack/react-table/blob/alpha/packages/react-table/src/createTable.tsx#L165-L177).
+This is what [Tanner Linsley](https://twitter.com/tannerlinsley) has been doing for his hook-based libraries such as [React Table](https://github.com/TanStack/react-table/blob/3ed64a99419d3c122f2f0f5e7138c491a094b349/packages/react-table/src/createTable.tsx#L225-L237).
 
 
 ```javascript
