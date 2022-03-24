@@ -14,7 +14,8 @@ const RootPath = process.cwd();
 const PostPath = path.join(RootPath, 'posts');
 
 export async function loadMDX(source: string) {
-  const bundle = await bundleMDX(source, {
+  const bundle = await bundleMDX({
+    source,
     xdmOptions(options) {
       options.remarkPlugins = [...(options?.remarkPlugins ?? []), remarkGfm, remarkPrism];
       options.rehypePlugins = [
@@ -38,7 +39,7 @@ export const getAllPostsMeta = async () => {
   return allPostPaths
     .map((postPath): PostMeta => {
       const post = fs.readFileSync(path.join(RootPath, postPath), 'utf-8');
-      
+
       const slug = path.basename(postPath).replace('.mdx', '');
       const meta = matter(post).data;
 
