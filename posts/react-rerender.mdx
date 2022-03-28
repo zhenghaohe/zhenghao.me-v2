@@ -3,7 +3,7 @@ title: When does React render your component?
 published: true
 listed: true
 date: '03/18/2022'
-lastUpdateDate: '03/23/2022'
+lastUpdateDate: '03/27/2022'
 tags: react
 ---
 
@@ -15,7 +15,7 @@ Normally I am not a big fan of drilling down to the implementation details and y
 - React (re)renders your component when:
     - there is a state update scheduled by your component
         - including updates scheduled by custom hooks your component consumes
-    - the parent component got rendered and your component doesn’t meet the criteria for **bailing out on re-rendering**
+    - the parent component got rendered and your component doesn’t meet the criteria for **bailing out on re-rendering**, where **all these four conditions** have to be satisfied at the same time:
         1. Your component has been rendered before i.e. it already mounted
         2. No `props` (referentially) changed
         3. No any context value consumed by your component changed
@@ -26,7 +26,7 @@ Normally I am not a big fan of drilling down to the implementation details and y
 
 ## What does the word “render” mean?
 
-I don’t know if you have noticed this – I kept saying “React renders your component”, as opposed to “your component renders”. People use them interchangeably. It is largely an arbitrary decision. However, call me pedantic but I do want to use the former exclusively in this post because it describes how React works more accurately. Your components – functions augmented by React with the ability to schedule an update on the UI – are called by React, not the other way around, regardless of whether that render was a result of your component proactively changing its own state or some other changes.
+I don’t know if you have noticed this – I kept saying “React renders your component”, as opposed to “your component renders”. People use them interchangeably. It is largely an arbitrary decision. However, call me pedantic but I do want to use the former exclusively in this post because it describes how React works more accurately. Your components – **functions augmented by React** with the ability to schedule an update on the UI – are called by React, not the other way around, regardless of whether that render was a result of your component proactively changing its own state or some other changes.
 
 As [one](https://reactjs.org/docs/design-principles.html#scheduling) of its core design principles, React has **full control** over scheduling and updating the UI. This means a few things to us:
 1. One state update made by our component doesn’t necessarily translate into one render (one invocation of your component by React) because:
@@ -274,49 +274,58 @@ Note that if `contextVlaue` were a primitive value, e.g. number or string, then 
 <details>
     <summary>Note that bail-out is on **individual-component** level</summary>
     <p>If one of these components meets the bail-out criteria, React will not render that component. However, React would still proceed to check if there are any updates needed for the **children** of the bailed-out component though. In the example below, while `ChildA` and `ChildB` get bailed out, their descendent – `ChildC` – still gets re-rendered whenever `Parent` gets re-rendered.</p>
-     ```typescript
-        function App() {
-            return (
-                <Parent>
-                <ChildA />
-                </Parent>
-            );
-        }
+     ```jsx
+    function useForceRender(interval) {
+        const render = useReducer(() => ({}))[1]
+        useEffect(() => {
+            const id = setInterval(render, interval)
+            return () => clearInterval(id)
+        }, [interval])
+    }
 
-        function Parent({ children }) {
-            useForceRender(1000);
-            const contextValue = {};
-            console.log("Parent is rendered");
-            return (
-                <div className="parent">
+    function App() {
+        return (
+            <Parent>
+                <ChildA />  
+            </Parent>
+        )
+    }
+
+    function Parent({ children }) {
+        useForceRender(1000)
+        const contextValue = {}
+        console.log('Parent is rendered')
+        return (
+            <div className="parent">
                 <Context.Provider value={contextValue}>{children}</Context.Provider>
-                </div>
-            );
-        }
+            </div>
+        )
+    }
 
-        function ChildA() {
-            console.log("ChildA is rendered");
-            return (
-                <div className="childA">
+    function ChildA() {
+        console.log('ChildA is rendered')
+        return (
+            <div className="childA">
                 <ChildB />
-                </div>
-            );
-        }
+            </div>
+        )
+    }
 
-        function ChildB() {
-            console.log("ChildB is rendered");
-            return (
-                <div className="childB">
+    function ChildB() {
+        console.log('ChildB is rendered')
+        return (
+            <div className="childB">
                 <ChildC />
-                </div>
-            );
-        }
+            </div>
+        )
+    }
 
-        function ChildC() {
-            console.log("ChildC is rendered");
-            const value = useContext(Context);
-            return <div className="childC"></div>;
-        }
+    function ChildC() {
+        console.log('ChildC is rendered')
+        const value = useContext(Context)
+        return <div className="childC"></div>
+    }
+
      ```
      ![alt](/art/blog/react-rerender/recording3.gif)
 
@@ -365,7 +374,7 @@ Although there is a lot going on in this function (as well as in this file), it 
 
 In order for us to reach this line, **these conditions have to be satisfied**:
 
-1. `(current !== null)` 
+1. `current !== null` 
 2. `oldProps === newProps` 
 3. `hasLegacyContextChanged() === false`
 4. `hasScheduledUpdateOrContext === false`
@@ -382,7 +391,7 @@ Rule 1 and rule 4 are easy to understand.
 Let’s focus on Rule 2 and Rule 3.
 
 ### How to not change props
-A component’s `props` is a property of its corresponding `ReactElement`, created by `React.createElement`. Because `ReactElement`s are immutable, every time React renders (calls) your component, `React.createElement` is called to produce a new `ReactElement`. As a result, `props` is created from scratch for every re-render.
+A component’s `props` is a property of its corresponding `ReactElement`, created by `React.createElement`. Because `ReactElement`s are immutable, every time React renders (calls) your component, `React.createElement` is called to produce a new `ReactElement`. As a result, your component's `props` is created from scratch for every re-render.
 
 Look back on our first example:
 ```jsx
@@ -395,18 +404,31 @@ function Parent() {
 }
 ```
 
-The `<Child />` returned from `Parent` gets compiled to `React.createElement(Child, null)`, which creates a `ReactElement` of this shape `{type: Child, props: {}}`
+The `<Child />` returned from `Parent` gets compiled to `React.createElement(Child, null)` by Babel, and that creates a `ReactElement` of this shape `{type: Child, props: {}}`
 
-Since `props` is an JavaScript object, so its reference is different every time it is created. 
+Since `props` is an JavaScript object, so its reference changes every time it gets re-created. By default, React uses `===` to compare the previous `props` and the current `props`. As a result, the `props` are considered different between re-renders. That’s why even though `Child` receives **nothing** from `Parent` as part of its `props`, it still gets re-rendered whenever `Parent` gets re-rendered – `React.createElement` is called for `Child` and that creates a new `props` object.
 
-That’s why even though `Child` receives **nothing** from `Parent` as part of its `props`, it still gets re-rendered whenever `Parent` gets re-rendered – `React.createElement` is called for `Child` to creates a new `props` object every time its parent gets re-rendered (called) by React.
+However, if we can **lift `Child` up** and pass it down via `Parent`’s `props`:
 
-However, if we can lift `Child` up and pass it down via `Parent`’s `props` , then whenever `Parent` gets rendered by React, there is no additional `React.createElement` invoked for `Child`
+```jsx
+function App() {
+    return <Parent><Child /></Parent>
+}
 
-as a result, **no new `props`** created for `Child`, and that makes it meet all **all four bail-out rules**.
+function Parent({children}) {
+  return (
+    <div>
+      {children}
+    </div>
+  );
+}
+```
+
+Then whenever `Parent` gets rendered by React, there is no `React.createElement` function call for `Child`. As a result, **no new `props`** created for `Child`, and that makes it meet all **all four bail-out rules** I mentioned above.
+
 
 -------------
-This is why in our [previous example](#not-every-child-component-is-created-equal), only `ChildA` gets re-rendered whenever `Parent` schedules an update:
+This is why in [this example](#not-every-child-component-is-created-equal), only `ChildA` gets re-rendered whenever `Parent` schedules an update:
 
 ```jsx
 function Parent({ children, lastChild }) {
@@ -422,17 +444,9 @@ function Parent({ children, lastChild }) {
 
 #### How to change the rule React uses to detect props changes
 
-By default, React uses `===` to compare the previous props and the current props. As a result, two referentially different objects with exactly the same properties are still considered different.
+I mentioned that, by default, React uses `===` to compare the previous `props` and the current `props`.
 
-```jsx
-const oldProps = {name: 'foo'}
-const newProps = {name: 'foo'}
- 
-oldProps === newProps // false
-```
-
-
-Luckily, React provides an alternative way to detect props change if we make our component a `PureComponent` or wrap it in `React.memo`. In those cases, instead of using `===` to check if the reference changed, React would **shallow compare** every property in the `props`, conceptually similar to `Object.keys(prevProps).some(key => prevProps[key] !== nextProps[key])`.
+Luckily, React provides an alternative way to detect `props` change if we make our component a `PureComponent` or wrap it in `React.memo`. In those cases, instead of using `===` to check if the reference changed, React would **shallow compare** every property in the `props`, conceptually similar to `Object.keys(prevProps).some(key => prevProps[key] !== nextProps[key])`.
 
 > However such optimization should not be abused and there are reasons why React didn’t make it the default rendering behaviour. Dan Abramov has repeatedly pointed out that we should not ignore [the costs](https://twitter.com/dan_abramov/status/1095661142477811717) of comparing `props` and a lot of times there are [better alternatives](https://overreacted.io/before-you-memo/).
 
@@ -441,14 +455,46 @@ Luckily, React provides an alternative way to detect props change if we make our
 
 If your component is a consumer of some context value, then when the provider gets re-rendered and the context value is changed (even **only referentially**), your component gets re-rendered too. 
 
+This is why in [this example](#context-consumers-get-rendered-whenever-the-provider-get-rendered), the context consumer `ChildC` gets re-rendered whenever `Parent` gets re-rendered:
 
+```jsx
+const Context = createContext();
 
-This is not bad per se. [The compound component pattern](https://kentcdodds.com/blog/compound-components-with-react-hooks) relies on this exact rendering behaviour of `Context`. However it can become a performance issue when a provider has too many consumers or consumers that are too expensive to get re-rendered unnecessarily. 
+export default function App() {
+  return (
+    <Parent lastChild={<ChildC />}>
+      <ChildB />
+    </Parent>
+  );
+}
+
+function Parent({ children, lastChild }) {
+  useForceRender(2000);
+  const contextValue = {};
+  console.log("Parent is rendered");
+  return (
+    <div className="parent">
+      <Context.Provider value={contextValue}>
+        <ChildA />
+        {children}
+        {lastChild}
+      </Context.Provider>
+    </div>
+  );
+}
+
+function ChildC() {
+  console.log("ChildC is rendered");
+  const value = useContext(Context)
+  return <div className="childC"></div>;
+}
+```
+
+Note this is not bad per se. [The compound component pattern](https://kentcdodds.com/blog/compound-components-with-react-hooks) relies on this exact rendering behaviour of context consumers. However it can become a performance issue when a provider has too many consumers or consumers that are too expensive to get re-rendered unnecessarily.
 
 In which case, the easiest fix is to wrap your non-primitive context values into `useMemo` so they **stay referentially the same** between re-renders of the provider component. 
 
-----------------
-There are many other techniques you can employ to optimize context consumption. My friend [Vladimir](https://twitter.com/thoughtspile) has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
+> There are many other techniques you can employ to optimize context consumption. My friend [Vladimir](https://twitter.com/thoughtspile) has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
 
 ## It is all based on one implicit premise...
 
@@ -476,7 +522,7 @@ My confession to you is that the whole bail-out thing is based on the premise th
 Whether you found the bail-out rules complex or not, one simple idea I would like you to walk away with is that – React could **re-render your component for a variety of reasons**. 
 
 
-It is **necessary** for React to do so because two of the [hardest problems in UI engineering](https://overreacted.io/the-elements-of-ui-engineering/) is to avoid inconsistency and staleness in your app’s states. 
+It is **necessary** for React to do so because two of the [hardest problems in UI engineering](https://overreacted.io/the-elements-of-ui-engineering/) is to avoid **inconsistency and staleness** in your app’s states. 
 
 
 
