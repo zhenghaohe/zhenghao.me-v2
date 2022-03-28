@@ -3,6 +3,7 @@ title: What are JavaScript variables made of
 published: true
 listed: true
 date: '01/21/2022'
+lastUpdateDate: '03/28/2022'
 tags: javascript,v8
 ---
 When we start learning to program, we often are taught using some metaphor to help us understand one of the most fundamental concepts in programming- variable. You may or may not have been told to think of variables as storage boxes or houses. Whatever that metaphor was, it became the mental shortcuts we use when we read/write programs, but we rarely take the time to introspect these intuitions we developed over time.
@@ -99,7 +100,7 @@ const bar = foo
 
 Given the JavaScript code snippet above, will we end up with two separate memory chunks that *duplicately* make up the string `baz`? Or there is only one string `baz` at runtime which is pointed by both variable `foo` and `bar`? 
 
-The answer is the latter. It is not much different than objects, except that objects are immutable and primitive types are not. 
+The answer is the latter. It is not much different than objects, except that objects are mutable and primitive types are immutable. 
 ![alt](/art/blog/javascript-variables/JSPrimitiveExample1.png)
 
 > Using object literals always gives you new, **unique** objects, while primitive values (except for numbers, they are complicated) are **reused**. That means with `const a = 'foo'; const b = 'foo'`, we only have one string `foo` stored in the memory at runtime due to [string interning](https://en.wikipedia.org/wiki/String_interning). This might seem strange to you at first, and if you need proof, please take a look at [my post](https://www.zhenghao.io/posts/javascript-memory) on the topic of the memory model in V8.
