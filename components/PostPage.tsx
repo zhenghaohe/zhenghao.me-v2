@@ -11,10 +11,14 @@ export const PostPage: React.FC<Props> = ({ meta, children }) => {
   return (
     <>
       <NextSeo
-        title={`${meta.title} - zhenghao`}
+        title={meta.title}
         description={meta.description}
-        canonical={`https://zhenghao.io/posts/${meta.slug}`}
-        openGraph={{ url: `https://zhenghao.io/posts/${meta.slug}` }}
+        canonical={`https://www.zhenghao.io/posts/${meta.slug}`}
+        openGraph={{ url: `https://www.zhenghao.io/posts/${meta.slug}` }}
+        additionalMetaTags={[
+          { name: 'twitter:title', content: meta.title },
+          { name: 'twitter:description', content: meta.description }
+        ]}
       />
       <Head>
         <link rel="stylesheet" href="/styles/prism.css" />

@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Mon, 28 Mar 2022 05:34:43 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 29 Mar 2022 06:31:02 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -14,6 +14,8 @@
             <link>https://zhenghao.io/posts/memo-or-not</link>
             <guid>https://zhenghao.io/posts/memo-or-not</guid>
             <pubDate>Sun, 20 Mar 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[Why you might still end up using useMemo/useCallback everywhere even though you want to avoid premature optimization]]></description>
+            <content:encoded><![CDATA[Why you might still end up using useMemo/useCallback everywhere even though you want to avoid premature optimization]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>react</category>
         </item>
@@ -22,6 +24,8 @@
             <link>https://zhenghao.io/posts/react-rerender</link>
             <guid>https://zhenghao.io/posts/react-rerender</guid>
             <pubDate>Fri, 18 Mar 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[When and why does React render my component exactly?]]></description>
+            <content:encoded><![CDATA[When and why does React render my component exactly?]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>react</category>
         </item>

@@ -4,6 +4,7 @@ published: true
 listed: true
 date: '03/20/2022'
 lastUpdateDate: '03/22/2022'
+description: 'Why you might still end up using useMemo/useCallback everywhere even though you want to avoid premature optimization'
 tags: react
 ---
 > See discussions on [reddit](https://www.reddit.com/r/javascript/comments/tjlc88/preemptive_memoization_in_react_is_probably_not/) 
@@ -47,7 +48,7 @@ Stabilized values (currently) can be arrived at in two ways in React:
 
 The most direct solution is to just wrap everything in `useMemo` and `useCallback` so the memoized value will be re-used between re-renders unless one of the dependencies has changed. 
 
-I have seen people end up memoizing everything even though they are well-aware of the good practice to not premature optimize. They understand that memoizing everything can even [hurt performance](https://kentcdodds.com/blog/usememo-and-usecallback#why-is-usecallback-worse) but it is way worse if an unstable referential identity busts out other memoizations unexpectedly. That can cause some major bugs.
+I have seen people end up memoizing everything even though they are well-aware of the good practice to not prematurely optimize. They understand that memoizing everything can even [hurt performance](https://kentcdodds.com/blog/usememo-and-usecallback#why-is-usecallback-worse) but it is way worse if an unstable referential identity busts out other memoizations unexpectedly. That can cause some major bugs.
 
 ![alt](/art/blog/memo-or-not/meme.jpeg)
 Don’t just take my word for it – let's take a look at a Hook-based library such as [React Hook Form](https://react-hook-form.com/). It does [memoize everything](https://github.com/react-hook-form/react-hook-form/blob/e4d87b865c32b0eb86fbf47127d18345e998b1fd/src/useFieldArray.ts#L332-L348):
