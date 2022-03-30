@@ -3,7 +3,7 @@ title: When does React render your component?
 published: true
 listed: true
 date: '03/18/2022'
-lastUpdateDate: '03/27/2022'
+lastUpdateDate: '03/29/2022'
 description: 'When and why does React render my component exactly?'
 tags: react
 ---
@@ -38,8 +38,9 @@ As [one](https://reactjs.org/docs/design-principles.html#scheduling) of its core
 2. One render to your component doesn’t necessarily translate into a visual update on the UI because React could decide to render your component (i.e. call your function) for a variety of reasons.
 
 <details>
-    <summary>Sometimes React cannot auto-batch the updates...</summary>
-    <p>At least for React 17, it cannot batch state updates in promises, because React has no control over when they are resolved, same thing with native event handlers, `setTimeout`, `setInterval`, and `requestAnimationFrame`, all of which are running much later in a totally separate event loop call stack</p>
+    <summary>In React 17, some state updates cannot be auto-batched...</summary>
+    <p>In React 17, some state updates cannot be batched, such as updates in promises, because React has no control over when they are resolved, same thing with native event handlers, `setTimeout`, `setInterval`, and `requestAnimationFrame`, all of which are running much later in a totally separate event loop call stack</p>
+    <p>In [React 18](https://twitter.com/he_zhenghao/status/1508944082017533955), all state updates can be auto-batched.</p>
 </details>
 
 
