@@ -56,6 +56,9 @@
     --syntax-keyword: hsl(36.3, 0%, 87.8%);
     --syntax-html-tag: hsl(33.9, 0%, 68%);
     --syntax-boolean: hsl(60, 0%, 80%);
+    --docsearch-searchbox-background: #283035;
+    --docsearch-muted-color: #939fb4;
+    --docsearch-text-color: #d3dae6;
   }
 
   html,

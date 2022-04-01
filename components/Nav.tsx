@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { RSSIcon } from './RssIcon';
+import {DocSearch} from './DocSearch'
 
 import ThemeSwitch from './ThemeSwitch';
 
@@ -39,6 +40,7 @@ const Nav: React.FC = () => {
             ))}
             <ThemeSwitch />
             <RSSIcon />
+            {/* <DocSearch /> */}
           </div>
         </nav>
       </div>
