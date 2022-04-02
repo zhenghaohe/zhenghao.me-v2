@@ -7,7 +7,8 @@ module.exports = {
     './pages/**/*.{jsx,tsx}',
     './components/**/*.{jsx,tsx}',
     './content/**/*.{mdx}',
-    './posts/**/*.{mdx}'
+    './posts/**/*.{mdx}',
+    './notes/**/*.{mdx}'
   ],
   darkMode: 'class',
   theme: {
@@ -16,6 +17,8 @@ module.exports = {
         ...colors,
         'purple': '#3f3cbb',
         'unhovered': '#C3D7D8',
+        'unhovered-tag': '#faebd7',
+        'hovered-tag': '#ffd090',
         'hovered': '#F2CFC2',
         primary: 'var(--color-text)',
         secondary: 'var(--color-text-secondary)',

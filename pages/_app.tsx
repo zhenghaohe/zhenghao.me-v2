@@ -10,6 +10,7 @@ import Head from 'next/head';
 
 import Nav from '@/components/Nav';
 import { SEO } from '@/components/SEO';
+import { TagsProvider } from '@/components/tags/TagsContext';
 
 const MyApp: React.FC<AppProps> = ({ Component, pageProps }) => {
   return (
@@ -19,10 +20,12 @@ const MyApp: React.FC<AppProps> = ({ Component, pageProps }) => {
       </Head>
       <SEO />
       <div className="w-full h-full">
-        <Nav />
-        <main className="w-full">
-          <Component {...pageProps} />
-        </main>
+        <TagsProvider>
+          <Nav />
+          <main className="w-full">
+            <Component {...pageProps} />
+          </main>
+        </TagsProvider>
       </div>
     </>
   );

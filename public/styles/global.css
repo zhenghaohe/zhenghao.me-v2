@@ -126,6 +126,16 @@
     @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered hover:bg-hovered dark:hover:bg-hovered dark:hover:text-warmGray-800 dark:bg-unhovered dark:text-black;
   }
 
+  .link-tag {
+    height: max-content;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered-tag hover:bg-hovered-tag dark:hover:bg-hovered-tag dark:hover:text-warmGray-800 dark:bg-unhovered-tag dark:text-black;
+  }
+
+  .link-tag-selected {
+    height: max-content;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-hovered-tag hover:bg-unhovered-tag dark:hover:bg-unhovered-tag dark:hover:text-warmGray-800 dark:bg-hovered-tag dark:text-black;
+  }
+
   .button {
     @apply p-2 border-2 border-warmGray-200 dark:border-warmGray-500;
   }

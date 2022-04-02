@@ -4,20 +4,21 @@ import { NextSeo } from 'next-seo';
 
 import { formateDatePreview, validDate } from '@/utils/formatDate';
 import { getAllPostsMeta } from '@/utils/loadMDX';
+import { Tag, TagList, ResetTagsButton } from '@/components/tags/Tag';
+import { useTags } from '@/components/tags/TagsContext';
 
 export const getStaticProps = async () => {
   const posts = await getAllPostsMeta();
   return { props: { posts } };
 };
 
-export const formatTags= (tags: string) => {
-  let formattedTagsArr: string[] = []
-  for(const tagStr of tags.split(',')) {
-    formattedTagsArr.push(`#${tagStr}`)
+export const formatTags = (tags: string) => {
+  let formattedTagsArr: string[] = [];
+  for (const tagStr of tags.split(',')) {
+    formattedTagsArr.push(`#${tagStr}`);
   }
-  return formattedTagsArr.join(', ')
-}
-
+  return formattedTagsArr;
+};
 
 const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
   return (
@@ -30,15 +31,33 @@ const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
           <h3 className="font-light link-btn">{title}</h3>
         </a>
       </Link>
-      <small>{formatTags(tags)}</small>
+      {/* <small>{formatTags(tags)}</small>
+       */}
+      {formatTags(tags).map((tag, index) => (
+        <Tag key={index} tag={tag} />
+      ))}
     </li>
   );
 };
 
 export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
+  const { tags: selectedTags } = useTags();
+  const showAllPosts = selectedTags.size === 0;
+
+  const fileredPosts = showAllPosts
+    ? posts
+    : posts.filter((post) => {
+        const postTagSet = new Set(formatTags(post.tags));
+        return Array.from(selectedTags).every((selectedTag) => postTagSet.has(selectedTag));
+      });
+
+  if (!showAllPosts && fileredPosts.length === 0) {
+    return <ResetTagsButton />;
+  }
+
   const postsByYear: Record<string, PostMeta[]> = {};
-  
-  posts.forEach((post) => {
+
+  fileredPosts.forEach((post) => {
     const year = new Date(post.date).getFullYear();
     const knownPosts = postsByYear[year] || [];
     postsByYear[year] = [...knownPosts, post];
@@ -48,16 +67,18 @@ export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
     <>
       {Object.entries(postsByYear)
         .reverse()
-        .map(([year, posts]) => (
-          <div key={year} className="w-full">
-            <h2 className="pl-1 text-lg font-semibold">{year}</h2>
-            <ul>
-              {posts.map((post) => (
-                <PostPreview key={post.slug} {...post} />
-              ))}
-            </ul>
-          </div>
-        ))}
+        .map(([year, posts]) => {
+          return (
+            <div key={year} className="w-full">
+              <h2 className="pl-1 text-lg font-semibold">{year}</h2>
+              <ul>
+                {posts.map((post) => {
+                  return <PostPreview key={post.slug} {...post} />;
+                })}
+              </ul>
+            </div>
+          );
+        })}
     </>
   );
 };
@@ -65,6 +86,11 @@ export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
 const Posts: React.FC<Props> = ({ posts }) => {
+  const postTagCountMap = posts.reduce((tagCountMap, post) => {
+    formatTags(post.tags).forEach((tag) => tagCountMap.set(tag, (tagCountMap.get(tag) ?? 0) + 1));
+    return tagCountMap;
+  }, new Map());
+
   return (
     <>
       <NextSeo
@@ -73,6 +99,7 @@ const Posts: React.FC<Props> = ({ posts }) => {
         openGraph={{ url: 'https://zhenghao.io/posts' }}
       />
       <div className="w-full sm:max-w-[75ch] m-auto px-5 py-16 flex flex-col justify-center items-center">
+        <TagList postTagCountMap={postTagCountMap} />
         <PostPreviewList posts={posts} />
       </div>
     </>
