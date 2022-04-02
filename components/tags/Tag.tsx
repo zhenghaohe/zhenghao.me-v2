@@ -26,7 +26,9 @@ export function Tag({ tag, count }: { tag: string; count?: number }) {
 
 export function TagList({ postTagCountMap }: { postTagCountMap: Map<'string', number> }) {
   const tags = [];
+  //@ts-ignore
   for (const [tag, count] of postTagCountMap) {
+    //@ts-ignore
     tags.push(<TagListItem tag={tag} count={count} />);
   }
 
