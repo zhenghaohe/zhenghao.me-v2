@@ -12,6 +12,8 @@ import { autoLinkHeadingsOptions } from './rehypeAutolinkPlugin';
 
 const RootPath = process.cwd();
 const PostPath = path.join(RootPath, 'posts');
+const NotePath = path.join(RootPath, 'notes');
+
 
 export async function loadMDX(source: string) {
   const bundle = await bundleMDX({
@@ -49,11 +51,44 @@ export const getAllPostsMeta = async () => {
     .sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)));
 };
 
+export const getAllNotesMeta = async () => {
+
+  const allPostPaths = await glob(`${NotePath}/**/*.mdx`);
+  console.log({allPostPaths});
+  
+  return allPostPaths
+    .map((postPath): PostMeta => {
+      const post = fs.readFileSync(path.join(RootPath, postPath), 'utf-8');
+
+      const slug = path.basename(postPath).replace('.mdx', '');
+      const meta = matter(post).data;
+
+      return { ...meta, slug } as PostMeta;
+    })
+    .filter((meta) => meta.published)
+    .sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)));
+};
+
+
 /**
  * Get a single post content by slug
  */
 export const getPost = async (slug: string) => {
   const source = fs.readFileSync(path.join(PostPath, `${slug}.mdx`), 'utf-8');
+
+  const { code, frontmatter } = await loadMDX(source);
+
+  const meta = { ...frontmatter, slug } as PostMeta;
+  return { meta, code };
+};
+
+
+
+/**
+ * Get a single post content by slug
+ */
+ export const getNote = async (slug: string) => {
+  const source = fs.readFileSync(path.join(NotePath, `${slug}.mdx`), 'utf-8');
 
   const { code, frontmatter } = await loadMDX(source);
 

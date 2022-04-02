@@ -5,7 +5,7 @@ import {DocSearch} from './DocSearch'
 
 import ThemeSwitch from './ThemeSwitch';
 
-const routes = [{route: '/posts', title: 'blog'}]
+const routes = [{route: '/posts', title: 'posts'}, {route: '/notes', title: 'notes'}]
 
 const Nav: React.FC = () => {
   const router = useRouter();
