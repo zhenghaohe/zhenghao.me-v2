@@ -6,6 +6,7 @@ import { formateDatePreview, validDate } from '@/utils/formatDate';
 import { getAllPostsMeta } from '@/utils/loadMDX';
 import { Tag, TagList, ResetTagsButton } from '@/components/tags/Tag';
 import { useTags } from '@/components/tags/TagsContext';
+import { useRouter } from 'next/router';
 
 export const getStaticProps = async () => {
   const posts = await getAllPostsMeta();
@@ -20,10 +21,12 @@ export const formatTags = (tags: string) => {
   return formattedTagsArr;
 };
 
-const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
+export const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
+  const router = useRouter();
+
   return (
     <li className="my-8">
-      <Link href={`posts/${slug}`}>
+      <Link href={`${router.asPath}/${slug}`}>
         <a className="flex items-center p-1 capitalize transition-colors duration-200 rounded outline-none">
           <p className="text-sm mr-8 min-w-[50px]">
             <time dateTime={validDate(date)}>{formateDatePreview(date)}</time>
@@ -43,6 +46,10 @@ const PostPreview: React.FC<PostMeta> = ({ slug, title, date, tags }) => {
 export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
   const { tags: selectedTags } = useTags();
   const showAllPosts = selectedTags.size === 0;
+  const postTagCountMap = posts.reduce((tagCountMap, post) => {
+    formatTags(post.tags).forEach((tag) => tagCountMap.set(tag, (tagCountMap.get(tag) ?? 0) + 1));
+    return tagCountMap;
+  }, new Map());
 
   const fileredPosts = showAllPosts
     ? posts
@@ -52,7 +59,12 @@ export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
       });
 
   if (!showAllPosts && fileredPosts.length === 0) {
-    return <ResetTagsButton />;
+    return (
+      <>
+        <TagList postTagCountMap={postTagCountMap} />
+        <ResetTagsButton />
+      </>
+    );
   }
 
   const postsByYear: Record<string, PostMeta[]> = {};
@@ -65,6 +77,7 @@ export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
 
   return (
     <>
+      <TagList postTagCountMap={postTagCountMap} />
       {Object.entries(postsByYear)
         .reverse()
         .map(([year, posts]) => {
@@ -86,10 +99,6 @@ export const PostPreviewList: React.FC<{ posts: PostMeta[] }> = ({ posts }) => {
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
 const Posts: React.FC<Props> = ({ posts }) => {
-  const postTagCountMap = posts.reduce((tagCountMap, post) => {
-    formatTags(post.tags).forEach((tag) => tagCountMap.set(tag, (tagCountMap.get(tag) ?? 0) + 1));
-    return tagCountMap;
-  }, new Map());
 
   return (
     <>
@@ -99,7 +108,6 @@ const Posts: React.FC<Props> = ({ posts }) => {
         openGraph={{ url: 'https://zhenghao.io/posts' }}
       />
       <div className="w-full sm:max-w-[75ch] m-auto px-5 py-16 flex flex-col justify-center items-center">
-        <TagList postTagCountMap={postTagCountMap} />
         <PostPreviewList posts={posts} />
       </div>
     </>

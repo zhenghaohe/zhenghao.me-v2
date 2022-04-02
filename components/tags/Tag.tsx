@@ -5,15 +5,20 @@ export function Tag({ tag, count }: { tag: string; count?: number }) {
   const { tags, toggleTags, resetTags } = useTags();
   const isSelected = tags.has(tag);
   const router = useRouter();
-  const isInPost = router.asPath.includes('posts/');
+  const isInPosts = router.asPath.includes('posts/');
+  const isInNotes = router.asPath.includes('notes/');
+  const isIsPreviewList = !isInPosts && !isInNotes;
 
   return (
     <small
-      className={!isSelected || isInPost ? `link-tag` : 'link-tag-selected'}
+      className={!isSelected || !isIsPreviewList ? `link-tag` : 'link-tag-selected'}
       style={{ margin: '12px 12px 0 0', display: 'inline-block', cursor: 'pointer' }}
       onClick={() => {
-        if (router.asPath.includes('posts/')) {
+        if (isInPosts) {
           router.push('/posts');
+          resetTags();
+        } else if (isInNotes) {
+          router.push('/notes');
           resetTags();
         }
         toggleTags(tag);
@@ -33,8 +38,8 @@ export function TagList({ postTagCountMap }: { postTagCountMap: Map<'string', nu
   }
 
   return (
-    <div className="mb-10">
-      <h2 className="pl-1 text-lg font-semibold">tags:</h2>
+    <div className="mb-10 self-start">
+      {/* <h2 className="pl-1 text-lg font-semibold">tags:</h2> */}
       <ul>{tags}</ul>
     </div>
   );

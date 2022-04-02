@@ -1,11 +1,15 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { RSSIcon } from './RssIcon';
-import {DocSearch} from './DocSearch'
+import { DocSearch } from './DocSearch';
 
 import ThemeSwitch from './ThemeSwitch';
+import { useTags } from './tags/TagsContext';
 
-const routes = [{route: '/posts', title: 'posts'}, {route: '/notes', title: 'notes'}]
+const routes = [
+  { route: '/posts', title: 'posts' },
+  { route: '/notes', title: 'notes' }
+];
 
 const Nav: React.FC = () => {
   const router = useRouter();
@@ -13,6 +17,7 @@ const Nav: React.FC = () => {
   const isActive = (pathname: string) => {
     return router.asPath.includes(pathname);
   };
+  const { resetTags } = useTags();
 
   return (
     <header className="relative w-full h-16">
@@ -23,7 +28,7 @@ const Nav: React.FC = () => {
               <VancouverTime />
             </a>
           </Link>
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-5">
             {/* {['/posts', '/art'].map((path) => (
               <Link key={path} href={path}>
                 <a className={`capitalize ${isActive(path) ? '' : 'opacity-50'}`}>
@@ -31,9 +36,12 @@ const Nav: React.FC = () => {
                 </a>
               </Link>
             ))} */}
-            {routes.map(({route, title}) => (
+            {routes.map(({ route, title }) => (
               <Link key={route} href={route}>
-                <a className={`capitalize ${isActive(route) ? '' : 'opacity-50'}`}>
+                <a
+                  className={`capitalize ${isActive(route) ? '' : 'opacity-50'}`}
+                  onClick={resetTags}
+                  >
                   {title}
                 </a>
               </Link>
@@ -49,12 +57,12 @@ const Nav: React.FC = () => {
 };
 
 function VancouverTime() {
-  const TimeFomatter = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Canada/Pacific",
-    hour: "numeric",
-    minute: "numeric",
-    weekday: "short",
-    hour12: false,
+  const TimeFomatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Canada/Pacific',
+    hour: 'numeric',
+    minute: 'numeric',
+    weekday: 'short',
+    hour12: false
   }).format();
   return <span>{TimeFomatter}, Vancouver</span>;
 }
