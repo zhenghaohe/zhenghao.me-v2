@@ -39,7 +39,7 @@ export function TagList({ postTagCountMap }: { postTagCountMap: Map<'string', nu
 
   return (
     <div className="mb-10 self-start">
-      {/* <h2 className="pl-1 text-lg font-semibold">tags:</h2> */}
+      <h2 className="pl-1 text-lg font-semibold">tags:</h2>
       <ul>{tags}</ul>
     </div>
   );
