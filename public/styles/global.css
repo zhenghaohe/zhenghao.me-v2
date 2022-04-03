@@ -128,12 +128,12 @@
 
   .link-tag {
     height: max-content;
-    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered-tag active:bg-hovered-tag dark:active:bg-hovered-tag dark:hover:text-warmGray-800 dark:bg-unhovered-tag dark:text-black;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered-tag focus:bg-hovered-tag hover:bg-hovered-tag active:bg-hovered-tag dark:active:bg-hovered-tag dark:hover:bg-hovered-tag dark:focus:bg-hovered-tag dark:hover:text-warmGray-800 dark:bg-unhovered-tag dark:text-black;
   }
 
   .link-tag-selected {
     height: max-content;
-    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-hovered-tag active:bg-unhovered-tag dark:active:bg-unhovered-tag dark:hover:text-warmGray-800 dark:bg-hovered-tag dark:text-black;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-hovered-tag focus:bg-unhovered-tag hover:bg-unhovered-tag  dark:active:bg-unhovered-tag dark:focus:bg-unhovered-tag dark:active:bg-unhovered-tag dark:hover:text-warmGray-800 dark:bg-hovered-tag dark:text-black;
   }
 
   .button {

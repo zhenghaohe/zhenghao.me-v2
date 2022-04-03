@@ -1,5 +1,16 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require('tailwindcss/colors');
+const plugin = require('tailwindcss/plugin');
+const hoverPlugin = plugin(function({ addVariant, e, postcss }) {
+  addVariant('hover', ({ container, separator }) => {
+      const hoverRule = postcss.atRule({ name: 'media', params: '(hover: hover)' });
+      hoverRule.append(container.nodes);
+      container.append(hoverRule);
+      hoverRule.walkRules(rule => {
+          rule.selector = `.${e(`hover${separator}${rule.selector.slice(1)}`)}:hover`
+      });
+  });
+});
 
 module.exports = {
   mode: 'jit',
@@ -16,10 +27,10 @@ module.exports = {
       colors: {
         ...colors,
         'purple': '#3f3cbb',
-        'unhovered': '#C3D7D8',
-        'unhovered-tag': '#faebd7',
+        'unhovered': '#d1e8f3ed',
+        'hovered': '#bae3f7',
         'hovered-tag': '#ffd090',
-        'hovered': '#F2CFC2',
+        'unhovered-tag': '#faebd7',
         primary: 'var(--color-text)',
         secondary: 'var(--color-text-secondary)',
         bg: 'var(--color-background)',
@@ -43,11 +54,11 @@ module.exports = {
       backgroundSize: {
         'zoom-350': '350% 350%',
         'zoom-150': '150% 150%'
-      }
+      },
     }
   },
   variants: {
     extend: {}
   },
-  plugins: []
+  plugins: [hoverPlugin]
 };
