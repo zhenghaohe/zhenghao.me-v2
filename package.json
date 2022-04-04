@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@docsearch/react": "^3.0.0",
+    "date-fns": "^2.28.0",
     "fathom-client": "^3.4.0",
     "feed": "^4.2.2",
     "light-date": "^1.2.0",

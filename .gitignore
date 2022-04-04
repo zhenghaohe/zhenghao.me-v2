@@ -27,3 +27,5 @@ public/*.js
 public/*.js.map
 public/robots.txt
 public/sitemap.xml
+
+.vercel
