@@ -3,7 +3,7 @@ title: When does React render your component?
 published: true
 listed: true
 date: '03/18/2022'
-lastUpdateDate: '03/29/2022'
+lastUpdateDate: '04/05/2022'
 description: 'When and why does React render my component exactly?'
 tags: react
 ---
@@ -494,7 +494,57 @@ function ChildC() {
 
 Note this is not bad per se. [The compound component pattern](https://kentcdodds.com/blog/compound-components-with-react-hooks) relies on this exact rendering behaviour of context consumers. However it can become a performance issue when a provider has too many consumers or consumers that are too expensive to get re-rendered unnecessarily.
 
-In which case, the easiest fix is to wrap your non-primitive context values into `useMemo` so they **stay referentially the same** between re-renders of the provider component. 
+In which case, the easiest fix is to wrap your non-primitive context values into `useMemo` so they **stay referentially the same** between re-renders of the provider component:
+```jsx
+  function Parent({ children, lastChild }) {
+    const contextValue = {};
+    const memoizedCxtValue = useMemo(contextValue)
+    return (
+      <div className="parent">
+        <Context.Provider value={memoizedCxtValue}>
+          <ChildA />
+          {children}
+          {lastChild}
+        </Context.Provider>
+      </div>
+    );
+  }
+```
+
+
+<details>
+    <summary>There is **one exception** where you don't want to use `useMemo` to wrap context values</summary>
+    <p>You can wrap context values inside `useMemo` as a performance optimization technique if the consumer subtree can be huge.</p>
+    <p>However there is one exception to this – if the context provider component is at *the top* of the component tree, then there is **no point** in memoizing the context value – as no passive rendering can happen to it. For example:</p>
+    ```jsx
+      const ContextA = createContext(null);
+
+      const Parent = () => {
+        const [state, dispatch] = useReducer(reducer, initialState);
+        const value = useMemo(() => [state, dispatch], [state]);
+        return (
+          <ContextA.Provider value={value}>
+            <Child1 />
+          </ContextA.Provider>
+        );
+      };
+    ```
+    <p>If `Parent` is at the top of the component tree, i.e. it doesn’t have any other parent components, then the only reason React would re-render it is `dispatch` is called, in which case the memoization we applied via `useMemo` would be busted anyway and as a result the subtree is re-rendered. So we are better off passing down the value directly, as in:</p>
+    ```jsx
+      const ContextA = createContext(null);
+
+      const Parent = () => {
+        const [state, dispatch] = useReducer(reducerA, initialStateA);
+        return (
+          <ContextA.Provider value={[state, dispatch]}>
+            <Child1 />
+          </ContextA.Provider>
+        );
+      };
+    ```
+</details>
+
+
 
 > There are many other techniques you can employ to optimize context consumption. My friend [Vladimir](https://twitter.com/thoughtspile) has a [great post](https://thoughtspile.github.io/2021/10/04/react-context-dangers/) on this that you should check out.
 
