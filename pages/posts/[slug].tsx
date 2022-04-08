@@ -79,9 +79,10 @@ export const getStaticProps = async (context: GetStaticPropsContext) => {
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
-export const Post: React.FC<Props> = ({ meta, code, tweets }) => {
+export const Post: React.FC<Props> = ({ meta, code, tweets }) => {  
   const StaticTweet = ({ id }) => {
     const tweet = tweets.find((tweet) => tweet.id === id);
+    
     return <Tweet {...tweet} />;
   };
   

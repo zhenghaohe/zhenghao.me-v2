@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Tue, 05 Apr 2022 18:15:18 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 08 Apr 2022 06:50:12 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[an overlooked factor for performance optimization in React]]></title>
+            <link>https://zhenghao.io/posts/top-level-perf</link>
+            <guid>https://zhenghao.io/posts/top-level-perf</guid>
+            <pubDate>Thu, 07 Apr 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[ when talking about performance, remember to consider the component’s position in the tree.]]></description>
+            <content:encoded><![CDATA[ when talking about performance, remember to consider the component’s position in the tree.]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>react</category>
+        </item>
         <item>
             <title><![CDATA[Preemptive memoization in React is probably not Evil (yet)]]></title>
             <link>https://zhenghao.io/posts/memo-or-not</link>

@@ -1,0 +1,104 @@
+---
+title: an overlooked factor for performance optimization in React
+published: true
+listed: true
+date: '04/07/2022'
+description: ' when talking about performance, remember to consider the component’s position in the tree.'
+tags: react
+---
+
+
+
+<StaticTweet id="1511425950671540225" />
+
+
+
+
+I tweeted [this](https://twitter.com/he_zhenghao/status/1511425950671540225) a few days ago about one important factor that has been consistently overlooked in the React community when talking about performance optimization.
+
+Many people, including me, sometimes like to seek out simple answers to problems they are faced with. It is relatively easy to arrive at a generic conclusion for most cases – we often forget or intentionally leave out edge cases. In the context of performance optimization in React, one of these edge cases is **the position** of your component in the component tree.
+
+## Rendering behaviour of a context-consuming component
+
+You probably know the rendering behaviour of a context-consuming component: it gets re-rendered whenever the context value it consumes changes (referentially). In the following example, every time `Parent` component gets re-rendered, the context consumer, i.e. `Child`, gets re-rendered too.
+
+```jsx
+function App() {
+  return (
+    <Parent>
+      <Child />
+    </Parent>
+  );
+}
+
+function Parent({children}) {
+  const [stateA, dispatchA] = useReducer(reducerA, initialStateA);
+
+  return (
+    <div className="parent">
+      <Context.Provider value={[stateA, dispatchA]}>{children}</Context.Provider>
+    </div>
+  );
+}
+
+function Child() {
+  const value = useContext(Context);
+  console.log("Child is re-rendered");
+  return <div></div>;
+}
+```
+
+The easiest fix is to wrap the context value `[stateA, dispatchA]` inside `useMemo`, as in:
+```jsx
+const Parent = () => {
+  const [stateA, dispatchA] = useReducer(reducerA, initialStateA);
+  const value = useMemo(() => [stateA, dispatchA], [stateA]);
+  return (
+    <ContextA.Provider value={value}>
+      <Child />
+    </ContextA.Provider>
+  );
+};
+```
+
+Then only when `stateA` changes, the memoized context value changes, and as a result `Child` gets re-rendered.
+
+Therefore it seems easy to make a rule to wrap the context value inside `useMemo` in every context-providing component. (not sure if there is an ESLint rule for that). And in most cases it is a good use of `useMemo`. However `useMemo` becomes **pointless** if the context-providing component is a **top–level** component...
+
+## It is redundant for top-level components
+
+I have seen many blog posts recommend doing this by including such an usage of `useMemo` in context-providing component as a (good) example, even some authoritative sources such [the new React docs](https://beta.reactjs.org/apis/usecontext#optimizing-re-renders-when-passing-objects-and-functions) and some famous personal blog in the community such as [daishi’s](https://twitter.com/dai_shi) blog( The above example is straight out of his post [*Four patterns for global state with React hooks: Context or Redux*](https://blog.axlight.com/posts/four-patterns-for-global-state-with-react-hooks-context-or-redux/)).
+
+However, the use of `useMemo` becomes meaningless if such a context-providing component – `Parent` in our example – is a top-level component. Being at the top-level means it has **no other parent components** that can trigger re-rendering to it (no [passive re-render](/posts/react-rerender#so-when-does-react-render-your-component-exactly) can happen). It only gets re-rendered when `dispatchA` is called from its children. As a result, the memorization via `useMemo` is busted anyways since `stateA` changed (as the dependency of `useMemo`). That’s why `useMemo` does nothing here to prevent unnecessary re-rendering. On top of that, by wrapping the context value inside `useMemo`, now you are paying the following extra cost for every re-render:
+
+1. allocating an arrow function 
+
+2. allocating a dependency array 
+
+3. shallow-comparing the dependency list and other costs related with invoking `useMemo` e.g. the invalidation logic.
+
+So when the context-providing component is at the top-level, we are better off passing down the context value directly:
+
+```jsx
+function Parent({children}) {
+  const [stateA, dispatchA] = useReducer(reducerA, initialStateA);
+
+  return (
+    <div className="parent">
+      <Context.Provider value={[stateA, dispatchA]}>{children}</Context.Provider>
+    </div>
+  );
+}
+
+```
+
+> Similarly, if we are looking at a **leaf** component that returns HTML tags like `ul`, `div` directly, then memoizing its `props` – values its parent passes down to it – is also mostly pointless. check out [this post](https://royi-codes.vercel.app/thousand-usecallbacks/) that covers this topic at great length.
+
+I am not here to criticize the new React docs (in fact I think the new docs is fantastic) or call out daishi (he is an incredible React developer and has contributed greatly to the React community) for the fact that they didn’t make a note for *not* use `useMemo` in top-level components or explicitly state they were under the assumption that such a component has parent components that can get re-rendered. I just wanted to remind people that when talking about performance, remember to consider **the component’s position in the tree**. It is too important of a detail to leave out of the conversation.
+
+## other optimization techniques
+P.S. Besides applying memoization via `useMemo`/`useCallback` , other are many other optimization techniques you can apply for contexts:
+
+1. You can split the context into multiple context providers, passing down separated context values
+2. Wait for Context selectors to arrive in React (check out the [RFC](https://github.com/reactjs/rfcs/pull/119)) or just go with ****[use-context-selector](https://github.com/dai-shi/use-context-selector) built by daishi**
+3. Use a more sophisticated state management library
