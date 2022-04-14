@@ -123,17 +123,17 @@
 
   .link-btn {
     height: max-content;
-    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered hover:bg-hovered dark:hover:bg-hovered dark:hover:text-warmGray-800 dark:bg-unhovered dark:text-black;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered hover:bg-hovered dark:hover:bg-hovered-dark dark:hover:text-white dark:bg-unhovered-dark;
   }
 
   .link-tag {
     height: max-content;
-    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered-tag focus:bg-hovered-tag hover:bg-hovered-tag active:bg-hovered-tag dark:active:bg-hovered-tag dark:hover:bg-hovered-tag dark:focus:bg-hovered-tag dark:hover:text-warmGray-800 dark:bg-unhovered-tag dark:text-black;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-unhovered-tag focus:bg-hovered-tag hover:bg-hovered-tag active:bg-hovered-tag dark:active:bg-hovered-tag dark:hover:bg-hovered-tag-dark dark:focus:bg-hovered-tag-dark dark:bg-unhovered-tag-dark dark:hover:text-white;
   }
 
   .link-tag-selected {
     height: max-content;
-    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-hovered-tag focus:bg-unhovered-tag hover:bg-unhovered-tag  dark:active:bg-unhovered-tag dark:focus:bg-unhovered-tag dark:active:bg-unhovered-tag dark:hover:text-warmGray-800 dark:bg-hovered-tag dark:text-black;
+    @apply px-1 font-light transition-colors duration-150 ease-linear rounded-sm bg-hovered-tag focus:bg-unhovered-tag hover:bg-unhovered-tag  dark:active:bg-unhovered-tag dark:focus:bg-unhovered-tag dark:active:bg-unhovered-tag dark:bg-hovered-tag-dark dark:hover:text-white;
   }
 
   .button {
@@ -182,16 +182,16 @@
 
   article :not(pre) > code {
     background: var(--syntax-background);
-
+    white-space: nowrap;
     font-family: 'Fira Code', monospace;
     @apply rounded-sm mx-1 py-[2px] px-2 text-sm text-warmGray-800 dark:text-warmGray-200;
   }
   article :not(pre) > code::before {
-    content: '`';
+    content: '「 ';
   }
 
   article :not(pre) > code::after {
-    content: '`';
+    content: ' 」';
   }
 
   article blockquote {
