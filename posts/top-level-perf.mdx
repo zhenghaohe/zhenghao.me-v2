@@ -48,7 +48,7 @@ function Child() {
 }
 ```
 
-The easiest fix is to wrap the context value `[stateA, dispatchA]` inside `useMemo`, as in:
+The easiest fix for the potentially unwanted re-rendering of `Child` is to wrap the context value `[stateA, dispatchA]` inside `useMemo`, as in:
 ```jsx
 const Parent = () => {
   const [stateA, dispatchA] = useReducer(reducerA, initialStateA);

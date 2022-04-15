@@ -187,11 +187,11 @@
     @apply rounded-sm mx-1 py-[2px] px-2 text-sm text-warmGray-800 dark:text-warmGray-200;
   }
   article :not(pre) > code::before {
-    content: '「 ';
+    content: '`';
   }
 
   article :not(pre) > code::after {
-    content: ' 」';
+    content: '`';
   }
 
   article blockquote {
