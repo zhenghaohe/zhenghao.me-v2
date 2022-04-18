@@ -216,7 +216,7 @@ function stringifyProp(object) {
 const userWithStringProps = stringifyProp(user) // {name:'foo', age: '28'}
 ```
 
-In the type langauge, the mapping is done using this syntax `[K in keyof T]` where the `keyof` operator gives us property names as a string union type. 
+In the type language, the mapping is done using this syntax `[K in keyof T]` where the `keyof` operator gives us property names as a string union type. 
 
 ```typescript
 type User = {
@@ -294,7 +294,7 @@ function fillArray(item, n) {
 }
 ```
 
-The recurisve solution would be:
+The recursive solution would be:
 ```javascript
 function fillArray(item, n, array = []) {
     return array.length === n ? array : fillArray(item, n, [item, ...array])
