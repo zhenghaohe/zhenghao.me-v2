@@ -4,11 +4,22 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sun, 17 Apr 2022 19:17:05 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Apr 2022 04:05:18 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[take control over your coding interview]]></title>
+            <link>https://zhenghao.io/posts/take-control-coding-interview</link>
+            <guid>https://zhenghao.io/posts/take-control-coding-interview</guid>
+            <pubDate>Wed, 20 Apr 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[take control over your coding interview so you don't have to guess the answer the interviewer is thinking of]]></description>
+            <content:encoded><![CDATA[take control over your coding interview so you don't have to guess the answer the interviewer is thinking of]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>technical interviews</category>
+            <category>musing</category>
+        </item>
         <item>
             <title><![CDATA[an overlooked factor for performance optimization in React]]></title>
             <link>https://zhenghao.io/posts/top-level-perf</link>
