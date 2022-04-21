@@ -145,6 +145,14 @@ Now the pricing data is stored in `config.js` seperately and `priceByRanges` is 
 If the array `priceByRanges` is always sorted in terms of the price ranges, we can further optimize Solution 2 by leveraging binary search.
 
 ```javascript
+
+const priceByRanges = [
+  { min: 1, max: 5, price: '5' },
+  { min: 6, max: 10, price: '4' },
+  { min: 11, max: 20, price: '3' },
+  { min: 21, max: Number.MAX_SAFE_INTEGER, price: '2.5' }
+];
+
 function getPrice(amount) {
   if (amount < priceByRanges[0].min) return 'unknown price';
   let start = 0,
@@ -162,6 +170,14 @@ function getPrice(amount) {
   return priceByRanges[start].price;
 }
 ```
+
+
+<details>
+    <summary>What is this `>>>`?</summary>
+    <p>`>>>` is binary right shift by 1 position, which is effectively just a division by 2 followed with a `Math.floor`. e.g. for 11: 1011 -> 101 results to 5.</p>
+
+</details>
+
 
 ### Notes on performance and big O
 
