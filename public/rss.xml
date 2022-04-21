@@ -4,11 +4,22 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Thu, 21 Apr 2022 04:26:44 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Apr 2022 23:27:21 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Why you should include debugging in the interview process]]></title>
+            <link>https://zhenghao.io/posts/debugging-interview</link>
+            <guid>https://zhenghao.io/posts/debugging-interview</guid>
+            <pubDate>Thu, 21 Apr 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[Technical interviews should stop over-indexing on coding ability along]]></description>
+            <content:encoded><![CDATA[Technical interviews should stop over-indexing on coding ability along]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>technical interviews</category>
+            <category>musing</category>
+        </item>
         <item>
             <title><![CDATA[take control over your coding interview]]></title>
             <link>https://zhenghao.io/posts/take-control-coding-interview</link>
