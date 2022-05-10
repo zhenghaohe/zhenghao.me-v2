@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Wed, 27 Apr 2022 00:17:53 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 10 May 2022 18:11:34 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Premature thoughts on becoming an engineering manager]]></title>
+            <link>https://zhenghao.io/posts/thoughts-on-EM</link>
+            <guid>https://zhenghao.io/posts/thoughts-on-EM</guid>
+            <pubDate>Tue, 10 May 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[an introspective, self-serving piece about why I aspire to become an EM]]></description>
+            <content:encoded><![CDATA[an introspective, self-serving piece about why I aspire to become an EM]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>musing</category>
+        </item>
         <item>
             <title><![CDATA[Why you should include debugging in the interview process]]></title>
             <link>https://zhenghao.io/posts/debugging-interview</link>
