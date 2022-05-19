@@ -1,0 +1,245 @@
+---
+title: JSON and the stringification oddities in JavaScript
+published: true
+listed: true
+date: '05/19/2022'
+tags: javascript
+---
+
+JSON is one of the things that looked deceptively simple when I first started learning web development because a JSON string looks just like a textual, minimal subset of a JavaScript object. When I was early in my career, I never took the time to properly study this data format. I just used `JSON.stringify` and `JSON.parse` until unexpected errors popped up. 
+
+In this blog post, I want to 
+1. summarize the quirks that I have come across when working with JSON (more specifically the `JSON.stringify` API) in JavaScript 
+2. consolidate my understanding by implementing a simplified version of `JSON.stringify` from scratch
+
+## What is JSON
+JSON is a data format invented by Douglas Crockford. You probably already know about this, but what’s interesting is that, as Crockford wrote in his own book [*How JavaScript Works*](https://www.howjavascriptworks.com/), he admitted that, “The worse thing about JSON is the name.” JSON stands for JavaScript Object Notation, and the problem with this name is that it misleads people to think it *only* works with JavaScript when in fact it was intended to allow programs written in different languages to communicate effectively. 
+
+On a similar note, Crockford also confessed that the two builtin APIs JavaScript provides to work with JSON – `JSON.parse` and `JSON.stringify` – were poorly named as well; they should have been called `JSON.decode` and `JSON.encode` respectively, because `JSON.parse` takes a JSON text and **decodes** it into JavaScript values and `JSON.stringify` takes a JavaScript value and **encodes** it into a JSON text/string.
+
+Enough with the naming, let’s take a look at what data types JSON supports, and what happens when a *JSON-incompatible* value gets stringified by `JSON.stringify`.
+
+## what data types does JSON support
+JSON has [an official website](https://www.json.org/json-en.html) where you can look up all the data types it supports, but to be honest the graphs on that page are kind of hard to understand, at least for me, so I prefer the following type annotation:
+
+```typescript
+type Json = 
+	| null
+	| boolean
+	| number
+	| string
+	| Json[]
+	| {[key: string]: Json}
+```
+
+For any there data type that are *not* part of the `Json` union type above, such as `undefined`, `Symbol`, `BigInt` and other built-in objects such as `Function`, `Map`, `Set`, `Regex`, they are not supported by JSON. Comments are not supported either.
+
+The next logical question is, in the context of JavaScript, what does it mean exactly when we say a data type is not supported by JSON?
+
+## Surprising and inconsistent behaviour of JSON.stringify
+
+In JavaScript, the way to convert a value to a JSON string is via `JSON.stringify`.
+
+For values of the types that are supported by JSON, they are converted into strings as expected:
+
+```javascript
+JSON.stringify(1) // '1'
+JSON.stringify(null) // 'null'
+JSON.stringify('foo') // '"foo"'
+JSON.stringify({foo: 'bar'}) // '{"foo":"bar"}'
+JSON.stringify(['foo', 'bar']) // '["foo","bar"]'
+```
+
+But things become messy when there are unsupported types involved during the stringification/encoding process.
+
+When supplied with a single value of primitive ****unsupported type  `undefined` , `Symbol` and `Function` , `JSON.stringify` outputs  `undefined` (not the string `undefined`):
+
+```javascript
+JSON.stringify(undefined) // undefined
+JSON.stringify(Symbol('foo')) // undefined
+JSON.stringify(() => {}) // undefined
+```
+
+
+For other builtin object types (except for `Function` and `Date`) such as `Map`, `Set`, `WeakMap`, `WeakSet`, `Regex`, etc., `JSON.stringify` will return a string of an empty object literal, i.e. `{}`:
+```javascript
+JSON.stringify(/foo/) // '{}'
+JSON.stringify(new Map()) // '{}'
+JSON.stringify(new Set()) //'{}'
+```
+
+More inconsistent behaviours occur when the values to be serialized are in an array or in an object. 
+
+For the unsupported types that result in `undefined` i.e. `undefined`, `Symbol`, `Function`, when they are found in an array, it gets converted to the string `‘null’`, while when found in an object, the entire property gets omitted from the output:
+
+```javascript
+JSON.stringify([undefined]) // '[null]'
+JSON.stringify({foo: undefined}) // '{}'
+
+JSON.stringify([Symbol()]) // '[null]'
+JSON.stringify({foo: Symbol()}) // '{}'
+
+JSON.stringify([() => {}]) // '[null]'
+JSON.stringify({foo: () => {}}) // '{}'
+```
+
+
+On the other hand, for other builtin object types such as `Map`, `Set`, `Regex` that exist in an array or an object, after the conversion done by `JSON.stringify` , they become strings of an empty object literal, i.e. `{}`:
+
+```javascript
+JSON.stringify([/foo/]) // '[{}]'
+JSON.stringify({foo: /foo/}) // '{"foo":{}}'
+
+JSON.stringify([new Set()]) // '[{}]'
+JSON.stringify({foo: new Set()}) // '{"foo":{}}'
+
+JSON.stringify([new Map()]) // '[{}]'
+JSON.stringify({foo: new Map()}) // '{"foo":{}}'
+```
+
+### Here are a few more exceptions
+
+1. For the recently added new type `BigInt`, `JSON.stringify` throws a `TypeError`. The other case where `JSON.stringify` throws an error is when a cyclic object is passed. For the most part, `JSON.stringify` is pretty forgiving – it wouldn’t your program crash just because you violate the rules of JSON (unless it is `BigInt` or cyclic objects of course).
+    ```javascript
+    const foo = {}
+    foo.a = foo
+
+    JSON.stringify(foo) // ❌ Uncaught TypeError: Converting circular structure to JSON
+    JSON.stringify(BigInt(1234567890)) // ❌ Uncaught TypeError: Do not know how to serialize a BigInt
+    ```
+2. Despite being of the `number` type, `NaN` and `Infinity` get converted into `null` by `JSON.stringify`. The rational behind the design decision is, as Crockford wrote in his book *How JavaScript Works*, the presence of `NaN` and `Infinity` indicates an error and we shouldn’t put bad data on the wire. Therefore he excluded them by making them `null`.
+    ```javascript
+    JSON.stringify(NaN) // 'null'
+    JSON.stringify(Infinity) // 'null'
+    ```
+3. `Date` objects get encoded into ISO strings by `JSON.stringify` because of `Date.prototype.toJSON`.
+    ```javascript
+        JSON.stringify(new Date()) // '"2022-05-19T18:19:54.842Z"'
+    ```
+4. `JSON.stringify` only processes enumerable, nonsymbol-keyed object properties. Symbol-keyed non-enumerable properties are ignored:
+    ```javascript
+    const foo = {}
+    foo[Symbol('p1')] = 'bar'
+    Object.defineProperty(foo, 'p2', {value: 'baz', enumerable: false})
+
+    JSON.stringify(foo) // '{}'
+    ```
+
+By the way, hope you can see why it is mostly a bad idea to use `JSON.parse` and `JSON.stringify` to deep clone an object.
+
+## A cheatsheet
+I know this is a lot to remember so I put together a cheatsheet for you to refer to.
+
+![alt](/art/blog/json-oddities/cheatsheet.png)
+
+
+## Customize the encoding
+What we have discussed so far is the default behaviour of how JavaScript encodes values into JSON strings via `JSON.stringify`. There are two ways you can take control over the conversion:
+1. Adding a `toJSON` method to the object you passed to `JSON.stringify`. This is why passing `Date` objects to `JSON.stringify` doesn't lead to an empty object literal because they inherit a `toJSON` method from their prototype.
+    ```javascript
+    const foo = {
+    toJSON: () => 'bar',
+    }
+
+    JSON.stringify(foo) // 'bar'
+    ```
+2. `JSON.stringify` takes an optional parameter called [replacer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#the_replacer_parameter), which can be either a function or an array, to alter the default behavior of the stringification process.
+
+
+## implement a simplified JSON.stringify from scratch
+
+I heard people ask this in a technical interview. Here is my attempt.
+
+> I skipped the optional `replacer` and `space` parameters for brevity.
+
+```javascript
+const isCyclic = (input) => {
+  let seen = new Set()
+
+  const dfs = (obj) => {
+    if (typeof obj !== 'object' || obj === null) return false
+    seen.add(obj)
+    return Object.entries(obj).some(([key, value]) => {
+      const result = seen.has(value) ? true : isCyclic(value)
+      seen.delete(value)
+      return result
+    })
+  }
+
+  return dfs(input)
+}
+
+function jsonStringify(data) {
+  if (isCyclic(data))
+    throw new TypeError('Converting circular structure to JSON')
+  if (typeof data === 'bigint')
+    throw new TypeError('Do not know how to serialize a BigInt')
+    
+  if (data === null) {
+    // get rid of null first because the type of null is 'object'
+    return 'null'
+  }
+
+  const type = typeof data
+
+  if (type !== 'object') {
+    let result = data
+    if (Number.isNaN(data) || data === Infinity) {
+      // for NaN and Infinity we return 'null'
+      result = 'null'
+    } else if (
+      type === 'function' ||
+      type === 'undefined' ||
+      type === 'symbol'
+    ) {
+      return undefined
+    } else if (type === 'string') {
+      result = '"' + data + '"'
+    }
+
+    return String(result)
+  }
+
+  if (type === 'object') {
+    if (typeof data.toJSON === 'function') {
+      return jsonStringify(data.toJSON())
+    }
+
+    if (data instanceof Array) {
+      let result = []
+
+      data.forEach((item, index) => {
+        if (
+          typeof item === 'undefined' ||
+          typeof item === 'function' ||
+          typeof item === 'symbol'
+        ) {
+          result[index] = 'null'
+        } else {
+          result[index] = jsonStringify(item)
+        }
+      })
+
+      result = '[' + result + ']'
+
+      return result.replace(/'/g, '"')
+    } else {
+      let result = []
+
+      Object.keys(data).forEach((item) => {
+        if (typeof item !== 'symbol') {
+          if (
+            data[item] !== undefined &&
+            typeof data[item] !== 'function' &&
+            typeof data[item] !== 'symbol'
+          ) {
+            result.push('"' + item + '"' + ':' + jsonStringify(data[item]))
+          }
+        }
+      })
+
+      return ('{' + result + '}').replace(/'/g, '"')
+    }
+  }
+}
+```
