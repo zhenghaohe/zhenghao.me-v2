@@ -13,9 +13,9 @@ In this blog post, I want to
 2. consolidate my understanding by implementing a simplified version of `JSON.stringify` from scratch
 
 ## What is JSON
-JSON is a data format invented by Douglas Crockford. You probably already know about this, but what’s interesting is that, as Crockford wrote in his own book [*How JavaScript Works*](https://www.howjavascriptworks.com/), he admitted that, “The worse thing about JSON is the name.” JSON stands for JavaScript Object Notation, and the problem with this name is that it misleads people to think it *only* works with JavaScript when in fact it was intended to allow programs written in different languages to communicate effectively. 
+JSON is a data format invented by [Douglas Crockford](https://www.crockford.com/about.html). You probably already know about this, but what’s interesting is that, as Crockford wrote in his own book [*How JavaScript Works*](https://www.howjavascriptworks.com/), he admitted that, “The worse thing about JSON is the name.” JSON stands for JavaScript Object Notation, and the problem with this name is that it misleads people to think it *only* works with JavaScript when in fact it was intended to allow programs written in different languages to communicate effectively. 
 
-On a similar note, Crockford also confessed that the two builtin APIs JavaScript provides to work with JSON – `JSON.parse` and `JSON.stringify` – were poorly named as well; they should have been called `JSON.decode` and `JSON.encode` respectively, because `JSON.parse` takes a JSON text and **decodes** it into JavaScript values and `JSON.stringify` takes a JavaScript value and **encodes** it into a JSON text/string.
+On a similar note, Crockford also confessed that the two built-in APIs JavaScript provides to work with JSON – `JSON.parse` and `JSON.stringify` – were poorly named as well; they should have been called `JSON.decode` and `JSON.encode` respectively, because `JSON.parse` takes a JSON text and **decodes** it into JavaScript values and `JSON.stringify` takes a JavaScript value and **encodes** it into a JSON text/string.
 
 Enough with the naming, let’s take a look at what data types JSON supports, and what happens when a *JSON-incompatible* value gets stringified by `JSON.stringify`.
 
@@ -52,7 +52,7 @@ JSON.stringify(['foo', 'bar']) // '["foo","bar"]'
 
 But things become messy when there are unsupported types involved during the stringification/encoding process.
 
-When supplied with a single value of primitive ****unsupported type  `undefined` , `Symbol` and `Function` , `JSON.stringify` outputs  `undefined` (not the string `undefined`):
+When passed directly with unsupported type  `undefined`, `Symbol`, and `Function`, `JSON.stringify` outputs  `undefined` (not the string `undefined`):
 
 ```javascript
 JSON.stringify(undefined) // undefined
@@ -61,7 +61,7 @@ JSON.stringify(() => {}) // undefined
 ```
 
 
-For other builtin object types (except for `Function` and `Date`) such as `Map`, `Set`, `WeakMap`, `WeakSet`, `Regex`, etc., `JSON.stringify` will return a string of an empty object literal, i.e. `{}`:
+For other built-in object types (except for `Function` and `Date`) such as `Map`, `Set`, `WeakMap`, `WeakSet`, `Regex`, etc., `JSON.stringify` will return a string of an empty object literal, i.e. `{}`:
 ```javascript
 JSON.stringify(/foo/) // '{}'
 JSON.stringify(new Map()) // '{}'
@@ -70,7 +70,7 @@ JSON.stringify(new Set()) //'{}'
 
 More inconsistent behaviours occur when the values to be serialized are in an array or in an object. 
 
-For the unsupported types that result in `undefined` i.e. `undefined`, `Symbol`, `Function`, when they are found in an array, it gets converted to the string `‘null’`, while when found in an object, the entire property gets omitted from the output:
+For unsupported types that result in `undefined` i.e. `undefined`, `Symbol`, `Function`, when they are found in an array, it gets converted to the string `‘null’`, while when found in an object, the *entire* property gets **omitted** from the output:
 
 ```javascript
 JSON.stringify([undefined]) // '[null]'
@@ -84,7 +84,7 @@ JSON.stringify({foo: () => {}}) // '{}'
 ```
 
 
-On the other hand, for other builtin object types such as `Map`, `Set`, `Regex` that exist in an array or an object, after the conversion done by `JSON.stringify` , they become strings of an empty object literal, i.e. `{}`:
+On the other hand, for other built-in object types such as `Map`, `Set`, `Regex` that exist in an array or an object, after the conversion done by `JSON.stringify` , they all become strings of an empty object literal, i.e. `{}`:
 
 ```javascript
 JSON.stringify([/foo/]) // '[{}]'
@@ -99,7 +99,7 @@ JSON.stringify({foo: new Map()}) // '{"foo":{}}'
 
 ### Here are a few more exceptions
 
-1. For the recently added new type `BigInt`, `JSON.stringify` throws a `TypeError`. The other case where `JSON.stringify` throws an error is when a cyclic object is passed. For the most part, `JSON.stringify` is pretty forgiving – it wouldn’t your program crash just because you violate the rules of JSON (unless it is `BigInt` or cyclic objects of course).
+1. For the recently added new type `BigInt`, `JSON.stringify` throws a `TypeError`. The other case where `JSON.stringify` throws an error is when a cyclic object is passed. For the most part, `JSON.stringify` is pretty forgiving – it wouldn’t make your program crash just because you violate the rules of JSON (unless it is `BigInt` or cyclic objects).
     ```javascript
     const foo = {}
     foo.a = foo
@@ -135,10 +135,10 @@ I know this is a lot to remember so I put together a cheatsheet for you to refer
 
 ## Customize the encoding
 What we have discussed so far is the default behaviour of how JavaScript encodes values into JSON strings via `JSON.stringify`. There are two ways you can take control over the conversion:
-1. Adding a `toJSON` method to the object you passed to `JSON.stringify`. This is why passing `Date` objects to `JSON.stringify` doesn't lead to an empty object literal because they inherit a `toJSON` method from their prototype.
+1. Adding a `toJSON` method to the object you passed to `JSON.stringify`. This is why passing `Date` objects to `JSON.stringify` doesn't lead to an empty object literal because a `Date` object inherits a `toJSON` method from its prototype.
     ```javascript
     const foo = {
-    toJSON: () => 'bar',
+        toJSON: () => 'bar',
     }
 
     JSON.stringify(foo) // 'bar'
@@ -174,7 +174,7 @@ function jsonStringify(data) {
     throw new TypeError('Converting circular structure to JSON')
   if (typeof data === 'bigint')
     throw new TypeError('Do not know how to serialize a BigInt')
-    
+
   if (data === null) {
     // get rid of null first because the type of null is 'object'
     return 'null'
