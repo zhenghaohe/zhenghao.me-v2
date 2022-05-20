@@ -1,0 +1,120 @@
+---
+title: A complete guide to check data types in JavaScript
+published: true
+listed: true
+date: '05/20/2022'
+description: 'JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. '
+tags: javascript
+---
+
+In JavaScript, there are [8 data types](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#javascript_types), and there are mainly 3 ways to check which type a given value is. In this post, I am going to cover what they are, when to use them, and, in my opinion, which one is the best.
+
+## Tl;dr
+
+- There are **no** built-in ways to check data types in JavaScript that are straightforward and all-encompassing. All of the current native ways are imperfect (or just straight up buggy).
+- Forget about `typeof` and `instanceof` , the **best** way to check data types is to use `Object.prototype.toString`
+
+## the typeof operator
+
+The `typeof` operator is probably the first that comes to mind. It works fine for `number`, `string`, `undefined`, `boolean`, `symbol`, `function` but there are some pitfalls to watch out for when using `typeof`:
+
+- it is a known bug that `typeof null === 'object'`. [_The history of typeof null_](https://2ality.com/2013/10/typeof-null.html) covers this bug in details.
+- It doesn’t differentiate between different reference types except for `function`.
+  ```javascript
+  typeof []; // 'object'
+  typeof {}; // 'object'
+  typeof new Date(); // 'object'
+  typeof /foo/; // 'object'
+  ```
+
+One fun fact about `typeof`: it is one of the _only_ two operators in existence of the language that is able to reference a thing that doesn’t exist and _not_ throw an error (the other is the `delete` operator). You can get away with something like this:
+
+```javascript
+typeof randomeVariableIDidNotDeclare; // doesn't even throw an error
+```
+
+## the instanceof operator
+
+The `instanceof` operator checks for the constructor of an object. In other words, it tests which class created a given value.
+
+```javascript
+let Car = function () {};
+let benz = new Car();
+benz instanceof Car; // true
+```
+
+Because of this, `instaceof`  can correctly determine types for objects, but **not** for primitive types.
+
+```javascript
+[] instanceof Array // ✅ true
+(() => {}) instanceof Function; // ✅ true
+new Map() instanceof Map; // ✅ true
+
+1 instanceof Number; // ❌ false
+'foo' instanceof String; // ❌ false
+```
+
+Also, since `instanceof` checks the constructor of an object, if you modify the prototype of an object during the runtime, the result of the `instanceof` check can change:
+
+```javascript
+const array = [];
+
+array instanceof Array; // ✅ true
+
+Object.setPrototypeOf(array, null);
+
+array instanceof Array; // ❌ false
+```
+
+As you can see, neither `typeof` or `instanceof` is perfect and most of the time people have to leverage and combine both approaches to do type checking.
+
+## the Object.prototype.toString method
+
+Turns out there is a third, arguably better way to check data types in JavaScript – `Object.prototype.toString`. It is a method that exists on `Object.prototype`, which returns a string value used for the description of an objects based on its `Symbol.toStringTag`.
+If you take a look [at its spec](https://262.ecma-international.org/6.0/#sec-object.prototype.tostring), you will realize that it is actually the **all-encompassing solution** we have been looking for when it comes to check data types.
+
+```javascript
+Object.prototype.toString.call({}); // "[object Object]"
+Object.prototype.toString.call(1); // "[object Number]"
+Object.prototype.toString.call('1'); // "[object String]"
+Object.prototype.toString.call(true); // "[object Boolean]"
+Object.prototype.toString.call(new String('string')); // "[object String]"
+Object.prototype.toString.call(function () {}); // "[object Function]"
+Object.prototype.toString.call(null); //"[object Null]"
+Object.prototype.toString.call(undefined); //"[object Undefined]"
+Object.prototype.toString.call(/123/g); //"[object RegExp]"
+Object.prototype.toString.call(new Date()); //"[object Date]"
+Object.prototype.toString.call([]); //"[object Array]"
+Object.prototype.toString.call(document); //"[object HTMLDocument]"
+Object.prototype.toString.call(window); //"[object Window]
+```
+
+With a little bit of string processing using a `regexp`, we can come up with the following solution that can account for **all cases**:
+
+```javascript
+function getType(obj) {
+  const lowerCaseTheFirstLetter = (str) => str[0].toLowerCase() + str.slice(1);
+  const type = typeof obj;
+  if (type !== 'object') {
+    return type;
+  }
+
+  return lowerCaseTheFirstLetter(
+    Object.prototype.toString.call(obj).replace(/^\[object (\S+)\]$/, '$1')
+  );
+}
+
+getType([]); // "array"
+getType('123'); // "string"
+getType(null); // "null"
+getType(undefined); // "undefined"
+getType(); // "undefined"
+getType(function () {}); // "function"
+getType(/123/g); // "regExp"
+getType(new Date()); // "date"
+getType(new Map()); // "map"
+getType(new Set()); // "set"
+```
+
+In fact, many runtime type validation libraries use this technique underneath, such as [this one](https://github.com/medikoo/type/blob/main/set/is.js#L7).
+

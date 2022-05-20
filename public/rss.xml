@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Fri, 20 May 2022 02:44:56 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 20 May 2022 18:44:29 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[A complete guide to check data types in JavaScript]]></title>
+            <link>https://zhenghao.io/posts/js-data-type</link>
+            <guid>https://zhenghao.io/posts/js-data-type</guid>
+            <pubDate>Fri, 20 May 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. ]]></description>
+            <content:encoded><![CDATA[JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. ]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>javascript</category>
+        </item>
         <item>
             <title><![CDATA[JSON and the stringification oddities in JavaScript]]></title>
             <link>https://zhenghao.io/posts/json-oddities</link>
