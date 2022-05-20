@@ -3,6 +3,7 @@ title: JSON and the stringification oddities in JavaScript
 published: true
 listed: true
 date: '05/19/2022'
+lastUpdateDate: '05/20/2022'
 tags: javascript
 ---
 
@@ -13,7 +14,7 @@ In this blog post, I want to
 2. consolidate my understanding by implementing a simplified version of `JSON.stringify` from scratch
 
 ## What is JSON
-JSON is a data format invented by [Douglas Crockford](https://www.crockford.com/about.html). You probably already know about this, but what’s interesting is that, as Crockford wrote in his own book [*How JavaScript Works*](https://www.howjavascriptworks.com/), he admitted that, “The worse thing about JSON is the name.” JSON stands for JavaScript Object Notation, and the problem with this name is that it misleads people to think it *only* works with JavaScript when in fact it was intended to allow programs written in different languages to communicate effectively. 
+JSON is a data format invented by [Douglas Crockford](https://www.crockford.com/about.html). You probably already know about this, but what’s interesting is that, as Crockford wrote in his book [*How JavaScript Works*](https://www.howjavascriptworks.com/), he admitted that, “The worse thing about JSON is the name.” JSON stands for JavaScript Object Notation, and the problem with this name is that it misleads people to think it *only* works with JavaScript when in fact it was intended to allow programs written in different languages to communicate effectively. 
 
 On a similar note, Crockford also confessed that the two built-in APIs JavaScript provides to work with JSON – `JSON.parse` and `JSON.stringify` – were poorly named as well; they should have been called `JSON.decode` and `JSON.encode` respectively, because `JSON.parse` takes a JSON text and **decodes** it into JavaScript values and `JSON.stringify` takes a JavaScript value and **encodes** it into a JSON text/string.
 
@@ -107,7 +108,7 @@ JSON.stringify({foo: new Map()}) // '{"foo":{}}'
     JSON.stringify(foo) // ❌ Uncaught TypeError: Converting circular structure to JSON
     JSON.stringify(BigInt(1234567890)) // ❌ Uncaught TypeError: Do not know how to serialize a BigInt
     ```
-2. Despite being of the `number` type, `NaN` and `Infinity` get converted into `null` by `JSON.stringify`. The rational behind the design decision is, as Crockford wrote in his book *How JavaScript Works*, the presence of `NaN` and `Infinity` indicates an error and we shouldn’t put bad data on the wire. Therefore he excluded them by making them `null`.
+2. Despite being of the `number` type, `NaN` and `Infinity` get converted into `null` by `JSON.stringify`. The rational behind the design decision is, as Crockford wrote in his book *How JavaScript Works*, the presence of `NaN` and `Infinity` indicates an error. He excluded them by making them `null` as "we shouldn’t put bad data on the wire".
     ```javascript
     JSON.stringify(NaN) // 'null'
     JSON.stringify(Infinity) // 'null'
