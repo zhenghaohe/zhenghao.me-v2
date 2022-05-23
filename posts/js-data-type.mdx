@@ -71,7 +71,7 @@ As you can see, neither `typeof` or `instanceof` is perfect and most of the time
 
 ## the Object.prototype.toString method
 
-Turns out there is a third, arguably better way to check data types in JavaScript – `Object.prototype.toString`. It is a method that exists on `Object.prototype`, which returns a string value used for the description of an objects based on its `Symbol.toStringTag`.
+Turns out there is a third, arguably better way to check data types in JavaScript – `Object.prototype.toString`. It is a method that exists on `Object.prototype`, which returns a string value used for the description of an object based on its `Symbol.toStringTag`.
 If you take a look [at its spec](https://262.ecma-international.org/6.0/#sec-object.prototype.tostring), you will realize that it is actually the **all-encompassing solution** we have been looking for when it comes to check data types.
 
 ```javascript
@@ -117,5 +117,5 @@ getType(new Map()); // "map"
 getType(new Set()); // "set"
 ```
 
-In fact, many runtime type validation libraries use this technique underneath, such as [this one](https://github.com/medikoo/type/blob/main/set/is.js#L7).
+In fact, many runtime type validation libraries use this technique under the hood, such as [this one](https://github.com/medikoo/type/blob/main/set/is.js#L7).
 
