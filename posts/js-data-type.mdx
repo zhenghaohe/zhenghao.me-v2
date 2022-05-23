@@ -3,6 +3,7 @@ title: A complete guide to check data types in JavaScript
 published: true
 listed: true
 date: '05/20/2022'
+lastUpdateDate: '05/23/2022'
 description: 'JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. '
 tags: javascript
 ---
@@ -19,7 +20,7 @@ In JavaScript, there are [8 data types](https://developer.mozilla.org/en-US/docs
 The `typeof` operator is probably the first that comes to mind. It works fine for `number`, `string`, `undefined`, `boolean`, `symbol`, `function` but there are some pitfalls to watch out for when using `typeof`:
 
 - it is a known bug that `typeof null === 'object'`. [_The history of typeof null_](https://2ality.com/2013/10/typeof-null.html) covers this bug in details.
-- It doesn’t differentiate between different reference types except for `function`.
+- it doesn't differentiate plain objects from other built-in objects, except for `function`.
   ```javascript
   typeof []; // 'object'
   typeof {}; // 'object'
