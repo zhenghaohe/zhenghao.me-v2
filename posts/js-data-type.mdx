@@ -28,11 +28,7 @@ The `typeof` operator is probably the first that comes to mind. It works fine fo
   typeof /foo/; // 'object'
   ```
 
-One fun fact about `typeof`: it is one of the _only_ two operators in existence of the language that is able to reference a thing that doesn’t exist and _not_ throw an error (the other is the `delete` operator). You can get away with something like this:
-
-```javascript
-typeof randomeVariableIDidNotDeclare; // doesn't even throw an error
-```
+Let's move on to the next option - the `instanceof` operator.
 
 ## the instanceof operator
 
