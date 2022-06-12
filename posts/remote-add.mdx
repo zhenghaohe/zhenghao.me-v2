@@ -1,0 +1,195 @@
+---
+title: One of my favorite JavaScript question - Remote Add
+published: true
+listed: true
+date: '06/12/2022'
+tags: technical interviews,javascript
+description: A coding question that tests for both algorithmic thinking and mastery over asynchronous JavaScript
+---
+
+I am the type of person who likes to read random programming-interview-related posts even if I am not actively interviewing or looking to switch jobs. It is just fun to solve coding puzzles with clearly-stated goals and well-defined constraints. On top of that, I love being amazed by creative solutions other people come up with.
+
+There is one JavaScript interview question that I came across a few years ago at a Chinese programming forum that really struck me intellectually interesting and unique, as it tests for both algorithmic thinking and mastery over asynchronous JavaScript, which is a rare combination. 
+
+## The question
+Let's pretend we are developing for some device where the JavaScript environment doesn’t have access to the addition operator `+`. In order to perform addition, we have to rely on an async, promise-returning API `addRemote` to perform addition on a remote server. It takes 100ms for us to get back the resulting sum over the network, including the time to initiate a connection, network roundtrip time, and server response time. 
+
+
+The question asks the candidate to write a function that takes any number of numbers as the input and uses this `addRemote` to return a `Promise` that resolves to the total sum.
+
+```javascript
+add(1, 2).then(sum => console.log(sum)) // 3
+add(1, 2, 3).then(sum => console.log(sum)) // 6
+add(1).then(sum => console.log(sum)) // 1
+```
+Note that the addition *must* be done by `addRemote` . 
+You can assume all inputs are valid numbers.
+
+--------------------
+Here we use `setTimout` to simulate the API call.
+
+```javascript
+const addRemote = async (a, b) =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(a + b), 100)
+})
+```
+
+<details>
+    <summary>but this question is so contrived…</summary>
+    <p>Admittedly, this question is contrived, so is pretty much any algorithm/data-structure-focused question out there, because in a typical interview setting, coding questions need to described and solved within 20 minutes. Questions, like finding [the kth largest number in an array](https://leetcode.com/problems/kth-largest-element-in-an-array/) , are still valid interview question as long as it focuses on the legit, core programming competences.</p>
+    <p>Questions that focus on practical app/system building with real-world constraints and trade-offs are normally come up in system design interviews.</p>
+</details>
+
+
+## Sequential Solution
+
+Let’s first think about how we would tackle this question if we could use the addition operator `+` as we normally do. There are various ways to write a function that trivially sums up a list of numbers synchronously. 
+
+One way to do is to use `Array.prototype.reduce` , which is arguably a canonical use case for `reduce` :
+
+```javascript
+function getSum(...numbers) {
+	return numbers.reduce((sum, num) => sum + num, 0)
+} 
+```
+
+Since this function is variadic (meaning it takes an indefinite number of arguments), we use a [rest operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters) `...` to collect all the numbers and condenses them into an array.
+
+For this question though, we don’t have access to the addition operator `+`, so we have to replace `+` with the function call `addRemote`:
+
+```javascript
+function getSum(...numbers) {
+	return numbers.reduce((sum, num) => addRemote(sum, num), 0)
+} 
+```
+
+Now this solution no longer works, simply because  `addRemote` performs addition asynchronously and it returns a `Promise`. At the subsequent iterations inside `reduce`, `sum` becomes the `Promise` returned by `addRemote` . Addition performed between a `Promise` and a number doesn’t make sense. Instead, what we should do is to wait until the `Promise` resolves to the actual sum, then proceed to pass the sum along with the current number to the next `addRemote` call. 
+
+Here is the correct solution:
+
+```javascript
+function add(...inputs) {
+  return inputs.reduce(
+    (sumPromise, num) => sumPromise.then((sum) => addRemote(sum, num)),
+    Promise.resolve(0)
+    // 👆 initializing the sumPromise to be a Promise that resolves to 0 
+	// so that we can safely call `.then` on it at the first iteration
+  )
+}
+```
+
+Here is the equivalent answer with  `async/await` 
+
+```javascript
+function getSum(...numbers) {
+  return numbers.reduce(async (sumPromise, num) => {
+    const sum = await sumPromise
+    return sum + num
+  }, 0)
+    // 👆 we don't need to `Promise.resolve(0)` for the initial value as
+	// awaiting a non-promise value will automatically
+	// wrap that value in a Promise
+}
+```
+
+
+<details>
+    <summary>Note that the reduce loop itself is **synchronous**…</summary>
+    <p>It is important to understand that the reduce loop itself is synchronous. It runs quickly and doesn’t wait for each `Promise` to resolve before it continues to the next iteration. All the `reduce` loop does is to chain a bunch of `then`s to the initial `Promise.resolve(0)` where each `then` ’s handler passes the previous sum and current number to the next  `addRemote` call. In other words, All the asynchronous additions are performed one at a time sequentially **after** the reduce loop ends. Here is what happened conceptually after we call `add(1,2,3)`</p>
+        ```javascript
+            // add(1,2,3) 
+
+            Promise(0) // sumPromise starts at 0
+                .then(0 => addRemote(0, 1)) // sumPromise resolves to 1
+                .then(1 => addRemote(1, 2)) // sumPromise resolves to 3
+                .then(3 => addRemote(3, 3)) // sumPromise resolves to 6
+        ```
+        If you are struggling to understand exactly why this solution even works with `reduce`, I suggest [this article](https://css-tricks.com/why-using-reduce-to-sequentially-resolve-promises-works/) by Alex. 
+</details>
+
+## Parallel solution
+
+The previous sequential solution works but it is *unnecessarily slow*, as every addition is performed sequentially one at a time when in fact they are not interdependent.
+
+To put into perspective how slow the current solution is, let’s use it to sum up more numbers:
+
+```javascript
+console.time('sequential')
+add(1,2,3,4,5,6,7,8,9).then(sum => console.timeEnd('sequential'))
+// 939.8701171875 ms
+```
+
+We are going to make 9 `addRemote` calls and each call needs to *wait for* the previous call’s `Promise` to resolve. That’s why it takes about 900ms to finish.
+
+I drew a graph to illustrate the series of additions. It is not hard to tell what the issue is with the current approach: an artificial **network waterfall** is created when in fact each request *doesn’t need* to depend on the previous one. 
+
+
+![alt](/art/blog/remote-add/sequential.png)
+
+A better approach would be to perform the async additions in parallel to speed up the process with a parallel approach.
+ 
+
+In the previously example, instead of waiting for `remoteAdd(0,1)`to resolve before we can call `remoteAdd(2,3)`, we can fire off `remoteAdd(0,1)`, `remoteAdd(2,3)` ,`remoteAdd(4,5)` ,`remoteAdd(6,7)` and `remoteAdd(8,9)` at the same time.  We can leverage `Promise.all` to get the results back all at once in a single promise. Then we continue to add up the intermediate sums recursively until we are left with only one number, by then we know we have reached the final sum.
+
+Here is a graph to illustrate what we are going to do in the second, improved solution. In theory the improved approach will give us the sum in about 400 ms.
+
+
+![alt](/art/blog/remote-add/divide-and-conquer.png)
+
+
+<details>
+    <summary>Before we jump to the implementation, let’s think about some real-world constraints first...</summary>
+    <p>During an interview, it is important to communicate with your interviewer to check your assumption and ask clarifying questions.</p>
+    <p>In this case, since we are switching to an approach with making multiple requests in parallel, it is important to understand if our `remoteAdd` API is **rate-limited** or not. Most of API providers will limit the number of requests within any given second so sending too many requests in quick succession may trigger rate limiting and result in a [status code 429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429). So check with the interviewer on this before continuing.</p>
+</details>
+
+Here is the parallel solution:
+
+```javascript
+function add(...inputs) {
+  const promises = []
+  while (inputs.length) {
+    const [a = 0, b = 0] = inputs.splice(0, 2)
+    promises.push(addRemote(a, b))
+  }
+
+  return Promise.all(promises).then((sums) =>
+    sums.length === 1 ? sums[0] : add(...sums)
+  )
+}
+```
+
+You can see that the amount of time needed has been cut down by 50%; it only takes around 400 ms.
+
+```javascript
+console.time('parallel')
+add(1,2,3,4,5,6,7,8,9).then(sum => console.timeEnd('parallel'))
+// 413.84619140625 ms
+```
+
+
+<details>
+    <summary>Note the improvement might not be as effective if the API server is running on HTTP/1.1...</summary>
+    <p>For HTTP/1.1, most browsers have a limit for the number of concurrent TCP connections per domain. Historically Chrome has a limit for 6 connections per domain. That means after the connection of the 6th request has been established, the 7th request has to wait for any of the previous requests to come back over the network before it can be sent off to the server.</p>
+    <p>However nowadays most of the modern websites are using HTTP/2 where can multiple (virtually unlimited) requests over a single connection with multiplexing.</p>
+</details>
+
+
+## Avoid network waterfall if you can
+
+The crux of this solution comes down to firing off as many `addRemote` call as possible and do that as early as possible. Although this question is contrived, the awareness of avoiding network waterfall is imperative to deliver a good user experience when we are building real-world apps.
+
+For example, in React, if we put every async data fetching logic inside individual components' `useEffect` hook, we are essentially doing the equivalent of the first approach where we sequentially add up each number – now the fetching *only* starts after the component renders, and all the children components can't start to fetch their data until their parents finish rendering. 
+
+One simple way to avoid this network waterfall is to have all the non-interdependent data fetching logic hoisted/lifted at the top level of the component tree so that we fetch the data all at once early on and then pass the fetched results down as props. 
+
+How to optimize the performance of a React app is outside the scope of this post so I will stop here.
+
+## Further optimization
+
+Clearly we don't have to repeatedly call `addRemote` to add up numbers that we have the sum for. By adding a cache to `remoteAdd` we can avoid those re-computations. However, there are a few things to consider before we jump to the implementation:
+
+1. since addition has associtiy and communiv , `addRemote(1,2)` and `addRemote(2,1)` give us the same result even though the inputs are different. Our cache needs to account for that. 
+2. how big is our cache going to be and what eviction strategy do we want to use?
+3. how do we invalidate our cache if for some reason `addRemote`'s results change over time (yea I know I might be stretching this question too far so I will stop here)
