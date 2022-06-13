@@ -8,7 +8,7 @@ import { useTags } from './tags/TagsContext';
 
 const routes = [
   { route: '/posts', title: 'posts' },
-  { route: '/notes', title: 'notes' }
+  // { route: '/notes', title: 'notes' }
 ];
 
 const Nav: React.FC = () => {
