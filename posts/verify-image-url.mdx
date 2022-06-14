@@ -1,0 +1,78 @@
+---
+title: Verify if a url links to an image (without relying on regex)
+published: true
+listed: true
+date: '06/14/2022'
+tags: javascript
+description: one of the rare cases that I need to work with MIME types in frontend web development
+---
+
+In a side project I built, I had an input field that let users to pass urls that are supposed to link to image files, and I wanted to add client-side validation for that.
+
+I started with the most obvious solution: regular expressions.
+
+## Regex
+
+A list of common image file types that are supported by most browsers can be found on [this MDN page](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types). I can check if the url ends with one of these filename extensions:
+
+```javaScript
+function isImgUrl(url) {
+  return /\.(jpg|jpeg|png|webp|avif|gif)$/.test(url)
+}
+```
+
+However, this assumes all urls must have the correct filename extension appended at the end, which _isn't_ always the case. For example, the url of my [github profile picture](https://avatars.githubusercontent.com/u/33640448?v=4) `https://avatars.githubusercontent.com/u/33640448?v=4` links to an image, but it doesn't end up with any image filename extension.
+
+The current solution doesn't cover this edge case.
+
+## Image's onload event
+
+Another approach is to create an image tag `<img >` dynamically in JavaScript and assigning the url to its `src` attribute. If the `onload` event fires off, then that means the browser can correctly decode the image data linked by the url. Thus we know it is indeed an image url.
+
+```jsx
+function isImgUrl(url) {
+  const img = new Image();
+  img.src = url;
+  return new Promise((resolve) => {
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+  });
+}
+```
+
+Now it works with urls that don't have the filename extensions attached.
+
+```jsx
+function isImgUrl(url) {
+  const img = new Image();
+  img.src = url;
+  return new Promise((resolve) => {
+    img.onerror = () => resolve(false);
+    img.onload = () => resolve(true);
+  });
+}
+
+const urls = [
+  'https://avatars.githubusercontent.com/u/33640448?v=4',
+  'https://httpbin.org/image/webp',
+  'https://upload.wikimedia.org/wikipedia/commons/a/a3/June_odd-eyed-cat.jpg'
+];
+
+Promise.all(urls.map((url) => isImgUrl(url))).then(console.log); // [true, true ,true]
+```
+
+However, by assigning the `url` to the `src` attribute of an image tag, the browser kicks off a `Get` request to download *the whole image* when we don't plan to actually render anything yet. This solution doesn't scale well if we have hundreds of urls to check.
+
+## Sending HEAD requests and only check for the MIME type
+
+Turns out there is a way to find out if a url links to an image file *without* incurring the cost of downloading. That is, to send a `HEAD` request to get the [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) from the `Content-Type` header.
+
+```jsx
+function isImgUrl(url) {
+  return fetch(url, {method: 'HEAD'}).then(res => {
+    return res.headers.get('Content-Type').startsWith('image')
+  })
+}
+```
+
+This works because all supported image types are nicely grouped under the `image/` MIME type. For example, the MIME type of a `jpeg` file is `image/jpeg` , and for a `png` file it is `image/png` , so we just need to check if the MIME type starts with the word `image`.

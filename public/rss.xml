@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Tue, 14 Jun 2022 06:31:33 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 14 Jun 2022 18:36:36 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Verify if a url links to an image (without relying on regex)]]></title>
+            <link>https://zhenghao.io/posts/verify-image-url</link>
+            <guid>https://zhenghao.io/posts/verify-image-url</guid>
+            <pubDate>Tue, 14 Jun 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[one of the rare cases that I need to work with MIME types in frontend web development]]></description>
+            <content:encoded><![CDATA[one of the rare cases that I need to work with MIME types in frontend web development]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>javascript</category>
+        </item>
         <item>
             <title><![CDATA[One of my favorite JavaScript question - Remote Add]]></title>
             <link>https://zhenghao.io/posts/remote-add</link>

@@ -120,7 +120,7 @@ add(1,2,3,4,5,6,7,8,9).then(sum => console.timeEnd('sequential'))
 // 939.8701171875 ms
 ```
 
-We are going to make 9 `addRemote` calls and each call needs to *wait for* the previous call’s `Promise` to resolve. That’s why it takes about 900ms to finish.
+We are going to make 9 `addRemote` calls and each call needs to *wait for* the previous call's `Promise` to resolve. That’s why it takes about 900ms to finish.
 
 I drew a graph to illustrate the series of additions. It is not hard to tell what the issue is with the current approach: an artificial **network waterfall** is created when in fact each request *doesn’t need* to depend on the previous one. 
 
