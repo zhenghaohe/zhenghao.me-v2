@@ -178,7 +178,7 @@ I would never claim that I fully understand how V8 works under the hood to optim
 
 ## Preparation
 
-I built [a simple app](https://codesandbox.io/s/still-glitter-yuu1dm?file=/src/index.js) to run the benchmarks. It has a table that shows the numbers of operations per second for insertion, deletion and iteration on objects and maps.
+I built [a simple app](https://csb-yuu1dm.netlify.app/) to run the benchmarks. It has a table that shows the numbers of operations per second for insertion, deletion and iteration on objects and maps.
 
 The performances of insertion and iteration are measured in operations per second. I wrote a util function `measureFor` that runs the target function repeatedly until the specified minimal amount of time threshold (i.e. the `duration` input field on the UI) has been reached. It returns the average number of times such a function is executed per second.
 
