@@ -3,24 +3,22 @@ title: The missing guide to choosing between Object and Map in JavaScript
 published: true
 listed: true
 date: '06/18/2022'
-description: 'why you probably should use Map more'
+description: 'why you probably should use ES6 Map more'
 tags: javascript
 ---
 
 > This is an unfinished draft
 
-In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`. There is even a acronym for that - [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
+Objects are great. They allows us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable Object with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
 
-Objects are great. They allows us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable Object. For example, a `Map` supports keys that are not strings or Symbols. On top of that, there is this common belief that `Map` is faster for operations like inserting/deleting keys at runtime.
+In this post, I will break down all the reasons when you should consider using `Map` vs. Object and their performance characteristics with some benchmarks.
 
-However, most people still reach out for objects by default when they need a hash map and only switch to using `Map` when they realize the keys can’t just be strings for their use cases. As a result, `Map` remains underused in today’s JavaScript community. 
-
-In this post, I will break down all the reasons why you should consider using `Map`s more often and when you should stick with plain objects. I also ran some benchmarks to measure their performance differences and present the results to you at the end of the post.
+> In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`. There is even a acronym for that - [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
 
 ## TL;DR:
 - Use Object for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
-- Use `Map` for dictionaries or hash maps where you have a variable number of entries whose keys might not be known at author time, such as the map inside an event emitter. 
-- According to my benchmarks, unless the keys are strings of small integers, `Map` is indeed more performant than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
+- Use `Map` for dictionaries or hash maps where you have a variable number of entries whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
+- According to my benchmarks, *unless* the keys are strings of small integers, `Map` is indeed **more performant** than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
 
 ## Why Object is bad for a hash-map use case
 
@@ -34,7 +32,7 @@ const obj = {[foo]: 'foo', [bar]: 'bar'}
 console.log(obj) // {"": 'foo', [object Object]: 'bar'}
 ```
 
-Other than that, using objects for hash maps can cause confusion and security hazards.
+More importantly, using objects for hash maps can cause confusion and security hazards.
 
 ### unwanted inheritance
 
@@ -44,19 +42,19 @@ Before ES6, the only way to get a hash map is by creating an empty object.
 const hashMap = {}
 ```
 
-However, upon creation, this object is no longer empty. Although `hashMap` is made with an empty object literal, it automatically inherits from `Object.prototype` . That’s why we can invoke methods like `hasOwnProperty` , `toString` , ``constructor`` on `hashMap` even when we never explicitly define those methods on the object. 
+However, upon creation, this object is no longer empty. Although `hashMap` is made with an empty object literal, it automatically inherits from `Object.prototype` . That's why we can invoke methods like `hasOwnProperty` , `toString` , ``constructor`` on `hashMap` even when we never explicitly define those methods on the object. 
 
-Because of prototypal inheritance, we now have two types of properties conflated: properties that live within the object itself, i.e. its *own* properties, and properties that live in the prototype chain, i.e. inherited properties. As a result, we have to rely on an additional check (e.g. `hasOwnProperty`) to make sure a given property is indeed user-provided, as opposed to inherited from the prototype. 
+Because of prototypal inheritance, we now have two types of properties conflated: properties that live within the object itself, i.e. its *own* properties, and properties that live in the prototype chain, i.e. inherited properties. As a result, we need an additional check (e.g. `hasOwnProperty`) to make sure a given property is indeed user-provided, as opposed to inherited from the prototype. 
 
 On top of that, because of how the property resolution mechanism works in JavaScript, any change to  `Object.prototype` at runtime will cause a ripple effect in all objects. This opens the door for [prototype pollution attack](https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf), which can be a serious security issue for large JavaScript applications.
 
-Fortunately, we can work around this by using `Object.create(null)`, which makes an object that inherits nothing so we can avoid unintended inheritance from `Object.prototype`
+Fortunately, we can work around this by using `Object.create(null)`, which makes an object that inherits nothing so we can avoid unintended inheritance from `Object.prototype`.
 
 ### name collisions
 
 When an object’s own properties have name collisions with ones on its prototype, it breaks expectations and thus crashes your program.
 
-For example, we have a function `foo` which accepts an Object:
+For example, we have a function `foo` which accepts an object:
 
 ```jsx
 function foo(obj) {
@@ -69,9 +67,9 @@ function foo(obj) {
 }
 ```
 
-There is a reliability hazard in `obj.hasOwnProperty(key)` : given how property resolution mechanism works in JavaScript, if `obj` contains a user-provided property with the same name `hasOwnProperty` , that shadows `Object.prototype.hasOwnProperty`. As a result, we don’t know which method is going to get called exactly during runtime. 
+There is a reliability hazard in `obj.hasOwnProperty(key)` : given how property resolution mechanism works in JavaScript, if `obj` contains a user-provided property with the same name `hasOwnProperty` , that shadows `Object.prototype.hasOwnProperty`. As a result, we *don’t know* which method is going to get called exactly during runtime. 
 
-There are workarounds to prevent this. For example we can “borrow” `hasOwnProperty` from `Object.prototype` instead:
+There are workarounds to prevent this. For example we can “borrow” the "real" `hasOwnProperty` from `Object.prototype` instead:
 
 ```jsx
  function foo(obj) {
@@ -84,7 +82,7 @@ There are workarounds to prevent this. For example we can “borrow” `hasOwnPr
 }
 ```
 
-A shorter way might be invoking the method on an object literal as in `{}.hasOwnProperty.call(key)` however it is still pretty cumbersome. That’s why there is a newly-added static method `Object.hasOwn`.
+A shorter way might be invoking the method on an object literal as in `{}.hasOwnProperty.call(key)` however it is still pretty cumbersome. That's why there is a newly-added static method `Object.hasOwn`.
 
 ### Sub-optimal ergonomics
 Objects don't provide adequate ergonomics to be used as a hash map. Many common tasks can't be intuitively performed.
@@ -93,11 +91,11 @@ Objects don't provide adequate ergonomics to be used as a hash map. Many common 
 
 Objects don’t come with a handy API to get the size, i.e. the number of properties. And there are nuances to what constitutes the size of an object:
 
-- if you only care about string, enumerable keys, then you can convert the keys to an array with `Object.keys()` and get its `length`
-- if you want to account for non-enumerable string keys, then you have to use `Object.getOwnPropertyNames` to get a list of the keys and get its length
+- if you only care about string, enumerable keys, then you can convert the keys to an array with `Object.keys()` and get its `length`.
+- if you want to account for *non-enumerable* string keys, then you have to use `Object.getOwnPropertyNames` to get a list of the keys and get its length.
 - if you are interested in symbol keys, you can use `getOwnPropertySymbols` to reveal the symbol keys. Or you can use `Reflect.ownKeys`  to get both string keys and symbol keys all at once, regardless if it is enumerable or not.
 
-All of the above options take a runtime complexity of `O(n)`  since we have to construct an array of keys first before we can get its length.
+All the above options take a runtime complexity of `O(n)` since we have to construct an array of keys first before we can get its length.
 
 #### iterate
 
@@ -115,11 +113,11 @@ for(const key in obj) {
 }
 ```
 
-We couldn’t use `for...of` with an object since by default it is not an iterable, unless we explicitly defines the `Symbol.iterator`  method on it.
+We couldn't use `for...of` with an object since by default it is not an iterable, unless we explicitly defines the `Symbol.iterator` method on it.
 
 We can use `Object.keys` , `Object.values` and `Object.entries` to get a list of enumerable, string keys (or/and values) and iterate through that instead, which introduces an extra step with overhead.
 
-Finally, the insertion order is not completely respected. In most browsers, integer keys are sorted in ascending order and take precedence over string keys even if the string keys are inserted before the integer keys.
+Finally, the insertion order is not *fully* respected. In most browsers, integer keys are sorted in ascending order and take precedence over string keys even if the string keys are inserted before the integer keys.
 
 ```jsx
 const obj = {}
@@ -145,17 +143,17 @@ const obj = {a: undefined}
 Object.hasOwn(obj, 'a') // true
 ```
 
-## Enter Map
+## Map for Hash Map
 
 ES6 brought Map. It is much more suited for a hash-map use case.
 
 First of all, unlike objects, which only allows keys that are strings and symbols, `Map`s supports keys of any data types so we can associate values with any data types. 
 
-However if you are using primary using Map to store meta-data for objects then you should use `WeakMap` instead for better GC perf..
+> However if you are using primary using Map to store meta-data for objects then you should use `WeakMap` instead for better GC perf..
 
 But more importantly, `Map` provides a clean separation between user-defined and built-in program data at the expense of an additional `Map.prototype.get` to retrieve entries. 
 
-A `Map` is an iterable so it cooperates with `for...of` ,`forEach` and destructuring. This provides better ergonomics. You can iterate a map easily with `for...of` . And you can do things like using nested destructuring to pull out the first entry from a `Map`.
+A `Map` is an iterable by default so it cooperates with `for...of` ,`forEach` and destructuring. This provides better ergonomics. You can iterate a map easily with `for...of` . And you can do things like using nested destructuring to pull out the first entry from a `Map`.
 
 ```jsx
 const [[firstKey, firstValue]] = map
@@ -165,7 +163,7 @@ const [[firstKey, firstValue]] = map
 
 - `Map.prototype.has` checks for the existence of a given entry, less awkward compared to having to `Object.prototype.hasOwnProperty` / `Object.hasOwn` on objects
 - `Map.prototype.get` returns the value associated to the provided key. One might feel this is clunkier than the dot notation or the bracket notation on objects. Nevertheless it provides a clean separation between user data and built-in method.
-- `Map.prototype`.size returns the number of entries in a `Map` and it is a clear winner over the maneuvers you have to perform to get an object’s size. Besides, it is much faster.
+- `Map.prototype`.size returns the number of entries in a `Map` and it is a clear winner over the maneuvers you have to perform to get an object's size. Besides, it is much faster.
 - `Map.prototype.clear` removes all the entries in a `Map` and it much faster than the `delete` operator.
 
 ## Performance extravaganza
