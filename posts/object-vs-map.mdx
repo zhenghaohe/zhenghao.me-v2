@@ -9,15 +9,13 @@ tags: javascript
 
 > This is an unfinished draft
 
-In JavaScript, Object is a pretty broad term. Almost everything in JavaScript can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to a collection of key-value pairs, delimited by a left brace `{` and a right brace `}`. You know, they are just plain old javascript objects ( there is even a acronym for those - [POJO](https://masteringjs.io/tutorials/fundamentals/pojo))
+In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to a collection of key-value pairs, delimited by a left brace `{` and a right brace `}`. You know, the plain old javascript objects., and there is even a acronym for those - [POJO](https://masteringjs.io/tutorials/fundamentals/pojo)
 
-Objects are great. They allows us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable Object. For example, a `Map` supports keys that are not strings or Symbols. On top of that, there is this common belief that `Map`s are faster than objects in terms of certain operations such as inserting/deleting keys at runtime.
+Objects are great. They allows us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable Object. For example, a `Map` supports keys that are not strings or Symbols. On top of that, there is this common belief that `Map` is faster for operations like inserting/deleting keys at runtime.
 
-However, most people still reach out for objects by default when they need a hash map and only switch to using `Map`s when they realize the keys can’t just be strings for their use cases. 
+However, most people still reach out for objects by default when they need a hash map and only switch to using `Map` when they realize the keys can’t just be strings for their use cases. As a result, `Map` remains underused in today’s JavaScript community. 
 
-As a result, `Map` remains underused in today’s JavaScript community. In this post, I will break down all the reasons why you should consider using `Map`s more often and when you should stick with plain objects. 
-
-I also ran some benchmarks to measure their performance differences and present the results to you at the end of the post.
+In this post, I will break down all the reasons why you should consider using `Map`s more often and when you should stick with plain objects. I also ran some benchmarks to measure their performance differences and present the results to you at the end of the post.
 
 ## TL;DR:
 - Use Object for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
@@ -26,7 +24,17 @@ I also ran some benchmarks to measure their performance differences and present 
 
 ## Why Object is bad for a hash-map use case
 
-Using objects for hash maps can cause confusion and security hazards. Here are the reasons:
+Probably the most obvious downside of using objects for hash maps is that objects only allows keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
+
+```jsx
+const foo = []
+const bar = {}
+const obj = {[foo]: 'foo', [bar]: 'bar'}
+
+console.log(obj) // {"": 'foo', [object Object]: 'bar'}
+```
+
+Other than that, using objects for hash maps can cause confusion and security hazards.
 
 ### unwanted inheritance
 
@@ -78,23 +86,10 @@ There are workarounds to prevent this. For example we can “borrow” `hasOwnPr
 
 A shorter way might be invoking the method on an object literal as in `{}.hasOwnProperty.call(key)` however it is still pretty cumbersome. That’s why there is a newly-added static method `Object.hasOwn`.
 
-### keys can only be strings or symbols
+### Sub-optimal ergonomics
+Objects don't provide adequate ergonomics to be used as a hash map. Many common tasks can't be intuitively performed.
 
-This is probably the most obvious downside of using objects as hash maps - objects only allows keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
-
-```jsx
-const foo = []
-const bar = {}
-const obj = {[foo]: 'foo', [bar]: 'bar'}
-
-console.log(obj) // {"": 'foo', [object Object]: 'bar'}
-```
-
-## Sub-optimal ergonomics
-
-Objects don’t provide adequate ergonomics to be used as a hash map. Many common tasks can’t be intuitively performed.
-
-### Size
+#### size
 
 Objects don’t come with a handy API to get the size, i.e. the number of properties. And there are nuances to what constitutes the size of an object:
 
@@ -104,7 +99,7 @@ Objects don’t come with a handy API to get the size, i.e. the number of proper
 
 All of the above options take a runtime complexity of `O(n)`  since we have to construct an array of keys first before we can get its length.
 
-### iteration
+#### iterate
 
 Looping through objects suffers from similar complexity.
 
@@ -136,11 +131,11 @@ obj[1] = 'last'
 console.log(obj) // {1: 'last', 2: 'second', foo: 'first'}
 ```
 
-### clear
+#### clear
 
 There is no easy way to remove all properties from an object, you have to delete each property one by one with the `delete` operator, which [has been known](https://stackoverflow.com/questions/43594092/slow-delete-of-object-properties-in-js-in-v8) to be slow historically. However my benchmarks show that its performance is actually not that bad any more. More on that later.
 
-### check property existence
+#### check property existence
 
 The simple 
 
@@ -179,13 +174,11 @@ const [[firstKey, firstValue]] = map
 
 ## Performance extravaganza
 
-I first noticed `Map`s provides better performance when it comes to dynamically inserting keys at runtime when I was grinding Leetcode. 
+I first noticed `Map` provides better performance at runtime when I was grinding Leetcode.
 
-Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use objects, but not on `Map`s.   
+Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use objects, but not on `Map`.   
 
-I would never claim that I fully understand how V8 works under the hood to optimize `Map`s despite my many attempts to read blog posts and peek the C++ source code. Therefore, I decided to run some benchmarks to measure the performance characteristics between objects and `Map` s for various operations. 
-
-Perfectly robust benchmarking is hard. Most of us never went through any form of training in either benchmarking or interpreting the results. The more benchmarking I do the more it felt like a story about [blind men and an elephant](https://en.wikipedia.org/wiki/Blind_men_and_an_elephant). So take everything I said here about performance a grain of salt. You’ll need to test such changes with your application in a production environment to know for sure if there are actual performance gains from using `Map`s over objects.
+I would never claim that I fully understand how V8 works under the hood to optimize `Map`s despite my many attempts to read blog posts and peek the C++ source code. Therefore, I decided to run some benchmarks to measure the performance characteristics between objects and `Map` s for various operations. Perfectly robust benchmarking is hard. Most of us never went through any form of training in either benchmarking or interpreting the results. The more benchmarking I do the more it felt like a story about [blind men and an elephant](https://en.wikipedia.org/wiki/Blind_men_and_an_elephant). So take everything I said here about performance a grain of salt. You’ll need to test such changes with your application in a production environment to know for sure if there are actual performance gains from using `Map`s over objects.
 
 ## Preparation
 
