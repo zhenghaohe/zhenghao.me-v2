@@ -137,11 +137,7 @@ There is no easy way to remove all properties from an object, you have to delete
 
 #### check property existence
 
-The simple 
-
-Finally, we can’t rely on the dot/bracket notation to check for ****existence**** of an property because the value could be set as `undefined`
-
-Instead we have to use `Object.prototype.hasOwnProperty` or `Object.hasOwn`
+Finally, we can't rely on the dot/bracket notation to check for existence of an property because the value itself could be set as `undefined`. Instead we have to use `Object.prototype.hasOwnProperty` or `Object.hasOwn`.
 
 ```jsx
 const obj = {a: undefined}
