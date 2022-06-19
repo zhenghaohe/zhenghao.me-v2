@@ -17,7 +17,7 @@ In this post, I will break down all the reasons when you should consider using `
 
 ## TL;DR:
 - Use Object for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
-- Use `Map` for dictionaries or hash maps where you have a variable number of entries whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
+- Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
 - According to my benchmarks, *unless* the keys are strings of small integers, `Map` is indeed **more performant** than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
 
 ## Why Object is bad for a hash-map use case
@@ -168,17 +168,26 @@ const [[firstKey, firstValue]] = map
 
 ## Performance extravaganza
 
-I first noticed `Map` provides better performance at runtime when I was grinding Leetcode.
+There seems to be a common belief among JavaScript community that `Map` is faster than Object, for the most part. There are [people](https://twitter.com/diegohaz/status/1534888291732013058) who claimed to see noticeable performance gains by switching from Object to `Map`. 
 
-Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use objects, but not on `Map`.   
+My experience of grinding Leetcode seems to confirm this belife: Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use objects, but not on `Map`.   
 
-I would never claim that I fully understand how V8 works under the hood to optimize `Map`s despite my many attempts to read blog posts and peek the C++ source code. Therefore, I decided to run some benchmarks to measure the performance characteristics between objects and `Map` s for various operations. Perfectly robust benchmarking is hard. Most of us never went through any form of training in either benchmarking or interpreting the results. The more benchmarking I do the more it felt like a story about [blind men and an elephant](https://en.wikipedia.org/wiki/Blind_men_and_an_elephant). So take everything I said here about performance a grain of salt. You’ll need to test such changes with your application in a production environment to know for sure if there are actual performance gains from using `Map`s over objects.
 
-## Preparation
+However, I believe just saying "`Map` is faster than Object" is reductive. There must be some nuance that's missing. I wanted to find out myself so I built [a little app](https://csb-yuu1dm.netlify.app/) to run some benchmarks.
+
+
+
+<details>
+    <summary> disclaimer</summary>
+    <p>I would never claim that I fully understand how V8 works under the hood to optimize `Map` despite my many attempts to read blog posts and peek the C++ source code. Perfectly robust benchmarking is hard, and most of us never went through any form of training in either benchmarking or interpreting the results. The more benchmarking I do the more it felt like a story about [blind men and an elephant](https://en.wikipedia.org/wiki/Blind_men_and_an_elephant). So take everything I said here about performance a grain of salt. You'll need to test such changes with your application in a production environment to know for sure if there are actual performance gains from using `Map`s over objects.</p>
+</details>
+
+
+### details
 
 I built [a simple app](https://csb-yuu1dm.netlify.app/) to run the benchmarks. It has a table that shows the numbers of operations per second for insertion, deletion and iteration on objects and maps.
 
-The performances of insertion and iteration are measured in operations per second. I wrote a util function `measureFor` that runs the target function repeatedly until the specified minimal amount of time threshold (i.e. the `duration` input field on the UI) has been reached. It returns the average number of times such a function is executed per second.
+The performances of insertion and iteration are measured in operations per second. I wrote an util function `measureFor` that runs the target function repeatedly until the specified minimal amount of time threshold (i.e. the `duration` input field on the UI) has been reached. It returns the average number of times such a function is executed per second.
 
 ```jsx
 function measureFor(f, duration) {
@@ -206,7 +215,7 @@ All keys are randomly generated so we don’t hit the inline-cache implemented b
 I used three types of keys here:
 
 1. strings that are generated by `Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)`.
-2. integer strings that generated by `Math.floor(Math.random() * MAX_INTEGER).toString()` where `MAX_INTEGER` is from the input field set by the user and is default to `1000` .
+2. integer strings that generated by `Math.floor(Math.random() * MAX_INTEGER).toString()` where `MAX_INTEGER` is from the input field set by the user (default is `1000`).
 3. numeric strings that are generated by `Math.random().toString()`.
 
 Note that I explicitly convert all numbers to strings using `toString` for both `Map` keys and object keys; otherwise objects will implicitly convert numbers into strings and that adds noise to our benchmarks.
