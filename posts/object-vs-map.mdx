@@ -1,5 +1,5 @@
 ---
-title: Why You Should Prefer Map Over Object In JavaScript
+title: Why You might Prefer Map Over Object In JavaScript
 published: true
 listed: true
 date: '06/18/2022'
@@ -252,7 +252,7 @@ Absolutely not… or at least not with an expectation that our app becomes 2 tim
 
 ### integer keys
 
-The reason I specifically want to run benchmarks on objects with integer keys is that V8 internally optimizes [integer-indexed properties](https://v8.dev/blog/fast-properties#named-properties-vs.-elements) and store them in a separate array that can be access linearly and consecutively.  I can’t find any resources confirming it employs the same kind of optimization for `Map`s though.
+The reason I specifically want to run benchmarks on objects with integer keys is that V8 internally optimizes [integer-indexed properties](https://v8.dev/blog/fast-properties#named-properties-vs.-elements) and store them in a separate array that can be accessed linearly and consecutively.  I can’t find any resources confirming it employs the same kind of optimization for `Map`s though.
 
 Let’s first try integer keys in the range of [0, 1000]. 
 
