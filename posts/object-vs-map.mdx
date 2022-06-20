@@ -1,5 +1,5 @@
 ---
-title: Why you should prefer Map over Object in JavaScript
+title: Why You Should Prefer Map Over Object In JavaScript
 published: true
 listed: true
 date: '06/18/2022'
@@ -115,7 +115,7 @@ We couldn't use `for...of` with an object since by default it is not an iterable
 
 We can use `Object.keys` , `Object.values` and `Object.entries` to get a list of enumerable, string keys (or/and values) and iterate through that instead, which introduces an extra step with overhead.
 
-Finally, the insertion order is not *fully* respected. In most browsers, integer keys are sorted in ascending order and take precedence over string keys even if the string keys are inserted before the integer keys.
+Finally, the insertion order is infamously not *fully* respected. In most browsers, integer keys are sorted in ascending order and take precedence over string keys even if the string keys are inserted before the integer keys.
 
 ```jsx
 const obj = {}
