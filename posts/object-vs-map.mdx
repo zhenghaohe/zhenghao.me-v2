@@ -7,22 +7,20 @@ description: 'why you probably should use ES6 Map more'
 tags: javascript
 ---
 
-> This is an unfinished draft
+In JavaScript, objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language - `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
 
-In JavaScript, Objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
-
-In this post, I will break down all the reasons when you should consider using `Map` vs. `Object` and their performance characteristics with some benchmarks.
+In this post, I will break down all the reasons when you should consider using `Map` vs. `Object` and their performance characteristics with benchmarks.
 
 > In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`.
 
 ## TL;DR:
 - Use `Object` for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
-- Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
-- According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
+- Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an event emitter. 
+- According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than `Object` on insertion, deletion and iteration speed, but it might take up more memory than `Object` of the same size. 
 
-## Why Object is sub-optimal for a hash-map use case
+## Why Object falls short for a hash-map use case
 
-Probably the most obvious downside of using objects for hash maps is that objects only allows keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
+Probably the most obvious downside of using objects for hash maps is that objects only allow keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
 
 ```jsx
 const foo = []
@@ -44,15 +42,15 @@ const hashMap = {}
 
 However, upon creation, this object is no longer empty. Although `hashMap` is made with an empty object literal, it automatically inherits from `Object.prototype` . That's why we can invoke methods like `hasOwnProperty` , `toString` , ``constructor`` on `hashMap` even when we never explicitly define those methods on the object. 
 
-Because of prototypal inheritance, we now have two types of properties conflated: properties that live within the object itself, i.e. its *own* properties, and properties that live in the prototype chain, i.e. inherited properties. As a result, we need an additional check (e.g. `hasOwnProperty`) to make sure a given property is indeed user-provided, as opposed to inherited from the prototype. 
+Because of prototypal inheritance, we now have two types of properties conflated: properties that live within the object itself, i.e. its *own* properties, and properties that live in the prototype chain, i.e. *inherited* properties. As a result, we need an additional check (e.g. `hasOwnProperty`) to make sure a given property is indeed user-provided, as opposed to inherited from the prototype. 
 
-On top of that, because of how the property resolution mechanism works in JavaScript, any change to  `Object.prototype` at runtime will cause a ripple effect in all objects. This opens the door for [prototype pollution attack](https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf), which can be a serious security issue for large JavaScript applications.
+On top of that, because of how the property resolution mechanism works in JavaScript, any change to  `Object.prototype` at runtime will cause a *ripple* effect in all objects. This opens the door for [prototype pollution attack](https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf), which can be a serious security issue for large JavaScript applications.
 
-Fortunately, we can work around this by using `Object.create(null)`, which makes an object that inherits nothing so we can avoid unintended inheritance from `Object.prototype`.
+Fortunately, we can work around this by using `Object.create(null)`, which makes an object that inherits nothing from `Object.prototype`.
 
 ### name collisions
 
-When an object’s own properties have name collisions with ones on its prototype, it breaks expectations and thus crashes your program.
+When an object’s *own* properties have name collisions with ones on its prototype, it breaks expectations and thus crashes your program.
 
 For example, we have a function `foo` which accepts an object:
 
@@ -69,7 +67,7 @@ function foo(obj) {
 
 There is a reliability hazard in `obj.hasOwnProperty(key)` : given how property resolution mechanism works in JavaScript, if `obj` contains a user-provided property with the same name `hasOwnProperty` , that shadows `Object.prototype.hasOwnProperty`. As a result, we *don’t know* which method is going to get called exactly during runtime. 
 
-There are workarounds to prevent this. For example we can “borrow” the "real" `hasOwnProperty` from `Object.prototype` instead:
+Some defensive programming can be done to prevent this. For example we can “borrow” the "real" `hasOwnProperty` from `Object.prototype` instead:
 
 ```jsx
  function foo(obj) {
@@ -131,7 +129,7 @@ console.log(obj) // {1: 'last', 2: 'second', foo: 'first'}
 
 #### clear
 
-There is no easy way to remove all properties from an object, you have to delete each property one by one with the `delete` operator, which [has been known](https://stackoverflow.com/questions/43594092/slow-delete-of-object-properties-in-js-in-v8) to be slow historically. However my benchmarks show that its performance is actually not that bad any more. More on that later.
+There is no easy way to remove all properties from an object, you have to delete each property one by one with the `delete` operator, which [has been known](https://stackoverflow.com/questions/43594092/slow-delete-of-object-properties-in-js-in-v8) to be slow historically. However my benchmarks show that its performance is actually not an order-of-magnitude slower than `Map.prototype.delete`. More on that later.
 
 #### check property existence
 
@@ -196,7 +194,7 @@ function measureFor(f, duration) {
     iterations++;
   }
 
-  return ((iterations / elapsed) * 1000).toFixed();
+  return ((iterations / elapsed) * 1000).toFixed(4);
 }
 ```
 
@@ -210,13 +208,13 @@ I used three types of keys here:
 2. integer strings, e.g. `123`.
 3. numeric strings generated by `Math.random().toString()`, e.g. `0.4024025689756525`.
 
-All keys are randomly generated so we don’t hit the inline-cache implemented by V8. I also explicitly convert integer and numeric keys to strings using `toString` before adding them to `Object` and `Map` to avoid noise of implicitly casting done by objects.
+All keys are randomly generated so we don’t hit the inline-cache implemented by V8. I also explicitly convert integer and numeric keys to strings using `toString` before adding them to objects to avoid the overhead of implicitly casting.
 
 Lastly, before the benchmark begins, there is also a warmup phase for at least 100ms where we repeatedly create new objects and maps that are discarded right away.
 
-I put the code on [codesandbox](https://codesandbox.io/s/still-glitter-yuu1dm) if you want to play with it.
+I put the code on [Codesandbox](https://codesandbox.io/s/still-glitter-yuu1dm) if you want to play with it.
 
-I started with `Object` and `Map` with a size of 100 properties/entries, all the way to 5000000, and had each type of operations keep running for 10000ms to see they perform against each other. Here are my findings...
+I started with `Object` and `Map` with a size of 100 properties/entries, all the way to 5000000, and had each type of operations keep running for 10000ms to see how they performed against each other. Here are my findings...
 
 <details>
     <summary>Why do we stop when the number of entries reaches 5000000?</summary>
@@ -323,7 +321,7 @@ After some attempts, the pattern I found about memory usage is still not as clea
 
 So what do we take away from all this?
 
-- `Map`s are faster than objects *unless* you have small integer, array-indexed keys.
-- `Map`s use more memory than objects in most cases.
-- Use `Map`s if you need a hash map with frequent updates; use objects if you want to a fixed key-value collection (i.e. record), and watch out for pitfalls that come with prototypal inheritance.
+- `Map` is faster than `Object` *unless* you have small integer, array-indexed keys.
+- `Map` uses more memory than `Object` of the same size in most cases.
+- Use `Map` if you need a hash map with frequent updates; use `Object` if you want to a fixed key-value collection (i.e. record), and watch out for pitfalls that come with prototypal inheritance.
 
