@@ -18,7 +18,7 @@ In this post, I will break down all the reasons when you should consider using `
 - Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
 - According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than `Object` on insertion, deletion and iteration speed, and it consumes **less memory** than `Object` of the same size. 
 
-## Why Object falls short for a hash-map use case
+## Why Object falls short of a hash-map use case
 
 Probably the most obvious downside of using objects for hash maps is that objects only allow keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
 
