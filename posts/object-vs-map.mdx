@@ -9,18 +9,18 @@ tags: javascript
 
 > This is an unfinished draft
 
-Objects are great. They allows us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable Object with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
+In JavaScript, Objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language – `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
 
-In this post, I will break down all the reasons when you should consider using `Map` vs. Object and their performance characteristics with some benchmarks.
+In this post, I will break down all the reasons when you should consider using `Map` vs. `Object` and their performance characteristics with some benchmarks.
 
-> In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`. There is even a acronym for that - [POJO](https://masteringjs.io/tutorials/fundamentals/pojo).
+> In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`.
 
 ## TL;DR:
-- Use Object for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
+- Use `Object` for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
 - Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
-- According to my benchmarks, *unless* the keys are strings of small integers, `Map` is indeed **more performant** than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
+- According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than Object on insertion/deletion/iteration speed, but it might take up more memory than an object of the same size. 
 
-## Why Object is bad for a hash-map use case
+## Why Object is sub-optimal for a hash-map use case
 
 Probably the most obvious downside of using objects for hash maps is that objects only allows keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
 
@@ -32,7 +32,7 @@ const obj = {[foo]: 'foo', [bar]: 'bar'}
 console.log(obj) // {"": 'foo', [object Object]: 'bar'}
 ```
 
-More importantly, using objects for hash maps can cause confusion and security hazards.
+More importantly, using objects for hash maps can cause confusion and *security hazards*.
 
 ### unwanted inheritance
 
@@ -85,11 +85,11 @@ There are workarounds to prevent this. For example we can “borrow” the "real
 A shorter way might be invoking the method on an object literal as in `{}.hasOwnProperty.call(key)` however it is still pretty cumbersome. That's why there is a newly-added static method `Object.hasOwn`.
 
 ### Sub-optimal ergonomics
-Objects don't provide adequate ergonomics to be used as a hash map. Many common tasks can't be intuitively performed.
+`Object` doesn't provide adequate ergonomics to be used as a hash map. Many common tasks can't be intuitively performed.
 
 #### size
 
-Objects don’t come with a handy API to get the size, i.e. the number of properties. And there are nuances to what constitutes the size of an object:
+`Object` doesn't come with a handy API to get the size, i.e. the number of properties. And there are nuances to what constitutes the size of an object:
 
 - if you only care about string, enumerable keys, then you can convert the keys to an array with `Object.keys()` and get its `length`.
 - if you want to account for *non-enumerable* string keys, then you have to use `Object.getOwnPropertyNames` to get a list of the keys and get its length.
@@ -147,13 +147,13 @@ Object.hasOwn(obj, 'a') // true
 
 ES6 brought Map. It is much more suited for a hash-map use case.
 
-First of all, unlike objects, which only allows keys that are strings and symbols, `Map`s supports keys of any data types so we can associate values with any data types. 
+First of all, unlike `Object`, which only allows keys that are strings and symbols, `Map` supports keys of any data types. 
 
-> However if you are using primary using Map to store meta-data for objects then you should use `WeakMap` instead for better GC perf..
+> However if you are using `Map` to store meta-data for objects, then you should use `WeakMap` instead to avoid memory leak.
 
-But more importantly, `Map` provides a clean separation between user-defined and built-in program data at the expense of an additional `Map.prototype.get` to retrieve entries. 
+But more importantly, `Map` provides a *clean separation* between user-defined and built-in program data, at the expense of an additional `Map.prototype.get` to retrieve entries. 
 
-A `Map` is an iterable by default so it cooperates with `for...of` ,`forEach` and destructuring. This provides better ergonomics. You can iterate a map easily with `for...of` . And you can do things like using nested destructuring to pull out the first entry from a `Map`.
+`Map` also provides better ergonomics: A `Map` is an iterable by default. That means you can iterate a map easily with `for...of`, and do things like using nested destructuring to pull out the first entry from a map.
 
 ```jsx
 const [[firstKey, firstValue]] = map
@@ -163,29 +163,25 @@ const [[firstKey, firstValue]] = map
 
 - `Map.prototype.has` checks for the existence of a given entry, less awkward compared to having to `Object.prototype.hasOwnProperty` / `Object.hasOwn` on objects
 - `Map.prototype.get` returns the value associated to the provided key. One might feel this is clunkier than the dot notation or the bracket notation on objects. Nevertheless it provides a clean separation between user data and built-in method.
-- `Map.prototype`.size returns the number of entries in a `Map` and it is a clear winner over the maneuvers you have to perform to get an object's size. Besides, it is much faster.
+- `Map.prototype.size` returns the number of entries in a `Map` and it is a clear winner over the maneuvers you have to perform to get an object's size. Besides, it is much faster.
 - `Map.prototype.clear` removes all the entries in a `Map` and it much faster than the `delete` operator.
 
 ## Performance extravaganza
 
-There seems to be a common belief among JavaScript community that `Map` is faster than Object, for the most part. There are [people](https://twitter.com/diegohaz/status/1534888291732013058) who claimed to see noticeable performance gains by switching from Object to `Map`. 
+There seems to be a common belief among JavaScript community that `Map` is faster than `Object`, for the most part. There are [people](https://twitter.com/diegohaz/status/1534888291732013058) who claimed to see noticeable performance gains by switching from `Object` to `Map`. 
 
-My experience of grinding Leetcode seems to confirm this belife: Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use objects, but not on `Map`.   
+My experience of grinding Leetcode seems to confirm this belief: Leetcode feeds a huge amount of data as the test cases to your solution and it times out if your solution is taking too long. Questions like [this one](https://leetcode.com/problems/random-pick-with-weight/discuss/671804/Javascript-with-explanation-and-very-interesting-find-regarding-vs-Map) only times out if you use `Object`, but not on `Map`.   
 
-
-However, I believe just saying "`Map` is faster than Object" is reductive. There must be some nuance that's missing. I wanted to find out myself so I built [a little app](https://csb-yuu1dm.netlify.app/) to run some benchmarks.
-
-
+However, I believe just saying "`Map` is faster than Object" is reductive. There must be some nuance that I wanted to find out myself. Therefore. I built [a little app](https://csb-yuu1dm.netlify.app/) to run some benchmarks.
 
 <details>
-    <summary> disclaimer</summary>
+    <summary>Important Disclaimer</summary>
     <p>I would never claim that I fully understand how V8 works under the hood to optimize `Map` despite my many attempts to read blog posts and peek the C++ source code. Perfectly robust benchmarking is hard, and most of us never went through any form of training in either benchmarking or interpreting the results. The more benchmarking I do the more it felt like a story about [blind men and an elephant](https://en.wikipedia.org/wiki/Blind_men_and_an_elephant). So take everything I said here about performance a grain of salt. You'll need to test such changes with your application in a production environment to know for sure if there are actual performance gains from using `Map`s over objects.</p>
 </details>
 
+### Benchmarking implementation details
 
-### details
-
-I built [a simple app](https://csb-yuu1dm.netlify.app/) to run the benchmarks. It has a table that shows the numbers of operations per second for insertion, deletion and iteration on objects and maps.
+ [The app](https://csb-yuu1dm.netlify.app/) has a table that shows the insertion, iteration, and deletion speed measured on `Object` and `Map`.
 
 The performances of insertion and iteration are measured in operations per second. I wrote an util function `measureFor` that runs the target function repeatedly until the specified minimal amount of time threshold (i.e. the `duration` input field on the UI) has been reached. It returns the average number of times such a function is executed per second.
 
@@ -206,139 +202,96 @@ function measureFor(f, duration) {
 
 As to deletion, I am simply going to measure the time taken for using the `delete` operator to remove all properties from an objects and compare it with the time with  `Map.prototype.delete` for a Map of the same size. I could use `Map.prototype.clear` but it defeats the purpose of the benchmarks as I know for sure it is going to be vastly faster.
 
-In these three operations, I pay more attention to insertion and iteration since it tends to be the most common operation I’d perform in my day-to-day work. However, this is definitely not an all-encompassing benchmarks for iteration performances as there are many different variants of iteration we can perform on a given object. Here I am only measuring the `for ... in` loop.
-
-The keys of entries/properties in Maps and objects are one of the most important factors for our benchmarks. 
-
-All keys are randomly generated so we don’t hit the inline-cache implemented by V8.
+In these three operations, I pay more attention to *insertion* and *iteration* since it tends to be the most common operation I’d perform in my day-to-day work. However, this is definitely not an all-encompassing benchmarks for iteration performances as there are many different variants of iteration we can perform on a given object. Here I am only measuring the `for ... in` loop.
 
 I used three types of keys here:
 
-1. strings that are generated by `Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)`.
-2. integer strings that generated by `Math.floor(Math.random() * MAX_INTEGER).toString()` where `MAX_INTEGER` is from the input field set by the user (default is `1000`).
-3. numeric strings that are generated by `Math.random().toString()`.
+1. strings, e.g. `yekwl7caqejth7aawelo4`.
+2. integer strings, e.g. `123`.
+3. numeric strings generated by `Math.random().toString()`, e.g. `0.4024025689756525`.
 
-Note that I explicitly convert all numbers to strings using `toString` for both `Map` keys and object keys; otherwise objects will implicitly convert numbers into strings and that adds noise to our benchmarks.
-The size and shape of the objects/`Map`s is also an important factor. You can change them with the `width` and `depth` input fields, where  `width` means the number of keys/entries that an object/map has and `depth` means the level of nesting it has. 
-
-For example, an object of `width: 3` and `depth: 2` with string keys could look like this:
-
-```jsx
-{
-    "yekwl7caqejth7aawelo4": {
-        "59xn8eeco2w7i4t0gl5tpg": 0,
-        "wrc0nqwpgqgo0wwrgqhkc8": 1,
-        "egscvn9ei8igp1yxacivdf": 2
-    },
-    "1hnynypi7kyzezz7ix3whg": {
-        "jhn8wucdoi7vd3uu56oz2": 0,
-        "gxt54oag82s2guzypm230b": 1,
-        "jsr6msypxe7ysezz4rgq5g": 2
-    },
-    "z1e1kdf0wvaiwzfgmpbrb": {
-        "x3fj0npaj3nxrby5cxzey9": 0,
-        "1fpoek59w4hsa421lcq82": 1,
-        "5u5hda43xa43tzfw4swzgw": 2
-    }
-}
-```
+All keys are randomly generated so we don’t hit the inline-cache implemented by V8. I also explicitly convert integer and numeric keys to strings using `toString` before adding them to `Object` and `Map` to avoid noise of implicitly casting done by objects.
 
 Lastly, before the benchmark begins, there is also a warmup phase for at least 100ms where we repeatedly create new objects and maps that are discarded right away.
 
+I put the code on [codesandbox](https://codesandbox.io/s/still-glitter-yuu1dm) if you want to play with it.
+
+I started with `Object` and `Map` with a size of 100 properties/entries, all the way to 5000000, and had each type of operations keep running for 10000ms to see they perform against each other. Here are my findings...
+
+<details>
+    <summary>Why do we stop when the number of entries reaches 5000000?</summary>
+    <p>Because this is about as big as an object can get in JavaScript. According to [@jmrk](https://stackoverflow.com/questions/54452896/maximum-number-of-entries-in-node-js-map#comment127492362_72149605), a V8 engineer who is active on Stackoverflow, “if the keys are strings, a regular object becomes unusably slow after ~8.3M elements (for which there is a technical reason: a certain bit field being 23 bits wide and taking a very slow fallback path when exceeded).”.</p>
+</details>
+
+
 ### string keys
 
-Let's start with (non-numeric) string keys. I have each type of operations running for 10000ms respectively and output the average numbers of operations per second.
+Generally speaking, when keys are (non-numeric) string, `Map` outperforms `Object` on all operations. 
 
-When we have 100 entries (i.e. `width: 100`), `Map`s outperform objects - they rae twice as fast for insertion and iteration. 
+![alt](/art/blog/object-vs-map/deletion-speed.png)
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a645a9fc-febb-4040-a4f8-97b90576c1ba/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233213Z&X-Amz-Expires=86400&X-Amz-Signature=509004a8c7e9094a3bf83c60595e185c34bcd07e276e653dd30b714aefd23ecf&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+But the nuance is that when the number of entries is not really huge (under 100000), `Map` is twice as fast as `Object` on insertion speed, but as the size grows over 100000, the performance gap starts to shrink.
 
-Let’s increase the size.
 
-When we have 1000 entries, the performance characteristics stay the same with `Map`s being twice as fast on every operation.
+I made some graphs to better illustrate my findings.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/eca87b2b-aeac-4e04-b619-96f3f2d09d2f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233430Z&X-Amz-Expires=86400&X-Amz-Signature=33d070d9d861ffb209ab6e76dbc09f31da78fff0790829eb80907a2098abd2c8&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
-When the size reaches to 10000, iteration speed on objects is now 5 times slower than it on `Map`s.
-
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/69ca095d-c79d-4338-bbc6-92b96b9bba45/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233438Z&X-Amz-Expires=86400&X-Amz-Signature=fa392893ea8afed3984d68a792b5236fe0c93fabf79eb7b9915a835623955d3c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
-Interestingly, when they have more than 100000 entries, objects start to slowly catch up (or `Map`s start to slow down). `Map` s are still faster, but it is only 70% faster for insertion, 50% faster for deletion. As to iteration speed, `Map`s are about 6 times faster than objects.
-
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/69ca095d-c79d-4338-bbc6-92b96b9bba45/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233438Z&X-Amz-Expires=86400&X-Amz-Signature=fa392893ea8afed3984d68a792b5236fe0c93fabf79eb7b9915a835623955d3c&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
-If we continue to increase the size to 1000000 (1 million),  `Map` s are only about 40% faster for insertion and 10 times faster for iteration. For iteration speed, `Map`s are about 10 times faster now.
-
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/52e8f45e-b6a6-4d7a-8a6c-8a3579775206/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233548Z&X-Amz-Expires=86400&X-Amz-Signature=ca0ec2f4da36cc1a2be94ef78890fd5bbc9ea32ae8f360086c8ba3f1d6c097d4&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
-Finally, after we increase the size to 5000000 (5 million), `Map` s are only about 34% faster for insertion speed. The gaps between deletion and iteration remain roughly the same.
-
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/67eb99f4-a32a-4afa-b233-3e654b2de23a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233554Z&X-Amz-Expires=86400&X-Amz-Signature=f77a529da14f79f66a621d3937a64ba7c71f5663a20de830d6301c7c88df359e&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
-I am going to stop here because this is about as big as an object can get in JavaScript. According to [@jmrk](https://stackoverflow.com/questions/54452896/maximum-number-of-entries-in-node-js-map#comment127492362_72149605), a V8 engineer who is active on Stackoverflow, “if the keys are strings, a regular object becomes unusably slow after ~8.3M elements (for which there is a technical reason: a certain bit field being 23 bits wide and taking a very slow fallback path when exceeded).”. 
-
-I pay more attention to the insertion speed than the two other operations, and there is a clear trend as we increase the size: when the size is relatively small, `Map` s are twice as fast as objects. As the size grows beyond 100000 entries, the gap starts to shrink and when we reached 5 million entries, `Map`s are only 34% faster.
-
-### graphs
-I made some graphs to better illustrate my findings. 
-
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/7e0583f2-e478-4508-aa16-9c183f42b0d6/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233722Z&X-Amz-Expires=86400&X-Amz-Signature=5433a026c23cde53fc7d49ea02bf14fb874307c199afc79dbad2e921c0fd917f&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
-
+![alt](/art/blog/object-vs-map/string-key-line-1.png)
 The above graph shows how insertion rate drops (y-axis) with the number of entries increasing (x-axis). However because the X-axis expands too wide (from 100 to 1000000), it is hard to tell the gap between these two lines.
 
 I then used log scales to process the data and made the graph below.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2b2b7bb0-5294-4449-96b3-ef43fb3068da/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233730Z&X-Amz-Expires=86400&X-Amz-Signature=82eb83910399fa51c224212b9081f43b300fe5a935a1083277c74d4bac745eca&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+![alt](/art/blog/object-vs-map/string-key-line-2.png)
 
-You can clearly tell the two lines are **converging**.
+You can clearly tell the two lines are converging.
 
-I made another graph plotting how much faster Maps are in relation to objects on insertion speed. You can see initially `Map` is about 2 times faster and then the difference shrinks. At the end `Map` is only 30% faster as the size grows to 5000000.
+I made another graph plotting how much faster `Map` is in relation to `Object` on insertion speed. You can see `Map` starts out being about 2 times faster than `Object`. Then over time the performance gap starts to shrink. Eventually `Map` is only 30% faster as the size grows to 5000000.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/9292d2f1-437e-46ea-a4a2-5f5fec54a005/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233738Z&X-Amz-Expires=86400&X-Amz-Signature=d17473b5415984cdafd2300bfc6ec50e99f8c8cf2da835bb269d29cfcf36887b&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+![alt](/art/blog/object-vs-map/string-key-line-3.png)
 
-Most of us will never have more than 1 million entries in an object or map. Having a magnitude of hundreds or thousands of entries, `Map`s are at least twice as performant as objects. Therefore, should we leave it at that and head over to start refactoring our codebase by going all in on `Map`s? 
+Most of us will never have more than 1 million entries in an object or map though. With a size of a few hundreds or thousands of entries, `Map` is at least twice as performant as `Object`. Therefore, should we leave it at that and head over to start refactoring our codebase by going all in on `Map`? 
 
-Absolutely not… or at least not with an expectation that our app becomes 2 times faster. Remember we haven’t explored other types of keys. Let’s take a look at integer keys.
+Absolutely not… or at least not with an expectation that our app becomes 2 times faster. Remember we haven't explored other types of keys. Let's take a look at integer keys.
 
 ### integer keys
 
-The reason I specifically want to run benchmarks on objects with integer keys is that I know V8 internally optimizes [integer-indexed properties](https://v8.dev/blog/fast-properties#named-properties-vs.-elements) and store them in a separate array that can be access linearly and consecutively.  I can’t find any resources confirming it employs the same kind of optimization for `Map`s so that's why I want to test them out and see how they perform.
+The reason I specifically want to run benchmarks on objects with integer keys is that V8 internally optimizes [integer-indexed properties](https://v8.dev/blog/fast-properties#named-properties-vs.-elements) and store them in a separate array that can be access linearly and consecutively.  I can’t find any resources confirming it employs the same kind of optimization for `Map`s though.
 
-Let’s first try integer keys within [0, 1000]. 
+Let’s first try integer keys in the range of [0, 1000]. 
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/181152d8-6856-47ee-9e0c-6cf6e779b5b3/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233848Z&X-Amz-Expires=86400&X-Amz-Signature=54edf54b52f8f597ce766f153891e7ee9426598402ce51251d1f216e4fbe3262&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+![Untitled](/art/blog/object-vs-map/integer-key-1.png)
 
-As I expected, objects outperform `Map` this time. They are 65% faster than `Map`s for insertion speed and 16% faster to iterate. 
+As I expected, `Object` **outperform** `Map` this time. They are 65% faster than maps for insertion speed and 16% faster to iterate.
 
-Let’s widen the range so that the maximum integer in the keys is 1200. 
+Let's widen the range so that the maximum integer in the keys is 1200. 
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ab39de01-0f95-443b-9e9c-2fc3d30d44b5/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233908Z&X-Amz-Expires=86400&X-Amz-Signature=f37a4d9b77ac2190fa31ad9952c70b204177573d52280283d779fa25fbbf49f1&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+![Untitled](/art/blog/object-vs-map/integer-key-2.png)
 
 It seems like now `Map` s start to get a little faster than objects for insertion and 5 times faster for iteration.
 
-Remember we only increase the integer keys’ range, not the actual size of objects/map (i.e. the number of entries).  Let’s bump up the size to see how that affects the performances.
+Now that we only increased the integer keys' range, not the actual size of `Object` and `Map`. Let's bump up the size to see how that affects the performances.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f972d8d8-17c9-4203-8e86-aa1f0027448d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220618%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220618T233921Z&X-Amz-Expires=86400&X-Amz-Signature=a9b2040f6585cf0586bfb0483cd97d25215b3ce80771fa31daafcf51f0cc9f76&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+![Untitled](/art/blog/object-vs-map/integer-key-3.png)
 
-Now Objects end up being 70% faster than `Map`s for insertion and 2 times slower for iteration.
+When a size of 1000 properties, `Object` ends up being 70% faster than `Map` for insertion and 2 times slower for iteration.
 
-I played with a bunch of different combinations of object/map sizes and integer key ranges and it is hard for me to come up with a clear pattern. But the general trend I am seeing is that, for as the size grows, with some relative small integer being the keys, objects can be more performant than `Map`s in terms of insertion, always roughly the same as to deletion and 4 or 5 times slower to iterate. The threshold of max integer keys at which objects start to be slower for insertion grows with the size of the objects. For example, when the object only has 100 entries, the threshold is 1200; when it has 10000 entries, the threshold seems to be around 24000.
+I played with a bunch of different combinations of `Object`/`Map` sizes and integer key ranges and failed to come up with a clear pattern. But the general trend I am seeing is that, for as the size grows, with some relative small integer being the keys, objects can be *more performant* than `Map`s in terms of insertion, always roughly the same as to deletion and 4 or 5 times slower to iterate. The threshold of max integer keys at which objects start to be slower for insertion grows with the size of the objects. For example, when the object only has 100 entries, the threshold is 1200; when it has 10000 entries, the threshold seems to be around 24000.
 
 ### numeric keys
 
-Lastly, let’s take a look at the last type of keys - numeric keys. 
+Lastly, let's take a look at the last type of keys - numeric keys. 
 
-Technically, the previously integer keys are also numeric. Here numeric keys specifically refer to the numeric strings generated by M`ath.random().toString()`
+Technically, the previously integer keys are also numeric. Here numeric keys specifically refer to the numeric strings generated by `Math.random().toString()`.
 
-The results are similar to those string-key cases: `Map`s start off as much faster than objects but the delta is getting smaller as we increase the size, i.e. the number of entries.
+The results are similar to those string-key cases: `Map`s start off as much faster than objects (2 times faster for insertion and deletion, 4-5 times faster for iteration), but the delta is getting smaller as we increase the size.
 
-### what about nested objects/maps
 
-You might have noticed that I have been only testing on flat flat objects and maps with only one depth. I did add some depth but I found the performance charateristics stay largely the same as long as the total number of entries are the same, no matter how many levels of nesting we have.
+<details>
+    <summary>What about nested objects/maps?</summary>
+    <p>You might have noticed that I have been only talking about flat objects and maps with only one depth. I did add some depth but I found the performance characteristics stay largely the same as long as the total number of entries are the same, no matter how many levels of nesting we have.</p>
+    <p>For example, with `width` being 100 and `depth` being 3, we have a total number of one million entries (100 * 100 * 100). The results are pretty much the same compared to just having `1000000` for width and 1 for `depth`</p>
+</details>
 
-For example, with `width` being 100 and `depth` being 3, we have a total number of one million entries (100 * 100 * 100). The results are pretty much the same compared to just having `1000000` for width and 1 for `depth`
-
-### What about memory usage?
+### Some notes on memory usage
 
 Another important facet of benchmarking is memory utilization. 
 
@@ -360,15 +313,17 @@ form.addEventListener("submit", (e) => {
 
 After some attempts, the pattern I found about memory usage is still not as clean as I hoped.  that `Map`s are consistently taking up more memory. 
 
-- If the keys are string keys and numeric keys, `Map`s use more memory than objects do by anywhere from 30% to 60%.
-- If the keys are integer keys, in which case the V8 optimization for objects kick in, an object only takes up 20% of the memory that a `Map` of the same size takes.
-- However, if the keys are numeric keys *and* the number of entries is fewer than 3000 - 4000, objects end up using 20% more memory than Maps. If we have more than 5000 entries, then `Map`s still consume more memory.
+- If the keys are string keys and numeric keys, `Map` uses more memory than `Object` does by anywhere from 30% to 60%.
+- If the keys are integer keys, in which case the V8 optimization for `Object` kick in, an object only needs **20%** of the memory that a `Map` of the same size takes.
+- However, if the keys are numeric keys *and* the number of entries is fewer than 3000 - 4000, `Object` ends up using 20% *more* memory than `Map`. If we have more than 5000 entries, then `Map` still consumes more memory.
+
+> If you know the reasons behind these seemingly inconsistent results or want to call out the flaws in my benchmarks, ping me. I'll be happy to update this post based on new information!
 
 ## Conclusion
 
 So what do we take away from all this?
 
-- `Map`s are faster than objects unless you have small integer, array-indexed keys.
+- `Map`s are faster than objects *unless* you have small integer, array-indexed keys.
 - `Map`s use more memory than objects in most cases.
-- Use `Map`s if you need a hash map where you want to update and delete entries at runtime; use objects if you want to a fixed key-value collection, and watch out for pitfalls that come with prototypal inheritance.
+- Use `Map`s if you need a hash map with frequent updates; use objects if you want to a fixed key-value collection (i.e. record), and watch out for pitfalls that come with prototypal inheritance.
 
