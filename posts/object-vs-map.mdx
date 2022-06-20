@@ -1,22 +1,22 @@
 ---
-title: The missing guide to choosing between Object and Map in JavaScript
-published: false
-listed: false
+title: Why you should prefer Map over Object in JavaScript
+published: true
+listed: true
 date: '06/18/2022'
-description: 'why you probably should use ES6 Map more'
+description: 'the missing guide to choosing between Object and Map in JavaScript'
 tags: javascript
 ---
 
-In JavaScript, objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language - `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a hash map and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains underused in today's JavaScript community. 
+In JavaScript, objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language - `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a [hash map](https://en.wikipedia.org/wiki/Hash_table) and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains **underused** in today's JavaScript community. 
 
-In this post, I will break down all the reasons when you should consider using `Map` vs. `Object` and their performance characteristics with benchmarks.
+In this post, I will break down all the reasons when you should consider using `Map` more and its performance characteristics with benchmarks.
 
 > In JavaScript, Object is a pretty broad term. Almost everything can be an object, except for two bottom types - `null` and `undefined`.  In this blog post, Object only refers to plain old objects, delimited by a left brace `{` and a right brace `}`.
 
 ## TL;DR:
 - Use `Object` for records where you have a fixed and finite number of properties/fields known at author time, such as a config object. And anything that is for one-time use in general.
-- Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an event emitter. 
-- According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than `Object` on insertion, deletion and iteration speed, but it might take up more memory than `Object` of the same size. 
+- Use `Map` for dictionaries or hash maps where you have a variable number of entries, with frequent updates, whose keys might not be known at author time, such as an [event emitter](https://github.com/developit/mitt/blob/main/src/index.ts#L45). 
+- According to [my benchmarks](#performance-extravaganza), *unless* the keys are strings of small integers, `Map` is indeed **more performant** than `Object` on insertion, deletion and iteration speed, and it consumes **less memory** than `Object` of the same size. 
 
 ## Why Object falls short for a hash-map use case
 
@@ -157,7 +157,7 @@ But more importantly, `Map` provides a *clean separation* between user-defined a
 const [[firstKey, firstValue]] = map
 ```
 
-`Map` provides dedicated APIs for various common tasks:
+In contrast to `Object`, `Map` provides dedicated APIs for various common tasks:
 
 - `Map.prototype.has` checks for the existence of a given entry, less awkward compared to having to `Object.prototype.hasOwnProperty` / `Object.hasOwn` on objects
 - `Map.prototype.get` returns the value associated to the provided key. One might feel this is clunkier than the dot notation or the bracket notation on objects. Nevertheless it provides a clean separation between user data and built-in method.
@@ -200,7 +200,7 @@ function measureFor(f, duration) {
 
 As to deletion, I am simply going to measure the time taken for using the `delete` operator to remove all properties from an objects and compare it with the time with  `Map.prototype.delete` for a Map of the same size. I could use `Map.prototype.clear` but it defeats the purpose of the benchmarks as I know for sure it is going to be vastly faster.
 
-In these three operations, I pay more attention to *insertion* and *iteration* since it tends to be the most common operation I’d perform in my day-to-day work. However, this is definitely not an all-encompassing benchmarks for iteration performances as there are many different variants of iteration we can perform on a given object. Here I am only measuring the `for ... in` loop.
+In these three operations, I pay more attention to insertion since it tends to be the most common operation I perform in my day-to-day work. For iteration performance, it is hard to come up with an all-encompassing benchmarks as there are many different variants of iteration we can perform on a given object. Here I am only measuring the `for ... in` loop.
 
 I used three types of keys here:
 
@@ -289,39 +289,71 @@ The results are similar to those string-key cases: `Map`s start off as much fast
     <p>For example, with `width` being 100 and `depth` being 3, we have a total number of one million entries (100 * 100 * 100). The results are pretty much the same compared to just having `1000000` for width and 1 for `depth`</p>
 </details>
 
-### Some notes on memory usage
-
+### Memory usage
 Another important facet of benchmarking is memory utilization. 
 
-I created an empty class `MemoryTest` and attached the object and map to it so the memory usage can be captured with heap snapshots from the browser.
+Since I don’t have control over the garbage collector in a browser environment, I decided to run benchmarks in Node. 
+
+I created a [little script](https://gist.github.com/zhenghaohe/b496dcffe3a9a6217eba90776dc2cafe) to measure their respective memory usage with manually triggered full garbage collection in each measurement. Run it with `node --expose-gc` and I got the following results:
 
 ```jsx
-class MemoryTest {}
-
-const memoryTest = new MemoryTest();
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-	// ...
-	// memory usage
-  memoryTest.myObj = objToIterate;
-  memoryTest.myMap = mapToIterate;
+{
+  object: {
+    'string-key': {
+      '10000': 3.390625,
+      '50000': 19.765625,
+      '100000': 16.265625,
+      '500000': 71.265625,
+      '1000000': 142.015625
+    },
+    'numeric-key': {
+      '10000': 1.65625,
+      '50000': 8.265625,
+      '100000': 16.765625,
+      '500000': 72.265625,
+      '1000000': 143.515625
+    },
+    'integer-key': {
+      '10000': 0.25,
+      '50000': 2.828125,
+      '100000': 4.90625,
+      '500000': 25.734375,
+      '1000000': 59.203125
+    }
+  },
+  map: {
+    'string-key': {
+      '10000': 1.703125,
+      '50000': 6.765625,
+      '100000': 14.015625,
+      '500000': 61.765625,
+      '1000000': 122.015625
+    },
+    'numeric-key': {
+      '10000': 0.703125,
+      '50000': 3.765625,
+      '100000': 7.265625,
+      '500000': 33.265625,
+      '1000000': 67.015625
+    },
+    'integer-key': {
+      '10000': 0.484375,
+      '50000': 1.890625,
+      '100000': 3.765625,
+      '500000': 22.515625,
+      '1000000': 43.515625
+    }
+  }
 }
 ```
 
-After some attempts, the pattern I found about memory usage is still not as clean as I hoped.  that `Map`s are consistently taking up more memory. 
-
-- If the keys are string keys and numeric keys, `Map` uses more memory than `Object` does by anywhere from 30% to 60%.
-- If the keys are integer keys, in which case the V8 optimization for `Object` kick in, an object only needs **20%** of the memory that a `Map` of the same size takes.
-- However, if the keys are numeric keys *and* the number of entries is fewer than 3000 - 4000, `Object` ends up using 20% *more* memory than `Map`. If we have more than 5000 entries, then `Map` still consumes more memory.
-
-> If you know the reasons behind these seemingly inconsistent results or want to call out the flaws in my benchmarks, ping me. I'll be happy to update this post based on new information!
+It is pretty clear that `Map` consumes less memory than `Object` by anywhere from 20% to 50%, which is no surprise since `Map` doesn't store [property descriptors](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperties) such as `writable`/`enumerable`/`configurable` like `Object` does.
 
 ## Conclusion
 
 So what do we take away from all this?
 
-- `Map` is faster than `Object` *unless* you have small integer, array-indexed keys.
-- `Map` uses more memory than `Object` of the same size in most cases.
+- `Map` is faster than `Object` *unless* you have small integer, array-indexed keys, and it is more memory-efficient.
 - Use `Map` if you need a hash map with frequent updates; use `Object` if you want to a fixed key-value collection (i.e. record), and watch out for pitfalls that come with prototypal inheritance.
 
+> If you know the details of exactly how V8 optimizes `Map` or simply want to call out the flaws in my benchmarks, ping me. I'll be happy to update this post based on your information!

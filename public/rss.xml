@@ -4,18 +4,18 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Mon, 20 Jun 2022 05:58:38 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 20 Jun 2022 17:35:20 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
         <item>
-            <title><![CDATA[The missing guide to choosing between Object and Map in JavaScript]]></title>
+            <title><![CDATA[Why you should prefer Map over Object in JavaScript]]></title>
             <link>https://zhenghao.io/posts/object-vs-map</link>
             <guid>https://zhenghao.io/posts/object-vs-map</guid>
             <pubDate>Sat, 18 Jun 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[why you probably should use ES6 Map more]]></description>
-            <content:encoded><![CDATA[why you probably should use ES6 Map more]]></content:encoded>
+            <description><![CDATA[the missing guide to choosing between Object and Map in JavaScript]]></description>
+            <content:encoded><![CDATA[the missing guide to choosing between Object and Map in JavaScript]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>javascript</category>
         </item>
