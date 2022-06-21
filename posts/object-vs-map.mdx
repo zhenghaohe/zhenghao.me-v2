@@ -7,6 +7,8 @@ description: 'the missing guide to choosing between Object and Map in JavaScript
 tags: javascript
 ---
 
+> See discussions on [reddit](https://www.reddit.com/r/javascript/comments/vgs7y1/why_you_should_prefer_map_over_object_in/) 
+
 In JavaScript, objects are handy. They allow us to easily group multiple pieces of data together. After ES6, we got a new addition to the language - `Map` . In a lot of aspects, it seems like a more capable `Object` with a somewhat clumsy interface. However, most people still reach for objects when they need a [hash map](https://en.wikipedia.org/wiki/Hash_table) and only switch to using `Map` when they realize the keys can't just be strings for their use cases. As a result, `Map` remains **underused** in today's JavaScript community. 
 
 In this post, I will break down all the reasons when you should consider using `Map` more and its performance characteristics with benchmarks.
@@ -362,6 +364,6 @@ So what do we take away from all this?
 
 `Map` is an ES6 feature. By now most of us shouldn't be worried about its compatibility unless you are targeting a user-base with some niche, old browser. By "old" I mean older than IE 11 because even IE 11 supports [Map](https://caniuse.com/mdn-javascript_builtins_map) and at this point IE 11 is [dead](https://twitter.com/swyx/status/1536353949132853248). We shouldn't mindlessly transpiling and adding polyfill to target ES5 by default, because not only does it bloat your bundle size, but also it is slow to run compared to modern JavaScript. Most importantly, it penalizes 99.999% of your users who use a modern browser.
 
-Plus, we don't have to drop supports for legacy browsers - serve legacy code via `nomodule` by serving fallback bundles so that we can avoid degrading the experience of visitors with modern browsers. Refer to [*Transitioning to modern JavaScript*](https://www.youtube.com/watch?v=cLxNdLK--yI&t=188s) if you need more convincing.
+Plus, we don't have to drop supports for legacy browsers - serve legacy code via `nomodule` by serving fallback bundles so that we can avoid degrading the experience of visitors with modern browsers. Refer to [*Transitioning to modern JavaScript*](https://www.youtube.com/watch?v=cLxNdLK--yI) if you need more convincing.
 
 The JavaScript language is evolving and the platforms keep getting better at optimizing modern JavaScript. We shouldn't use browser compatibility as an excuse to ignore all the improvements that have been made.
