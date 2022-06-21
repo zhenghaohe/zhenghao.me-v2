@@ -22,7 +22,7 @@ In this post, I will break down all the reasons when you should consider using `
 
 ## Why Object falls short of a hash-map use case
 
-Probably the most obvious downside of using objects for hash maps is that objects only allow keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` method.
+Probably the most obvious downside of using objects for hash maps is that objects only allow keys that are strings and symbols. Any other types will be implicitly cast to string via the `toString` methods.
 
 ```jsx
 const foo = []
@@ -67,7 +67,7 @@ function foo(obj) {
 }
 ```
 
-There is a reliability hazard in `obj.hasOwnProperty(key)` : given how property resolution mechanism works in JavaScript, if `obj` contains a user-provided property with the same name `hasOwnProperty` , that shadows `Object.prototype.hasOwnProperty`. As a result, we *don’t know* which method is going to get called exactly during runtime. 
+There is a reliability hazard in `obj.hasOwnProperty(key)`: given how property resolution mechanism works in JavaScript, if `obj` contains a user-provided property with the same name `hasOwnProperty` , that shadows `Object.prototype.hasOwnProperty`. As a result, we *don’t know* which method is going to get called exactly during runtime. 
 
 Some defensive programming can be done to prevent this. For example we can “borrow” the "real" `hasOwnProperty` from `Object.prototype` instead:
 
