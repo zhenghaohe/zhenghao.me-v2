@@ -358,11 +358,10 @@ So what do we take away from all this?
 
 > If you know the details of exactly how V8 optimizes `Map` or simply want to call out the flaws in my benchmarks, ping me. I'll be happy to update this post based on your information!
 
-
 ## Notes on browser compatibility
 
-`Map` is an ES6 feature. By now most of us shouldn't be worried about its compatibility unless you are targeting some niche, old browser. By "old" I mean older than IE11 because even IE 11 supports [Map](https://caniuse.com/mdn-javascript_builtins_map) and IE 11 is [dead](https://twitter.com/swyx/status/1536353949132853248). We shouldn't mindlessly transpiling and adding polyfill to target ES5 by default, as it not only bloats your bundle size and is slow to run and penalizes 99.999% of your users that are using a normal browser that can support ES6.
+`Map` is an ES6 feature. By now most of us shouldn't be worried about its compatibility unless you are targeting a user-base with some niche, old browser. By "old" I mean older than IE 11 because even IE 11 supports [Map](https://caniuse.com/mdn-javascript_builtins_map) and at this point IE 11 is [dead](https://twitter.com/swyx/status/1536353949132853248). We shouldn't mindlessly transpiling and adding polyfill to target ES5 by default, because not only does it bloat your bundle size, but also it is slow to run compared to modern JavaScript. Most importantly, it penalizes 99.999% of your users who use a modern browser.
 
-Plus, we don't have to drop supports for legacy browsers - serve legacy code via `nomodule` by serving fallback bundles so we avoid degrading the experience of visitors that use modern browsers. Refer to [*Transitioning to modern JavaScript*](https://www.youtube.com/watch?v=cLxNdLK--yI&t=188s) if you need more convincing.
+Plus, we don't have to drop supports for legacy browsers - serve legacy code via `nomodule` by serving fallback bundles so that we can avoid degrading the experience of visitors with modern browsers. Refer to [*Transitioning to modern JavaScript*](https://www.youtube.com/watch?v=cLxNdLK--yI&t=188s) if you need more convincing.
 
 The JavaScript language is evolving and the platforms keep getting better at optimizing modern JavaScript. We shouldn't use browser compatibility as an excuse to ignore all the improvements that have been made.
