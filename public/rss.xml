@@ -4,13 +4,13 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Tue, 21 Jun 2022 04:01:33 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 21 Jun 2022 16:20:59 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
         <item>
-            <title><![CDATA[Why You Might Prefer Map Over Object In JavaScript]]></title>
+            <title><![CDATA[When You Should Prefer Map Over Object In JavaScript]]></title>
             <link>https://zhenghao.io/posts/object-vs-map</link>
             <guid>https://zhenghao.io/posts/object-vs-map</guid>
             <pubDate>Sat, 18 Jun 2022 07:00:00 GMT</pubDate>
