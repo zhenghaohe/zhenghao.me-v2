@@ -26,7 +26,7 @@ Note that the addition *must* be done by `addRemote` .
 You can assume all inputs are valid numbers.
 
 --------------------
-Here we use `setTimout` to simulate the API call.
+Here we use `setTimeout` to simulate the API call.
 
 ```javascript
 const addRemote = async (a, b) =>
@@ -108,7 +108,7 @@ function getSum(...numbers) {
         If you are struggling to understand exactly why this solution even works with `reduce`, I suggest [this article](https://css-tricks.com/why-using-reduce-to-sequentially-resolve-promises-works/) by Alex. 
 </details>
 
-## Parallel solution
+## Concurrent solution
 
 The previous sequential solution works but it is *unnecessarily slow*, as every addition is performed sequentially one at a time when in fact they are not interdependent.
 
@@ -127,7 +127,7 @@ I drew a graph to illustrate the series of additions. It is not hard to tell wha
 
 ![alt](/art/blog/remote-add/sequential.png)
 
-A better approach would be to perform the async additions in parallel to speed up the process with a parallel approach.
+A better approach would be to perform the async additions concurrently to speed up the process.
  
 
 In the previously example, instead of waiting for `remoteAdd(0,1)`to resolve before we can call `remoteAdd(2,3)`, we can fire off `remoteAdd(0,1)`, `remoteAdd(2,3)` ,`remoteAdd(4,5)` ,`remoteAdd(6,7)` and `remoteAdd(8,9)` at the same time.  We can leverage `Promise.all` to get the results back all at once in a single promise. Then we continue to add up the intermediate sums recursively until we are left with only one number, by then we know we have reached the final sum.
@@ -141,10 +141,10 @@ Here is a graph to illustrate what we are going to do in the second, improved so
 <details>
     <summary>Before we jump to the implementation, let’s think about some real-world constraints first...</summary>
     <p>During an interview, it is important to communicate with your interviewer to check your assumption and ask clarifying questions.</p>
-    <p>In this case, since we are switching to an approach with making multiple requests in parallel, it is important to understand if our `remoteAdd` API is **rate-limited** or not. Most of API providers will limit the number of requests within any given second so sending too many requests in quick succession may trigger rate limiting and result in a [status code 429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429). So check with the interviewer on this before continuing.</p>
+    <p>In this case, since we are switching to an approach with making multiple requests concurrently, it is important to understand if our `remoteAdd` API is **rate-limited** or not. Most of API providers will limit the number of requests within any given second so sending too many requests in quick succession may trigger rate limiting and result in a [status code 429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429). So check with the interviewer on this before continuing.</p>
 </details>
 
-Here is the parallel solution:
+Here is the concurrent solution:
 
 ```javascript
 function add(...inputs) {
@@ -163,8 +163,8 @@ function add(...inputs) {
 You can see that the amount of time needed has been cut down by 50%; it only takes around 400 ms.
 
 ```javascript
-console.time('parallel')
-add(1,2,3,4,5,6,7,8,9).then(sum => console.timeEnd('parallel'))
+console.time('concurrent')
+add(1,2,3,4,5,6,7,8,9).then(sum => console.timeEnd('concurrent'))
 // 413.84619140625 ms
 ```
 
@@ -190,6 +190,6 @@ How to optimize the performance of a React app is outside the scope of this post
 
 Clearly we don't have to repeatedly call `addRemote` to add up numbers that we have the sum for. By adding a cache to `remoteAdd` we can avoid those re-computations. However, there are a few things to consider before we jump to the implementation:
 
-1. since addition has associtiy and communiv , `addRemote(1,2)` and `addRemote(2,1)` give us the same result even though the inputs are different. Our cache needs to account for that. 
+1. since addition has associative and commutative, `addRemote(1,2)` and `addRemote(2,1)` give us the same result even though the inputs are different. Our cache needs to account for that. 
 2. how big is our cache going to be and what eviction strategy do we want to use?
 3. how do we invalidate our cache if for some reason `addRemote`'s results change over time (yea I know I might be stretching this question too far so I will stop here)
