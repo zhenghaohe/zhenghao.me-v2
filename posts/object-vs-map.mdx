@@ -75,8 +75,8 @@ Some defensive programming can be done to prevent this. For example we can “bo
  function foo(obj) {
 	//...
 	for(const key in obj) {
-		if(Object.prototype.hasOwnProperty.call(key)) {
-			
+		if(Object.prototype.hasOwnProperty.call(obj, key)) {
+			// ...
 		}
 	}
 }
