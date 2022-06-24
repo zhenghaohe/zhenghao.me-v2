@@ -34,7 +34,7 @@ module.exports = {
         'hovered-tag': '#ffd090',
         'unhovered-tag': '#faebd7',
         // 'hovered-tag-dark': '#b07065',
-        'hovered-tag-dark': '#bc857c',
+        'hovered-tag-dark': '#98787c',
         'unhovered-tag-dark': '#292524',
         primary: 'var(--color-text)',
         secondary: 'var(--color-text-secondary)',
