@@ -68,7 +68,7 @@ However, by assigning the `url` to the `src` attribute of an image tag, the brow
 
 Turns out there is a way to find out if a url links to an image file *without* incurring the cost of downloading. That is, to send a `HEAD` request to get the [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) from the `Content-Type` header. 
 
-As we have seen previously, file extensions are not a *necessary* part of an url. Instead, browsers use [MIME Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) to interpret the contents of requested files. When a image file comes off the network, browsers look at the response's `Content-type` header for its MIME type and invoke the appropriate decoder to decompress the image file. 
+As we have seen previously, file extensions are not a *necessary* part of a url. Instead, browsers use [MIME Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) to interpret the contents of requested files. When a image file comes off the network, browsers look at the response's `Content-type` header for its MIME type and invoke the appropriate decoder to decompress the image file. 
 
 Different image formats all start with the `image` MIME type, along with different subtypes. For example, For example, the MIME type of a `jpeg` file is `image/jpeg`, and for a `png` file it is `image/png`. Therefore, we only need to check if the MIME type starts with `image`:
 
