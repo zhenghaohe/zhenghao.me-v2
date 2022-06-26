@@ -24,7 +24,7 @@ function isImgUrl(url) {
 
 The most obvious drawback with this approach is that I have to list out every single possible image file extension in the regex. 
 
-Also, it is based on a false premise: all image urls must have the correct file extension appended at the end. The reality is, on the web, file extensions don't really matter. For example, this url `https://avatars.githubusercontent.com/u/33640448?v=4` links to my [github profile picture](https://avatars.githubusercontent.com/u/33640448?v=4), but it doesn't end up with any image file extension. The current solution fails to cover this edge case.
+Also, it is based on a false premise: all image urls must have the correct file extension appended at the end. The reality is, on the web, file extensions don't really matter. For example, this url `https://avatars.githubusercontent.com/u/33640448?v=4` links to my [Github profile picture](https://avatars.githubusercontent.com/u/33640448?v=4), but it doesn't end up with any image file extension. The current solution fails to cover this edge case.
 
 ## Image's onload event
 
