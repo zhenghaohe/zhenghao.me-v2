@@ -3,7 +3,7 @@ title: JSON and the stringification oddities in JavaScript
 published: true
 listed: true
 date: '05/19/2022'
-lastUpdateDate: '06/07/2022'
+lastUpdateDate: '06/26/2022'
 tags: javascript
 ---
 
@@ -89,7 +89,7 @@ JSON.stringify({foo: () => {}}) // '{}'
 ```
 
 
-On the other hand, for other built-in object types such as `Map`, `Set`, `Regex` that exist in an array or an object, after the conversion done by `JSON.stringify` , they all become strings of an empty object literal, i.e. `{}`:
+On the other hand, for other built-in object types such as `Error`, `Map`, `Set`, `Regex` that exist in an array or an object, after the conversion done by `JSON.stringify` , they all become strings of an empty object literal, i.e. `{}`:
 
 ```javascript
 JSON.stringify([/foo/]) // '[{}]'
