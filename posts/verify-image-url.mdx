@@ -3,6 +3,7 @@ title: Verify if a url links to an image (without relying on regex)
 published: true
 listed: true
 date: '06/14/2022'
+lastUpdateDate: '06/26/2022'
 tags: javascript
 description: one of the rare cases that I need to work with MIME types in frontend web development
 ---
@@ -13,7 +14,7 @@ I started with the most obvious solution: regular expressions.
 
 ## Regex
 
-A list of common image file types that are supported by most browsers can be found on [this MDN page](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types). I can check if the url ends with one of these filename extensions:
+A list of common image file types that are supported by most browsers can be found on [this MDN page](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types). I can check if the url ends with one of these file extensions:
 
 ```javaScript
 function isImgUrl(url) {
@@ -21,7 +22,9 @@ function isImgUrl(url) {
 }
 ```
 
-However, not only do I have to list out every single possible image filename extension in the regex, this approach wrongly assumes that all urls must have the correct filename extension appended at the end, which _isn't_ always the case. For example, the url of my [github profile picture](https://avatars.githubusercontent.com/u/33640448?v=4) (`https://avatars.githubusercontent.com/u/33640448?v=4`) links to an image, but it doesn't end up with any image filename extension. The current solution doesn't cover this edge case.
+The most obvious drawback with this approach is that I have to list out every single possible image file extension in the regex. 
+
+Also, it is based on a false premise: all image urls must have the correct file extension appended at the end. The reality is, on the web, file extensions don't really matter. For example, this url `https://avatars.githubusercontent.com/u/33640448?v=4` links to my [github profile picture](https://avatars.githubusercontent.com/u/33640448?v=4), but it doesn't end up with any image file extension. The current solution fails to cover this edge case.
 
 ## Image's onload event
 
@@ -38,7 +41,7 @@ function isImgUrl(url) {
 }
 ```
 
-Now it works with urls that don't have the filename extensions attached.
+This approach works with urls that don't have file extensions attached.
 
 ```jsx
 function isImgUrl(url) {
@@ -63,7 +66,12 @@ However, by assigning the `url` to the `src` attribute of an image tag, the brow
 
 ## Sending HEAD requests and only check for the MIME type
 
-Turns out there is a way to find out if a url links to an image file *without* incurring the cost of downloading. That is, to send a `HEAD` request to get the [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) from the `Content-Type` header.
+Turns out there is a way to find out if a url links to an image file *without* incurring the cost of downloading. That is, to send a `HEAD` request to get the [MIME type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) from the `Content-Type` header. 
+
+As we have seen previously, file extensions are not a *necessary* part of an url. Instead, browsers use [MIME Type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) to interpret the contents of requested files. When a image file comes off the network, browsers look at the response's `Content-type` header for its MIME type and invoke the appropriate decoder to decompress the image file. 
+
+Different image formats all start with the `image` MIME type, along with different subtypes. For example, For example, the MIME type of a `jpeg` file is `image/jpeg`, and for a `png` file it is `image/png`. Therefore, we only need to check if the MIME type starts with `image`:
+
 
 ```jsx
 function isImgUrl(url) {
@@ -73,4 +81,4 @@ function isImgUrl(url) {
 }
 ```
 
-This works because all supported image types are nicely grouped under the `image/` MIME type. For example, the MIME type of a `jpeg` file is `image/jpeg` , and for a `png` file it is `image/png` , so we just need to check if the MIME type starts with the word `image`.
+Now without having to incur the overhead of a full response payload, we get to know if a given url links to an image file.
