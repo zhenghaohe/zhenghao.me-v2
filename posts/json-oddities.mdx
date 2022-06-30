@@ -3,7 +3,7 @@ title: JSON and the stringification oddities in JavaScript
 published: true
 listed: true
 date: '05/19/2022'
-lastUpdateDate: '06/26/2022'
+lastUpdateDate: '06/29/2022'
 tags: javascript
 ---
 
@@ -137,7 +137,6 @@ I know this is a lot to remember so I put together a cheatsheet for you to refer
 
 ![alt](/art/blog/json-oddities/cheatsheet.png)
 
-
 ## Customize the encoding
 What we have discussed so far is the default behaviour of how JavaScript encodes values into JSON strings via `JSON.stringify`. There are two ways you can take control over the conversion:
 1. Adding a `toJSON` method to the object you passed to `JSON.stringify`. This is why passing `Date` objects to `JSON.stringify` doesn't lead to an empty object literal because a `Date` object inherits a `toJSON` method from its prototype.
@@ -150,7 +149,7 @@ What we have discussed so far is the default behaviour of how JavaScript encodes
     ```
 2. `JSON.stringify` takes an optional parameter called [replacer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#the_replacer_parameter), which can be either a function or an array, to alter the default behavior of the stringification process.
 
-
+ss
 ## Implement a simplified JSON.stringify from scratch
 
 I heard people ask this in a technical interview. Here is my attempt.
@@ -248,7 +247,7 @@ function jsonStringify(data) {
   }
 }
 ```
-
+> Checkout [safe-stable-stringify](https://www.npmjs.com/package/safe-stable-stringify), an safer alternative to `JSON.stringify`, which gracefully handles cyclic objects and `bigint`.
 
 ## Further Reading
  - [the stringify spec](https://262.ecma-international.org/5.1/#sec-15.12.3)
