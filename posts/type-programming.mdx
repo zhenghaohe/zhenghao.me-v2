@@ -3,7 +3,7 @@ title: An introduction to type programming in TypeScript
 published: true
 listed: true
 date: '01/31/2022'
-lastUpdateDate: '03/01/2022'
+lastUpdateDate: '06/29/2022'
 description: Learn to write types using the type language and leverage your existing javascript knowledge to master TypeScript quicker
 tags: typescript
 ---
@@ -303,7 +303,9 @@ function fillArray(item, n, array = []) {
 
 How do we write out the equivalence in our type language? Here are logical steps to arrive at one solution:
 1. create a generic type called `FillArray` (remember we talked about that generics in our type language are just like functions?)
-    - `FillArray<Item, N extends number, Array extends Item[] = []>`
+    ```typescript
+        FillArray<Item, N extends number, Array extends Item[] = []>
+    ```
 2. Inside the "function body", we need to check if the `length` property on `Array` is already `N` using the `extends` keyword.
     - if it has reached to `N` (the base case), then we simply return `Array` 
     - if it hasn't reached to `N`, it recurses and added one more `Item` into `Array`
