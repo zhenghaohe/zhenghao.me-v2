@@ -3,7 +3,7 @@ title: Verify if a url links to an image (without relying on regex)
 published: true
 listed: true
 date: '06/14/2022'
-lastUpdateDate: '06/26/2022'
+lastUpdateDate: '06/29/2022'
 tags: javascript
 description: one of the rare cases that I need to work with MIME types in frontend web development
 ---
@@ -82,3 +82,6 @@ function isImgUrl(url) {
 ```
 
 Now without having to incur the overhead of a full response payload, we get to know if a given url links to an image file.
+
+> Note that this is still not a production grade solution.
+> There a few noticeable drawbacks to it: 1. it doesn't work when the request is rejected by CORS 2. it doesn't work with images formats that are not supported by browsers.
