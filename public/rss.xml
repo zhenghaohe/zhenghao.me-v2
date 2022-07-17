@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Thu, 30 Jun 2022 03:27:49 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 17 Jul 2022 20:14:02 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Understand JavaScript Memory Leaks with queryObjects]]></title>
+            <link>https://zhenghao.io/posts/queryObjects</link>
+            <guid>https://zhenghao.io/posts/queryObjects</guid>
+            <pubDate>Sun, 17 Jul 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[An API shipped with Chrome Dev console turns out to be a surprisingly easy way to observe how garbage collection works in JavaScript]]></description>
+            <content:encoded><![CDATA[An API shipped with Chrome Dev console turns out to be a surprisingly easy way to observe how garbage collection works in JavaScript]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>javascript</category>
+        </item>
         <item>
             <title><![CDATA[When You Should Prefer Map Over Object In JavaScript]]></title>
             <link>https://zhenghao.io/posts/object-vs-map</link>
