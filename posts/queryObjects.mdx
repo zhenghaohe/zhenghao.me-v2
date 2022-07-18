@@ -188,7 +188,7 @@ setInterval(foo, 1000);
 
 These examples are derived from *[A surprising JavaScript memory leak found at Meteor](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).* I don't think I can adequately explain the reasons behind the memory leaks in the nested `setInterval` example so I won't try here. If you know the exact reason behind it, please let me know, and I will update the post.
 
-### never-settling Promises
+### Promises that are never settled
 
 I have to admit that this garbage collection behavior with `Promise`s was unexpected to me. 
 
