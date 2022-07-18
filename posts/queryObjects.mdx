@@ -10,7 +10,7 @@ Memory leaks has been a relatively underdiscussed topic in the JavaScript commun
 
 However, as the legendary Douglas Crockford predicted in his nearly 20-year-ago blog post [*JScript Memory Leaks*](http://www.crockford.com/javascript/memory/leak.html), the problem with memory leaks has become more prominent with the recent rise of SPA, where web pages are becoming **web apps** with much deeper user session.
 
-Identifying and debugging JavaScript memory leaks has been mostly an effort involving taking heap snapshots, manually compare them, cut through the noise, and diff out the culprit that caused the leaks. It is a time-consuming task that can’t be easily automated.
+Identifying and debugging JavaScript memory leaks has been mostly an effort involving taking heap snapshots, manually comparing them, cutting through the noise, and diffing out the culprit that caused the leaks. It is a time-consuming task that can’t be easily automated.
 
 In this post I want to show you how we can leverage a lesser-known API called `queryObjects` to understand and detect memory leaks in Chrome from the DevTools Console. 
 
