@@ -4,13 +4,13 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Mon, 18 Jul 2022 05:43:10 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 19 Jul 2022 02:14:06 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
         <item>
-            <title><![CDATA[Understand JavaScript Memory Leaks with queryObjects]]></title>
+            <title><![CDATA[Detect JavaScript Memory Leaks with queryObjects]]></title>
             <link>https://zhenghao.io/posts/queryObjects</link>
             <guid>https://zhenghao.io/posts/queryObjects</guid>
             <pubDate>Sun, 17 Jul 2022 07:00:00 GMT</pubDate>
