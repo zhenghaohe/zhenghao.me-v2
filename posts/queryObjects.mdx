@@ -98,7 +98,7 @@ This is expected behavior: the returned function `bar` reads th`test`'s property
 <details>
     <summary>how do we fix it?</summary>
     <p>
-The fix is easy: just have a separate reference to `test.b` and use that instead from the returned function.
+We can fix it by adding a separate reference to `test.b` and use that instead from the returned function.
 
 ```tsx
 function foo() {
@@ -190,6 +190,9 @@ function foo() {
 setInterval(foo, 1000);
 ```
 
+<details>
+    <summary>how do we fix it?</summary>
+    <p>
 The fix is easy though: just clear the nested `setInterval` via `clearInterval`.
 
 ```js
@@ -207,6 +210,13 @@ function foo() {
 }
 setInterval(foo, 1000);
 ```
+
+</p>
+</details>
+
+
+
+
 
 > These examples are derived from [*A surprising JavaScript memory leak found at Meteor*](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).
 
