@@ -3,16 +3,18 @@ title: Detect JavaScript Memory Leaks with queryObjects
 published: true
 listed: true
 date: '07/17/2022'
+lastUpdateDate: '07/24/2022'
 description: 'An API shipped with Chrome Dev console turns out to be a surprisingly easy way to observe how garbage collection works in JavaScript'
 tags: javascript
 ---
+
 Memory leaks has been a relatively underdiscussed topic in the JavaScript community, largely because client-side JavaScript, shipped with web pages to browsers, are typically short-lived, compared with their server-side counterpart. Most of the times, a web page doesn't stay open for long and once the user refresh the page or close the tab, memory retained by JavaScript all get automatically released and recycled.
 
-However, as the legendary Douglas Crockford predicted in his nearly 20-year-ago blog post [*JScript Memory Leaks*](http://www.crockford.com/javascript/memory/leak.html), the problem with memory leaks has become more prominent with the recent rise of SPA, where web pages are becoming **web apps** with much deeper user session.
+However, as the legendary Douglas Crockford predicted in his nearly 20-year-ago blog post [_JScript Memory Leaks_](http://www.crockford.com/javascript/memory/leak.html), the problem with memory leaks has become more prominent with the recent rise of SPA, where web pages are becoming **web apps** with much deeper user session.
 
 Identifying and debugging JavaScript memory leaks has been mostly an effort involving taking heap snapshots, manually comparing them, cutting through the noise, and diffing out the culprit that caused the leaks. It is a time-consuming task that can’t be easily automated.
 
-In this post I'll show you how we can leverage a lesser-known API called `queryObjects` to detect memory leaks in Chrome from the DevTools Console. 
+In this post I'll show you how we can leverage a lesser-known API called `queryObjects` to detect memory leaks in Chrome from the DevTools Console.
 
 > Note that this post doesn't try to outline a comprehensive list of possible memory leaks in JavaScript applications and how to fix them. For those who are interested in that, I recommend [this](https://nolanlawson.com/2020/02/19/fixing-memory-leaks-in-web-applications/) and [this post](https://nolanlawson.com/2022/01/05/memory-leaks-the-forgotten-side-of-web-performance/) written by the amazing Nolan Lawson.
 
@@ -21,8 +23,8 @@ In this post I'll show you how we can leverage a lesser-known API called `queryO
 [queryObjects](https://developer.chrome.com/docs/devtools/console/utilities/#queryObjects-function) takes a constructor and returns an array of objects that were created with the input constructor.
 
 ```tsx
-const array = new Uint8Array(1_000_000_000) // allocating 1GB memory
-queryObjects(Uint8Array) // logs out an array of all existing uint8 arrays
+const array = new Uint8Array(1_000_000_000); // allocating 1GB memory
+queryObjects(Uint8Array); // logs out an array of all existing uint8 arrays
 ```
 
 At the surface it looks like an API to query how many instances of a given class has been created so far. However, it has [an undocumented feature](https://twitter.com/ChromeDevTools/status/1250355473661882369) of forcing a garbage collection whenever it's called.
@@ -31,13 +33,18 @@ My performance profiling results also confirm this.
 
 ![alt](/art/blog/queryObjects/perf_profiling.png)
 
-Its ability to query live objects in memory after triggering a garbage collection is a perfect lens into memory allocation and can be served as an educational tool to observe and understand how memory leaks happens without having to look through and diff heap snapshots. 
+Its ability to query live objects in memory after triggering a garbage collection is a perfect lens into memory allocation and can be served as an educational tool to observe and understand how memory leaks happens without having to look through and diff heap snapshots.
 
-Beyond that, you can even write [automated tests](https://github.com/chrisguttandin/standardized-audio-context/blob/master/test/memory/module.js#L35) with it. Christoph Guttandin wrote a [blog post](https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer) on how to programmatically detects memory leaks by leveraging `queryObjects`.
+Beyond that, you can even write [automated tests](https://github.com/chrisguttandin/standardized-audio-context/blob/master/test/memory/module.js#L35) with it. Christoph Guttandin wrote a [blog post](https://media-codings.com/articles/automatically-detect-memory-leaks-with-puppeteer) on how to programmatically detect memory leaks by leveraging `queryObjects`.
 
 <details>
-    <summary>`queryObjects` is only available in Chrome</summary>
-    <p>`queryObjects` is a Chrome DevTools API. I don't know if there are an exact equivalent in other browsers. But given how ubiquitous Chromium and V8 are in the current JavaScript landscape, the garbage collection behavior could very likely be consistent across different platforms and browsers. I am not 100% sure though.</p>
+  <summary>`queryObjects` is only available in Chrome</summary>
+  <p>
+    `queryObjects` is a Chrome DevTools API. I don't know if there are an exact equivalent in other
+    browsers. But given how ubiquitous Chromium and V8 are in the current JavaScript landscape, the
+    garbage collection behavior could very likely be consistent across different platforms and
+    browsers. I am not 100% sure though.
+  </p>
 </details>
 
 ## Minimal reproducible memory leaks examples
@@ -52,18 +59,18 @@ This can happen accidentally under non-strict mode:
 
 ```tsx
 function fn() {
-	foo = new Uint8Array(1_000_000_000)
+  foo = new Uint8Array(1_000_000_000);
 }
 
-fn()
-queryObjects(Uint8Array) // logs out an array of uint8Arrays
+fn();
+queryObjects(Uint8Array); // logs out an array of uint8Arrays
 ```
 
 ### closure
 
-JavaScript is a celebration of closures, where a function can freely access free variables (i.e. variables declared outside the function). 
+JavaScript is a celebration of closures, where a function can freely access free variables (i.e. variables declared outside the function).
 
-Closure is what makes JavaScript an interesting language, but that doesn't come for free: the engine has to keep free variables in memory even after the function where those variables defined finishes execution. It causes *memory retention*, but we don't normally equate that to memory leaks, unless the browser itself is buggy.
+Closure is what makes JavaScript an interesting language, but that doesn't come for free: the engine has to keep free variables in memory even after the function where those variables defined finishes execution. It causes _memory retention_, but we don't normally equate that to memory leaks, unless the browser itself is buggy.
 
 In the following example, the returned function `bar` closes over object `test`, thus retaining the memory allocated for it.
 
@@ -71,23 +78,22 @@ In the following example, the returned function `bar` closes over object `test`,
 class Test {}
 
 function foo() {
-    const test = new Test()
-    test.a = new Uint8Array(1_000_000_000)
-    test.b = 'foo'
+  const test = new Test();
+  test.a = new Uint8Array(1_000_000_000);
+  test.b = 'foo';
 
-    return () => {
-        console.log(test.b)
-    }
+  return () => {
+    console.log(test.b);
+  };
 }
 
-const bar = foo()
+const bar = foo();
 
-queryObjects(Uint8Array) // ❌ [uint8Array]
-queryObjects(Test)  // ❌ [{Test}]
+queryObjects(Uint8Array); // ❌ [uint8Array]
+queryObjects(Test); // ❌ [{Test}]
 ```
 
 This is expected behavior: the returned function `bar` reads th`test`'s property, that's why its memory, along with the giant `Uint8Array`, is retained.
-
 
 <details>
     <summary>how do we fix it?</summary>
@@ -96,70 +102,71 @@ The fix is easy: just have a separate reference to `test.b` and use that instead
 
 ```tsx
 function foo() {
-    const test = new Test()
-    test.a = new Uint8Array(1_000_000_000)
-    test.b = 'foo'
+  const test = new Test();
+  test.a = new Uint8Array(1_000_000_000);
+  test.b = 'foo';
 
-    const { b } = test
+  const { b } = test;
 
-    return () => {
-        console.log(b)
-    }
+  return () => {
+    console.log(b);
+  };
 }
 
-queryObjects(Uint8Array) // ✅ empty array
-queryObjects(Test) // ✅ empty array
+queryObjects(Uint8Array); // ✅ empty array
+queryObjects(Test); // ✅ empty array
 ```
+
 </p>
 </details>
 
-The memory retention is easy to identify in the above example. Perhaps a more confusing example is when you have a *write-only* variables captured in the closure:
+The memory retention is easy to identify in the above example. Perhaps a more confusing example is when you have a _write-only_ variables captured in the closure:
 
 ```tsx
 function fn() {
-  let a
+  let a;
 
   return () => {
-     a = new Uint8Array(1_000_000_000)
+    a = new Uint8Array(1_000_000_000);
   };
-};
+}
 const foo = fn();
 
-foo()
+foo();
 ```
 
-In this example, `foo` doesn't *read* variable `a` from its closure. It only *writes* to it. On top of that, there is no way for us to reach to the enclosed variable `a` from outside. It seems like `a` can be safely garbage collected. However our test with `queryObjects` tells us the memory allocated for `a` is still retained. 
+In this example, `foo` doesn't _read_ variable `a` from its closure. It only _writes_ to it. On top of that, there is no way for us to reach to the enclosed variable `a` from outside. It seems like `a` can be safely garbage collected. However our test with `queryObjects` tells us the memory allocated for `a` is still retained.
 
 ```tsx
 function fn() {
-  let a
+  let a;
 
   return () => {
-     a = new Uint8Array(1_000_000_000)
+    a = new Uint8Array(1_000_000_000);
   };
-};
+}
 const foo = fn();
 
-foo()
-queryObjects(Uint8Array) // ❌ [uint8Array]
+foo();
+queryObjects(Uint8Array); // ❌ [uint8Array]
 ```
 
-In theory a highly-optimized JavaScript engine could release the memory retained for `a`  for the case as it is write-only. However it is not an easy task as it faces [the halting problem](https://en.wikipedia.org/wiki/Halting_problem). Furthermore, such a mistake can be easily prevented by [a linter](https://eslint.org/docs/latest/rules/no-unused-vars).
+In theory a highly-optimized JavaScript engine could release the memory retained for `a` for the case as it is write-only. However it is not an easy task as it faces [the halting problem](https://en.wikipedia.org/wiki/Halting_problem). Furthermore, such a mistake can be easily prevented by [a linter](https://eslint.org/docs/latest/rules/no-unused-vars).
 
 ### setInterval
 
 `setInterval` seems to be another usual suspect for memory leaks. Its recurring nature makes the issue even worse; memory leaks caused by it escalate very quickly.
 
-But first,  `setInterval` *alone* doesn't cause memory leaks. It doesn't prevent the callback passed to it from being garbage collected:
+But first, `setInterval` _alone_ doesn't cause memory leaks. It doesn't prevent the callback passed to it from being garbage collected:
 
 ```tsx
-const myQueryObject = queryObjects // had to call the original queryObjects from a different reference
+const myQueryObject = queryObjects; // had to call the original queryObjects from a different reference
 
 function foo() {
-  const array = new Uint8Array(1_000_000_000)
+  const array = new Uint8Array(1_000_000_000);
 
-  myQueryObject(Uint8Array) // ✅ empty array
-};
+  myQueryObject(Uint8Array); // ✅ empty array
+}
 
 setInterval(foo, 1000);
 ```
@@ -169,24 +176,39 @@ In the above example, even though we invoke `foo` every second, `array`'s memory
 However, nested `setInterval`s cause memory leaks. In the following example we can observe that `queryObjects` logs out an ever-growing array, which gets a new `Uint8Array` added every second.
 
 ```tsx
-
-const myQueryObject = queryObjects
+const myQueryObject = queryObjects;
 
 function foo() {
-  const array = new Uint8Array(1_000)
+  const array = new Uint8Array(1_000);
 
-	setInterval(() => {
-        array // referencing `array`
-    }, 1000);
-    
-   myQueryObject(Uint8Array) // 🔥 ever-growing array of uint8Arrays
-  
-};
+  setInterval(() => {
+    array; // referencing `array`
+  }, 1000);
+
+  myQueryObject(Uint8Array); // 🔥 ever-growing array of uint8Arrays
+}
 setInterval(foo, 1000);
-
 ```
 
-These examples are derived from *[A surprising JavaScript memory leak found at Meteor](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).* I don't think I can adequately explain the reasons behind the memory leaks in the nested `setInterval` example so I won't try here. If you know the exact reason behind it, please let me know, and I will update the post.
+The fix is easy though: just clear the nested `setInterval` via `clearInterval`.
+
+```js
+const myQueryObject = queryObjects;
+
+function foo() {
+  const array = new Uint8Array(1_000);
+
+  const intervalId = setInterval(() => {
+    array; // referencing `array`
+  }, 1000);
+
+  myQueryObject(Uint8Array); // ✅ empty array
+  clearInterval(intervalId);
+}
+setInterval(foo, 1000);
+```
+
+> These examples are derived from [*A surprising JavaScript memory leak found at Meteor*](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).
 
 ### Promises that are never settled
 
@@ -195,31 +217,32 @@ Nolan noted in his [blog post](https://nolanlawson.com/2020/02/19/fixing-memory-
 In the following code snippet, we create a `Promise` , and that **never** gets resolved or rejected. We then attach a callback that allocates a giant `Uint8Array` to its `then`.
 
 ```tsx
-const p = new Promise((resolve, reject) => {})
-const giantArrayPromise = p.then(() => new Uint8Array(1_000_000_000))
+const p = new Promise((resolve, reject) => {});
+const giantArrayPromise = p.then(() => new Uint8Array(1_000_000_000));
 
-queryObjects(Uint8Array) // ✅ empty array
+queryObjects(Uint8Array); // ✅ empty array
 ```
 
-This is expected. Since it never resolves, the callback is never called. Therefore that `Uint8Array` shouldn't get allocated in the first place. 
+This is expected. Since it never resolves, the callback is never called. Therefore that `Uint8Array` shouldn't get allocated in the first place.
 
 Maybe Nolan was referring to something slightly different here? Let's tweak the previous example a bit:
 
 ```js
 const callbackFn = () => {
-    const a = new Uint8Array(1_000_000_000);
-    return () => a;
-}
+  const a = new Uint8Array(1_000_000_000);
+  return () => a;
+};
 
-const p = new Promise((resolve, reject) => {})
-p.then(callbackFn())
+const p = new Promise((resolve, reject) => {});
+p.then(callbackFn());
 
-queryObjects(Uint8Array) // ❌ [uint8Array]
+queryObjects(Uint8Array); // ❌ [uint8Array]
 ```
 
-This time `Uint8Array` does leak. 
+This time `Uint8Array` does leak.
 
 The second example looks pretty similar to our first [closure example](#closure). The difference here is that, instead of storing the returned function to a variable like we did in the closure example, we attach that function to a `Promise`'s `then`, and that caused memory leaks.
+
 ## Final thoughts
 
 Although `queryObjects` might not help much with debugging memory leaks in production, it serves as a great tool to programmatically detect memory leaks with a quick feedback loop. I found it invaluable when it comes to create a minimal reproducible examples of memory leaks and quickly validate assumptions.
