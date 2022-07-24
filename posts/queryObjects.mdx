@@ -238,13 +238,17 @@ This is expected. Since it never resolves, the callback is never called. Therefo
 Maybe Nolan was referring to something slightly different here? Let's tweak the previous example a bit:
 
 ```js
-const callbackFn = () => {
-  const a = new Uint8Array(1_000_000_000);
+let giantArray = new Uint8Array(1_000_000_000)
+
+function foo() {
+  const a = giantArray;
   return () => a;
 };
 
 const p = new Promise((resolve, reject) => {});
-p.then(callbackFn());
+p.then(foo());
+
+giantArray = null
 
 queryObjects(Uint8Array); // ❌ [uint8Array]
 ```
