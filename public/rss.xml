@@ -4,11 +4,21 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sun, 24 Jul 2022 20:51:31 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 04 Aug 2022 18:36:43 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Working with dates using Regex Named Capture Groups]]></title>
+            <link>https://zhenghao.io/posts/dates-regex</link>
+            <guid>https://zhenghao.io/posts/dates-regex</guid>
+            <pubDate>Thu, 04 Aug 2022 07:00:00 GMT</pubDate>
+            <description><![CDATA[A feature added in ES2018 makes working with dates in different formats a bit easier]]></description>
+            <content:encoded><![CDATA[A feature added in ES2018 makes working with dates in different formats a bit easier]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>javascript</category>
+        </item>
         <item>
             <title><![CDATA[Detect JavaScript Memory Leaks with queryObjects]]></title>
             <link>https://zhenghao.io/posts/queryObjects</link>
