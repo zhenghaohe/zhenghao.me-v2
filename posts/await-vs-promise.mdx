@@ -1,0 +1,276 @@
+---
+title: Why async/await is more than just syntactic sugar
+published: true
+listed: true
+date: '08/08/2022'
+tags: javascript
+description: My takes on async/await vs Promise
+---
+
+Despite thousands of posts on `async/await` vs. `Promise` already existing, many of them left a lot to be desired. So I want to write up my own post on this topic.
+
+The point I like to make in this post is that async/await is more than syntactic sugar on top of `Promise`, as `async/await` do offer tangible benefits.
+
+> This blog post assumes basic knowledge of `Promise` and `async/await`. I am not here to compete with tutorials on [MDN](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous) and [javascript.info](https://javascript.info/promise-basics).
+
+## TL;DR:
+
+- `async/await` allows us to use all the language constructs that are available in synchronous programming, resulting in more **expressive** and **readable** code;
+- `async/await` unifies the experience of asynchronous programming; and
+- `async/await` provides better error stack trace;
+
+I will also address some of the common objections to `async/await` at the end of the post.
+
+## A little bit of history of async programming in JavaScript
+
+Asynchronous programming is common in JavaScript. Whenever we need to make a web service call, a file access, or a database operation, asynchronicity is how we prevent the UI from being blocked despite the langue being single-threaded.
+
+Before the major upgrade JavaScript received in ES2015 (ES6), callback is how people dealt with asynchronous programming. The only way for us to express **temporal dependency** is nesting one callback inside of the other. This led to so called [Callback Hell](http://callbackhell.com/).
+
+`Promise` then was introduced in JavaScript in ES2015. It is an object for asynchronous operations which we can easily pass around, compose, aggregate and apply transformations to. Temporal dependency is cleanly expressed via `then` method chaining.
+
+<details>
+    <summary>More on the history…</summary>
+    <p>The idea of `Promise` in JavaScript wasn’t original. It was inspired by a very old language called [E language](http://wiki.erights.org/wiki/Promise). Its creator [Mark Miller](https://twitter.com/marksammiller) is also a [TC39 representative](https://tc39wiki.calculist.org/about/people/). And the `async/await` syntax was borrowed from [C#](https://docs.microsoft.com/en-us/dotnet/csharp/async).</p>
+</details>
+
+With `Promise` serving as a powerful primitive, it sounds like asynchronous programming is a solved issue in JavaScript, right? 
+
+Well, not quite yet, because sometimes `Promise` can be a little too low level to work with…
+
+## Sometimes Promise can be too low level to work with
+
+Despite the advent of `Promise`, there was still a need for a higher-level language construct for asynchronous programming in JavaScript.
+
+Let's consider this example where we need a function to poll an API at some interval. It resolves to `null` when the maximum number of retries has met.
+
+Here is one possible solution with `Promise`:
+
+```jsx
+let count = 0;
+
+function apiCall() {
+  return new Promise((resolve) =>
+    // at 6th retry, it resolves to 'value'
+    count++ === 5 ? resolve('value') : resolve(null)
+  );
+}
+
+function sleep(interval) {
+  return new Promise((resolve) => setTimeout(resolve, interval));
+}
+
+function poll(time, interval) {
+  return new Promise((resolve) => {
+    // skip error handling for brevity...
+
+    if (time === 0) resolve(null);
+    apiCall().then((val) => {
+      if (val !== null) resolve(val);
+      else {
+        sleep(interval).then(() => {
+          resolve(poll(time - 1, interval));
+        });
+      }
+    });
+  });
+}
+
+poll(6, 1000).then(console.log); // 'value'
+```
+
+How intuitive and readable this solution is would depend one's familiarity with `Promise`, how `Promise.resolve` "flats" `Promise` and recursion. To me, this is not the most readable way to write such a function.
+
+<details>
+    <summary>You can use `setInterval` instead</summary>
+    <p>There is almost always another way to write a function. Here is a solution with `setInterval` written by my friend [James](https://twitter.com/jrsinclair):</p>
+        ```jsx
+        const pollInterval = (retry, interval) => {
+            return new Promise((resolve) => {
+
+            let intervalToken, timeoutToken;
+
+            intervalToken = setInterval(async () => {
+                const result = await apiCall();
+                if (result !== null) {
+                clearInterval(intervalToken);
+                clearTimeout(timeoutToken);
+                resolve(result);
+                }
+            }, interval);
+
+            timeoutToken = setTimeout(() => {
+                clearInterval(intervalToken);
+                resolve(null);
+            }, retry * interval);
+            });
+        };
+        ```
+</details>
+
+
+## Enter async/await
+
+Let's rewrite the above solution using the `async/await` syntax:
+
+```jsx
+async function poll(retry, interval) {
+  while (retry >= 0) {
+    const value = await apiCall().catch((e) => {}); // skip error handling for brevity...
+    if (value !== null) return value;
+    await sleep(interval);
+    retry--;
+  }
+
+  return null;
+}
+```
+
+I expect most people'd find the above solution *more readable*, because we are able to use all **normal language constructs** such as such as `for`/`while` loop, `try-catch` for an asynchronous operations.
+
+<details>
+    <summary>the recursive approach</summary>
+    <p>However, this is not strictly an apple-to-apple comparison as I switched from a recursive approach to an iterative approach. Let’s rewrite the above solution using recursion:</p>
+        ```jsx
+        const pollAsyncAwait = async (retry, interval) => {
+            if (retry < 0) return null;
+
+            const value = await apiCall().catch((e) => {}); // skip error handling for brevity...
+            if (value !== null) return value;
+
+            await sleep(interval);
+            return pollAsyncAwait(retry - 1, interval);
+        };
+        ```
+</details>
+
+This is probably the biggest selling point of `async/await` - enabling you to write asynchronous code in a synchronous fashion. On the other hand, this is where probably the most common objection to `async/await` comes from. More on that later.
+
+By the way, `await` even has the right [operator precedence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence), so that `await a + await b` does mean `(await a) + (await b)`, as opposed to, let's say, `await (a + await b)`.
+
+### async/await offers an unified experience across sync and async code
+
+Another nice thing about `async/await` is that `await` automatically wraps any non-Promises (`non-thenable`s) into `Promise`s. The semantics of `await` equates to `Promise.resolve`, that means you can `await` anything:
+
+```jsx
+function fetchValue() {
+  return 1;
+}
+
+async function fn() {
+  const val = await fetchValue();
+  console.log(val); // 1
+}
+
+// 👆 this is equal to the following 
+
+function fn() {
+  Promise.resolve(fetchValue()).then((val) => {
+    console.log(val); // 1
+  });
+}
+```
+
+If we were to attach the `then` method to the number `1` returned from `fetchValue`, the following error would occur:
+
+```jsx
+function fetchValue() {
+  return 1;
+}
+
+function fn() {
+  fetchValue().then((val) => {
+    console.log(val);
+  });
+}
+
+fn(); // ❌ Uncaught TypeError: fetchValue(...).then is not a function
+```
+
+Lastly, anything returned from an `async` function is always a `Promise`:
+
+```jsx
+Object.prototype.toString.call((async function () {})()); // '[object Promise]'
+```
+
+### async/await provides better error stack tracing
+
+V8 engineer [Mathias](https://twitter.com/mathias) wrote a post called [Asynchronous stack traces: why await beats Promise#then()](https://mathiasbynens.be/notes/async-stack-traces) covering why the engine has an easier time capturing and store stack trace for `async/await` compared to `Promise`.
+
+Here is a demo:
+
+```jsx
+async function foo() {
+  await bar();
+  return 'value';
+}
+
+function bar() {
+  throw new Error('BEEP BEEP');
+}
+
+foo().catch((error) => console.log(error.stack));
+
+// Error: BEEP BEEP
+//     at bar (<anonymous>:7:9)
+//     at foo (<anonymous>:2:9)
+//     at <anonymous>:10:1
+```
+
+The async version captures the error stack trace correctly.
+
+Le's take a look at the `Promise` version:
+
+```jsx
+function foo() {
+  return bar().then(() => 'value');
+}
+
+function bar() {
+  return Promise.resolve().then(() => {
+    throw new Error('BEEP BEEP');
+  });
+}
+
+foo().catch((error) => console.log(error.stack));
+
+// Error: BEEP BEEP  at <anonymous>:7:11
+```
+
+Stack trace is lost. Switching from anonymous arrow function to named function declaration helps a bit, but not by much:
+
+```jsx
+function foo() {
+  return bar().then(() => 'value');
+}
+
+function bar() {
+  return Promise.resolve().then(function thisWillThrow() {
+    throw new Error('BEEP BEEP');
+  });
+}
+
+foo().catch((error) => console.log(error.stack));
+
+// Error: BEEP BEEP
+//    at thisWillThrow (<anonymous>:7:11)
+```
+
+## Common objections to async/await
+
+I've seen two common objections to `async/await`.
+
+First, `async/await` can be a footgun when one [unnecessarily sequentializes](https://web.dev/javascript-async-functions/#careful!-avoid-going-too-sequential) *independent* async function calls when they can be handled concurrently (or “in parallel” if we use the term loosely) with `Promise.all`.
+
+This tends to happen when people try to muddle through asynchronous programming without truly understanding how `Promise` works behind the scenes.
+
+The second one is more nuanced. Some [functional programming enthusiasts](https://dev.to/jesterxl/why-i-don-t-use-async-await-4amc) think `async/await` invites imperative style programming. From a FP programmer's point of view, being able to use `for/while` loops and `try catch` is not a blessing, as those language constructs imply **side effects** and encourages less-than-ideal error handling.
+
+I sympathize with this argument. FP programmers rightfully care about **certainty** in their programs. They want to be absolutely confident in their code. In order to get there, a sophisticated type system with types like [Result](https://folktale.origamitower.com/api/v2.3.0/en/folktale.result.html) is warranted.
+
+However, most people, including myself, are not there yet (although I think FP is really cool and I am slowly learning it). Control flow statements (`for/while` loop) and `try catch` error handling are more familiar, and thus we are able to write complicate programs with them more easily.
+
+
+## Further reading
+
+- [HOW TO RUN ASYNC JAVASCRIPT FUNCTIONS IN SEQUENCE OR PARALLEL](https://jrsinclair.com/articles/2019/how-to-run-async-js-in-parallel-or-sequential/)
