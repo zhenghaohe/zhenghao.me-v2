@@ -60,16 +60,16 @@ function sleep(interval) {
   return new Promise((resolve) => setTimeout(resolve, interval));
 }
 
-function poll(time, interval) {
+function poll(retry, interval) {
   return new Promise((resolve) => {
     // skip error handling for brevity...
 
-    if (time === 0) resolve(null);
+    if (retry === 0) resolve(null);
     apiCall().then((val) => {
       if (val !== null) resolve(val);
       else {
         sleep(interval).then(() => {
-          resolve(poll(time - 1, interval));
+          resolve(poll(retry - 1, interval));
         });
       }
     });
