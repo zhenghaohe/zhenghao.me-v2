@@ -20,7 +20,7 @@ The point I'd like to make in this post is that async/await is more than syntact
 
 Asynchronous programming is common in JavaScript. Whenever we need to make a web service call, a file access, or a database operation, asynchronicity is how we prevent the UI from being blocked despite the language being single-threaded.
 
-Before the major upgrade JavaScript received in ES2015 (ES6), callbacks were how people dealt with asynchronous programming. The only way for us to express _temporal dependency_ (i.e. the execution order of asynchronous operations) is nesting one callback inside of the other. This led to so called [Callback Hell](http://callbackhell.com/).
+Before the major upgrade JavaScript underwent in ES2015 (ES6), callbacks were how people dealt with asynchronous programming. The only way for us to express _temporal dependency_ (i.e. the execution order of asynchronous operations) is nesting one callback inside of the other. This led to so called [Callback Hell](http://callbackhell.com/).
 
 `Promise` then was introduced in JavaScript in ES2015. It is a first-class object for asynchronous operations which we can easily pass around, compose, aggregate and apply transformations to. Temporal dependency is cleanly expressed via `then` method chaining.
 
