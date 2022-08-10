@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Tue, 09 Aug 2022 00:15:31 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 10 Aug 2022 04:27:51 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -75,8 +75,8 @@
             <link>https://zhenghao.io/posts/js-data-type</link>
             <guid>https://zhenghao.io/posts/js-data-type</guid>
             <pubDate>Fri, 20 May 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. ]]></description>
-            <content:encoded><![CDATA[JavaScript is such an imperfect language that you can’t even rely on it  for simple things like checking data types. ]]></content:encoded>
+            <description><![CDATA[JavaScript is such an imperfect language that you can't even rely on it for simple things like checking data types.]]></description>
+            <content:encoded><![CDATA[JavaScript is such an imperfect language that you can't even rely on it for simple things like checking data types.]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>javascript</category>
         </item>
