@@ -3,7 +3,7 @@ title: Detect JavaScript Memory Leaks with queryObjects
 published: true
 listed: true
 date: '07/17/2022'
-lastUpdateDate: '07/24/2022'
+lastUpdateDate: '08/09/2022'
 description: 'An API shipped with Chrome Dev console turns out to be a surprisingly easy way to observe how garbage collection works in JavaScript'
 tags: javascript
 ---
@@ -214,13 +214,9 @@ setInterval(foo, 1000);
 </p>
 </details>
 
+> These examples are derived from [_A surprising JavaScript memory leak found at Meteor_](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).
 
-
-
-
-> These examples are derived from [*A surprising JavaScript memory leak found at Meteor*](http://point.davidglasser.net/2013/06/27/surprising-javascript-memory-leak.html).
-
-### Promises that are never settled
+### Promises
 
 Nolan noted in his [blog post](https://nolanlawson.com/2020/02/19/fixing-memory-leaks-in-web-applications/) on memory leaks related to `Promise`s, “A Promise can leak if it's never resolved or rejected, in which case any `.then()` callbacks attached to it will leak.” With `queryObjects`, we can easily verify if this is (still) true from your DevTools Console.
 
@@ -238,17 +234,17 @@ This is expected. Since it never resolves, the callback is never called. Therefo
 Maybe Nolan was referring to something slightly different here? Let's tweak the previous example a bit:
 
 ```js
-let giantArray = new Uint8Array(1_000_000_000)
+let giantArray = new Uint8Array(1_000_000_000);
 
 function foo() {
   const a = giantArray;
   return () => a;
-};
+}
 
 const p = new Promise((resolve, reject) => {});
 p.then(foo());
 
-giantArray = null
+giantArray = null;
 
 queryObjects(Uint8Array); // ❌ [uint8Array]
 ```
@@ -257,6 +253,44 @@ This time `Uint8Array` does leak.
 
 The second example looks pretty similar to our first [closure example](#closure). The difference here is that, instead of storing the returned function to a variable like we did in the closure example, we attach that function to a `Promise`'s `then`, and that caused memory leaks.
 
+Lastly, when I was playing around with `Promise` when writing this post, a surprising memory leak occurred when the `resolve` function of a `Promise` is referenced somewhere else:
+
+```js
+let i = 0;
+
+while (i++ < 100) {
+  new Promise((resolve) => {
+    document.body.addEventListener('click', resolve, { once: true });
+  });
+}
+
+queryObjects(Promise); // ❌ Array(100)
+```
+
+The event target, which is `document.body` in this case, holds a reference to the `resolve` functions of the `Promise`s and prevent the `Promise`s get collected even after they were resolved. I guess this is probably because every `resolve` has an internal reference back to the `Promise` where it comes from.
+
+
+We can use `removeEventListener` to fix it:
+
+```js
+let i = 0;
+
+while (i++ < 100) {
+  const handler = () => resolve();
+
+  new Promise((resolve) => {
+    document.body.addEventListener('click', handler, { once: true });
+    removeEventListener('click', handler);
+  });
+}
+
+queryObjects(Promise); // ✅ empty array
+
+```
+
 ## Final thoughts
 
 Although `queryObjects` might not help much with debugging memory leaks in production, it serves as a great tool to programmatically detect memory leaks with a quick feedback loop. I found it invaluable when it comes to create a minimal reproducible examples of memory leaks and quickly validate assumptions.
+
+By the way, Safari's DevTools Console has [an API](https://twitter.com/webkit/status/1249747490464616448) called `queryHolders` that lets you which exact variables are holding the reference to the leaking object. Sadly at the time of writing Chrome hasn't implemented this API yet.
+
