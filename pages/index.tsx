@@ -8,7 +8,8 @@ import Image from 'next/image';
 import { Experience } from '@/components/Experience';
 import { components } from '@/components/MDXComponents';
 import { Spacer } from '@/components/Spacer';
-import { MyPic} from '@/components/MyPic';;
+import { MyPic} from '@/components/MyPic';
+import {DynamicPic} from '@/components/DynamicPic';
 
 import { getAllPostsMeta, loadMDX } from '@/utils/loadMDX';
 import { PostPreviewList } from './posts';
@@ -23,7 +24,7 @@ export const getStaticProps = async () => {
   return { props: { code, posts } };
 };
 
-const mdxComponents = { ...components, Experience, Spacer, Image, MyPic};
+const mdxComponents = { ...components, Experience, Spacer, Image, MyPic,DynamicPic};
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
@@ -36,10 +37,4 @@ export default function Home({ code, posts }: Props) {
       <Component components={mdxComponents} />
     </article>
   );
-}
-
-
-function Stuff({posts}) {
-  return <code>{JSON.stringify(posts)}</code>
-
 }
