@@ -6,7 +6,7 @@ const image = images[1]
 
 function MyPic() {
 
-  
+
   return (
 
     <DistortImage />

@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
-export const DynamicPic = dynamic(() => import('./MyPic'), {
+// import DistortImage from "./DistortImage"
+export const DynamicPic = dynamic(() => import("./DistortImage"), {
     ssr: false
 })
 
