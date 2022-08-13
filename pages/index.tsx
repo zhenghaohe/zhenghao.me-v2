@@ -8,7 +8,6 @@ import Image from 'next/image';
 import { Experience } from '@/components/Experience';
 import { components } from '@/components/MDXComponents';
 import { Spacer } from '@/components/Spacer';
-import { MyPic} from '@/components/MyPic';
 import {DynamicPic} from '@/components/DynamicPic';
 
 import { getAllPostsMeta, loadMDX } from '@/utils/loadMDX';
@@ -24,7 +23,7 @@ export const getStaticProps = async () => {
   return { props: { code, posts } };
 };
 
-const mdxComponents = { ...components, Experience, Spacer, Image, MyPic,DynamicPic};
+const mdxComponents = { ...components, Experience, Spacer, Image,DynamicPic};
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
