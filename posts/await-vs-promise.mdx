@@ -22,6 +22,8 @@ Asynchronous programming is common in JavaScript. Whenever we need to make a web
 
 Before the major upgrade JavaScript underwent in ES2015 (ES6), callbacks were how people dealt with asynchronous programming. The only way for us to express _temporal dependency_ (i.e. the execution order of asynchronous operations) is nesting one callback inside of the other. This led to so called [Callback Hell](http://callbackhell.com/).
 
+> Reddit user [@theQuandary](https://www.reddit.com/r/javascript/comments/wmpdsu/comment/ik2cnoh/?utm_source=share&utm_medium=web2x&context=3) pointed out that before ES6, there were other better alternatives to asynchronous programming in JavaScript than callbacks. Sorry for not being 100% accurate here, as I wasn't around for much of that history.
+
 `Promise` then was introduced in JavaScript in ES2015. It is a first-class object for asynchronous operations which we can easily pass around, compose, aggregate and apply transformations to. Temporal dependency is cleanly expressed via `then` method chaining.
 
 <details>
