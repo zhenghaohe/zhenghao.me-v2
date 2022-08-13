@@ -175,6 +175,17 @@ function fn() {
 }
 ```
 
+<details>
+  <summary>Note this is a browser-dependent behavior...</summary>
+  <p>Saying `await foo` equals to `Promise.resolve(foo).then(...)` is not 100% accurate. </p>
+  <p>
+    Before Chrome 73, the ECMAScript spec translated `await foo` to `new Promise(resolve => resolve(p))`.
+    Then there was a change in the spec made in [this PR](https://github.com/tc39/ecma262/pull/1250).
+    But until now, not every browser respects the change in the spec; as of this writing, Safari still hasn't implemented the updated spec. As a result, running [this snippet](https://gist.github.com/zhenghaohe/c90ec960b890eca60b7bd8008f856a70)
+    in Safari gives you different result than running it in Chrome.
+  </p>
+</details>
+
 If we were to attach the `then` method to the number `1` returned from `fetchValue`, the following error would occur:
 
 ```jsx
@@ -273,7 +284,6 @@ The second one is more nuanced. Some [functional programming enthusiasts](https:
 I sympathize with this argument. FP programmers rightfully care about **certainty** in their programs. They want to be absolutely confident in their code. In order to get there, a sophisticated type system with types like [Result](https://folktale.origamitower.com/api/v2.3.0/en/folktale.result.html) is warranted. But I don't think `async/await` itself is incompatible with FP. My friend [James](https://twitter.com/jrsinclair), an expert in FP, said that there is an equivalent of `async/await` in Haskell - the [Do-notation](https://wiki.haskell.org/Keywords#do) feature.
 
 Anyway, I think for most people, including me, FP remains an acquired taste (although I do think FP is super cool and I am slowly learning it). Normal control flow statements and `try catch` error handling provided by `async/await` are invaluable for us to orchestrate complicated asynchronous operations in JavaScript. That's precisely why saying "`async/await` is just a syntactic sugar" is an understatement.
-
 
 ## Further reading
 
