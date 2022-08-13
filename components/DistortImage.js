@@ -116,14 +116,14 @@ function DistortImage() {
     //console.log(hover)
 
     //console.log(displacementSprite.scale.y, count)
-    displacementFilter.scale.set(Math.min(30, count));
-    console.log('count',count)
+    displacementFilter.scale.set(Math.min(20, count));
+
     displacementSprite.x += 1;
-    displacementSprite.y += 1;
+    displacementSprite.y += 0.1;
 
     //console.log(displacementSprite.texture.baseTexture.wrapMode)
 
-    count = Math.min(30, count + 1);
+    count = Math.min(20, count + 1);
 
     canvas = playground.current.querySelector('canvas');
 
