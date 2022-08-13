@@ -3,6 +3,7 @@ title: Why async/await is more than just syntactic sugar
 published: true
 listed: true
 date: '08/08/2022'
+lastUpdateDate: '08/13/2022'
 tags: javascript
 description: My takes on async/await vs Promise
 ---
@@ -179,10 +180,13 @@ function fn() {
   <summary>Note this is a browser-dependent behavior...</summary>
   <p>Saying `await foo` equals to `Promise.resolve(foo).then(...)` is not 100% accurate. </p>
   <p>
-    Before Chrome 73, the ECMAScript spec translated `await foo` to `new Promise(resolve => resolve(p))`.
-    Then there was a change in the spec made in [this PR](https://github.com/tc39/ecma262/pull/1250).
-    But until now, not every browser respects the change in the spec; as of this writing, Safari still hasn't implemented the updated spec. As a result, running [this snippet](https://gist.github.com/zhenghaohe/c90ec960b890eca60b7bd8008f856a70)
-    in Safari gives you different result than running it in Chrome.
+    Before Chrome 73, the ECMAScript spec translated `await foo` to `new Promise(resolve =>
+    resolve(p))`. Then there was a change in the spec made in [this
+    PR](https://github.com/tc39/ecma262/pull/1250). But until now, not every browser respects the
+    change in the spec; as of this writing, Safari still hasn't implemented the updated spec. As a
+    result, running [this
+    snippet](https://gist.github.com/zhenghaohe/c90ec960b890eca60b7bd8008f856a70) in Safari gives
+    you a different result from that in Chrome.
   </p>
 </details>
 
