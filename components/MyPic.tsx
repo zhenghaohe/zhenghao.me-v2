@@ -5,10 +5,9 @@ import { DynamicPic } from '@/components/DynamicPic'
 
 const image = images[1]
 
-const useForceRender = () => useReducer(() => ({}))
+
 export function MyPic() {
-  // console.log(globalThis)
-  const [_, update] = useForceRender()
+
   const [isLoaded, setIsLoaded] = useState(false)
   const mounted = useRef(false)
   // useEffect(() => {
