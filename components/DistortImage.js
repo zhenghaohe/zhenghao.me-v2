@@ -1,22 +1,22 @@
 import * as PIXI from 'pixi.js';
 import { useEffect, useRef, useState } from 'react';
 import noise from '../public/art/displacement.png';
-import myImage from '../public/art/mypic.jpg';
+// import myImage from '../public/art/mypic.jpg';
 
+const myImage = document.querySelector('#foo')
+// console.log('myImage',myImage)
 function DistortImage() {
   const width = window.offsetWidth;
   const height = width * 1.33;
   let playground = useRef(null);
 
-  let canvas;
-
   let count = 0;
   let raf;
 
-  const renderer = PIXI.autoDetectRenderer({ width, height, backgroundColor: 13756659});
+  const renderer = PIXI.autoDetectRenderer({ width, height, backgroundAlpha: 0});
   renderer.autoResize = true;
 
-  const ratio = 0.25;
+  const ratio = 0.2391;
   let tp, preview;
   let displacementSprite, displacementFilter, stage;
 
@@ -24,7 +24,7 @@ function DistortImage() {
     // console.log('renderer.backgroundColor',renderer.backgroundColor)
     // renderer.options.backgroundColor = 'red'
     // renderer.
-    renderer.resize(myImage.width * ratio, myImage.height * ratio);
+    renderer.resize(myImage.width, myImage.height );
     playground.current.appendChild(renderer.view);
 
     stage = new PIXI.Container();
@@ -61,15 +61,6 @@ function DistortImage() {
     //console.log(displacementSprite.texture.baseTexture.wrapMode);
   }
 
-  function removeScene() {
-    cancelAnimationFrame(raf);
-
-    //console.log(stage);
-    stage.removeChildren();
-    stage.destroy(true);
-    playground.current.removeChild(canvas);
-  }
-
   function stopAnimation() {
     cancelAnimationFrame(raf);
     displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
@@ -103,7 +94,6 @@ function DistortImage() {
     displacementSprite.x += 2;
     displacementSprite.y += 2;
 
-    canvas = playground.current?.querySelector('canvas');
 
     if (stage !== null) {
       renderer.render(stage);
@@ -125,8 +115,6 @@ function DistortImage() {
 
     count = Math.min(20, count + 1);
 
-    canvas = playground.current.querySelector('canvas');
-
     if (stage !== null) {
       renderer.render(stage);
     }
@@ -142,7 +130,7 @@ function DistortImage() {
 
   return (
     <div
-      style={{ width: myImage.width * ratio, margin: '0 auto'}}
+      style={{ position: 'absolute', top: 0, zIndex:999}}
       ref={playground}
       onMouseEnter={startAnimation}
       onMouseLeave={stopAnimation}></div>

@@ -30,7 +30,7 @@
     "feed": "^4.2.2",
     "light-date": "^1.2.0",
     "mdx-bundler": "^8.0.1",
-    "next": "^11.1.2",
+    "next": "^12.2.5",
     "next-plugin-preact": "^3.0.6",
     "next-seo": "^4.28.1",
     "pixi.js": "^6.5.1",

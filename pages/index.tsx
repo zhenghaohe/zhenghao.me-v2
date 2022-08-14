@@ -8,6 +8,7 @@ import { Experience } from '@/components/Experience';
 import { components } from '@/components/MDXComponents';
 import { Spacer } from '@/components/Spacer';
 import { DynamicPic } from '@/components/DynamicPic';
+import { MyPic } from '@/components/MyPic';
 import { getAllPostsMeta, loadMDX } from '@/utils/loadMDX';
 
 export const getStaticProps = async () => {
@@ -20,7 +21,7 @@ export const getStaticProps = async () => {
   return { props: { code, posts } };
 };
 
-const mdxComponents = { ...components, Experience, Spacer, Image, DynamicPic };
+const mdxComponents = { ...components, Experience, Spacer, Image, MyPic };
 
 type Props = InferGetStaticPropsType<typeof getStaticProps>;
 
