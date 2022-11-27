@@ -239,5 +239,5 @@ ruby {
 
 #name-intro {
   align-items: flex-end;
-  margin-top: -15px;
+  /* margin-top: -15px; */
 }
