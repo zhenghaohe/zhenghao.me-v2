@@ -25,7 +25,7 @@ const Nav: React.FC = () => {
         <nav className="w-full sm:max-w-[75ch] m-auto sm:grid md:flex px-5 justify-between items-center ">
           <Link href="/" passHref>
             <a title="Home" aria-label="Home">
-              <VancouverTime />
+              <LocalTime />
             </a>
           </Link>
           <div className="flex items-center gap-5">
@@ -56,7 +56,7 @@ const Nav: React.FC = () => {
   );
 };
 
-function VancouverTime() {
+function LocalTime() {
   const TimeFomatter = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Canada/Pacific',
     hour: 'numeric',
@@ -64,7 +64,7 @@ function VancouverTime() {
     weekday: 'short',
     hour12: false
   }).format();
-  return <span>{TimeFomatter}, Vancouver</span>;
+  return <span>{TimeFomatter}, Seattle</span>;
 }
 
 export default Nav;

@@ -231,3 +231,13 @@ details {
 /* details summary {
   margin-left: -1rem;
 } */
+
+
+ruby {
+  margin-left: 1rem;
+}
+
+#name-intro {
+  align-items: flex-end;
+  margin-top: -15px;
+}

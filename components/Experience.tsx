@@ -5,7 +5,7 @@ import { a11yDate, visibleDate } from '@/utils/date';
 const experience = [
   {
     company: 'Instacart',
-    location: 'remote',
+    location: 'Seattle',
     position: 'Senior Software Engineer',
     startDate: 'June, 2021',
     endDate: 'present',
