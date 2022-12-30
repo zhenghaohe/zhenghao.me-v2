@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Fri, 30 Dec 2022 20:02:54 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 30 Dec 2022 20:03:20 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -17,7 +17,7 @@
             <description><![CDATA[I distilled my interview experience from over 20 frontend interviews that I took in the past two years.]]></description>
             <content:encoded><![CDATA[I distilled my interview experience from over 20 frontend interviews that I took in the past two years.]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>interview</category>
+            <category>technical interviews</category>
         </item>
         <item>
             <title><![CDATA[Why async/await is more than just syntactic sugar]]></title>
