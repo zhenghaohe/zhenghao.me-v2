@@ -4,18 +4,18 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Fri, 30 Dec 2022 19:47:42 GMT</lastBuildDate>
+        <lastBuildDate>Fri, 30 Dec 2022 19:53:24 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2022, Zhenghao He</copyright>
         <item>
-            <title><![CDATA[Two types of frontend coding interviews]]></title>
+            <title><![CDATA[The frontend interview guide you've been missing]]></title>
             <link>https://zhenghao.io/posts/frontend-interview-type</link>
             <guid>https://zhenghao.io/posts/frontend-interview-type</guid>
             <pubDate>Fri, 30 Dec 2022 08:00:00 GMT</pubDate>
-            <description><![CDATA[My takes on async/await vs Promise]]></description>
-            <content:encoded><![CDATA[My takes on async/await vs Promise]]></content:encoded>
+            <description><![CDATA[I distilled my interview experience from over 20 frontend interviews that I took in the past two years.]]></description>
+            <content:encoded><![CDATA[I distilled my interview experience from over 20 frontend interviews that I took in the past two years.]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>interview</category>
         </item>
