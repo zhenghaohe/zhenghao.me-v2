@@ -1,0 +1,96 @@
+---
+title: Two types of frontend coding interviews
+published: true
+listed: true
+date: '12/30/2022'
+tags: interview
+description: My takes on async/await vs Promise
+---
+
+
+
+
+Ever since [Cracking the Coding Interview](https://www.crackingthecodinginterview.com/) by Gayle McDowell came out, the tech industry has long-standing standard, unified technical hiring practices for software engineers - algorithms & data structures questions for coding and system design questions for high-level software architecture.
+
+Nowadays, more companies have recognized software engineers with a user-facing specialty, so they offer special interview loops for frontend candidates, separated from the traditional interview track that centers on backend and distributed systems.
+
+<details>
+  <summary>What does the term “frontend” mean exactly?</summary>
+  <p>
+    The expectation and job requirements of a frontend engineer role vary across companies. Most of the time, the term refers exclusively to engineers who work with web technologies (JavaScript, CSS, HTML, etc.). For engineers working on native applications (Android, iOS, FireOS), they are often put into the "mobile engineer" category. In this blog post, I am using the former definition, i.e., **web** frontend engineer.
+  </p>
+</details>
+
+Unlike standard backend-centric software engineer interviewing process with time-honored questions like [reverse a linked list](https://leetcode.com/problems/reverse-linked-list/) that seemed to be popular already [back in 1970](https://www.deconstructconf.com/2019/hillel-wayne-what-we-can-learn-from-software-history), frontend interview track is relatively new and less defined. 
+
+I have been actively interviewing for the past 2 years, primarily for frontend roles, at FAANG companies and smaller startups (I lost count of the exact number, but it should be in the range of 20-30).
+
+From my experience, there are two types of frontend coding interviews:
+
+1. Directly building UI that end users interact with using web technologies (HTML, CSS, JavaScript). I call them **UI-building** questions.
+2. Implementing functions, utilities, libraries, toolsets, or frameworks in JavaScript that facilitate frontend development. I will refer to this type as **utility-building** questions.
+
+![alt](/art/blog/frontend-interview-type/summary.png)
+
+
+## UI-building questions
+This type of interview questions normally start with a design mockup, or the interviewers might just verbally describe the UI without having design ready to see if you can navigate ambiguity. This could be any common UI widget such as a slideshow, or a simple game like Tic-tac-toe. 
+
+Overall, this type of questions test candidates' ability to *translate* a design mockup into a functional, interactive UI with semantic, accessible html markups. Most interviewers are ok with popular UI frameworks/libraries such as React.
+
+Despite the common belief that the default job function for frontend engineers is to build UI, candidates who spend most of their time working on the other side of the spectrum of web development can easily mess up the UI-building questions, as their day job doesn't involve writing a lot of html and css by hand. 
+
+Take a slideshow widget for example: implementing an ease-in animation using CSS transitions can easily throw off candidates who haven’t had a ton of experience with CSS animations before.
+
+Outside of hand crafting HTML and CSS, state management is a big part of this interview type. Interviewers will be looking for signals where the candidate shows awareness of various UI states and ability to handle them properly. For example:
+
+1. did the candidate ask for clarification about an empty/pending state when there happens to be nothing to render?
+2. did they set the UI to the correct state, reflecting life cycles of async requests?
+3. did they throttle user action to prevent rage clicking or debounce user input to save computing power?
+4. did they handle UI edge cases such as long strings, error state and timeout state? 
+5. are they aware of common UX patterns such as optimistic updates?
+
+If the interviewers happen to be well-versed in the UI framework (e.g. React) you chose to implement the UI (most of the time they are), you can also expect questions regarding the specifics of that framework. 
+
+Lastly, it is easy for the interviewer to probe topics like accessibility, testing, frontend security risks, performance, internationalization, etc. They are a good proxy for hands-on frontend engineering experience. The broad range of these followup questions also makes this interview type hard to prepare for. 
+
+On the other hand, interviewers tend to put less emphasis on algorithms and data structure. For example, you aren't likely going to be asked to implement a [trie (prefix tree)](https://leetcode.com/problems/implement-trie-prefix-tree/) when building a typeahead widget, or to implement a [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) algorithm when building a game to shuffle deck of cards.
+
+## Utility-building questions
+Utility-building frontend interview usually takes the form of writing functions/classes in pure, (UI) framework-agnostic JavaScript. Implementing a debounce utility function—the frontend equivalent of “reverse a linked list”—falls into this category. Unlike the former, pixel pushing category, this type of interviews primarily tests candidates' mastery over the JavaScript language and relevant general computer science knowledge.
+
+Sometimes this type of questions can extend beyond the core of the JavaScript language, covering the hosting environment, which is the browser environment in most cases. An example would be to implement the builtin `getElementByClassNames` method. In order to properly implement it, candidates need to be familiar with HTML DOM APIs and their quirks such as `Element.tagName` returning tag names in uppercase strings and `HTMLCollection` being an array-like object that doesn’t come with native array methods.
+
+Other common questions of this type include:
+
+1. implementing native array methods from scratch
+2. writing debounce/throttle/rate-limiting utility
+3. writing reusable cache/memoization utility using higher order functions
+4. building a small event emitter library that supports the pubsub model
+5. building JSON schema validator that recursively traverses through a nested object
+
+The common theme for these questions is that they focus heavily on testing candidate's understanding of various data structure and abstract algorithmic thinking ability. To traverse through the DOM tree to collect matching nodes, performing a depth-first search is usually what the interviewers look for. Of course alternatively iterative solutions such as a breath-first search work as well. The point is in order to pass, the candidate needs to be familiar with one of the tree traversal techniques.
+
+Possible followup questions are:
+
+1. idiosyncrasies of the JavaScript language
+2. runtime/space complexity analysis
+3. API ergonomics for better developer experience
+
+Unlike the former UI-building questions, there is no actual UI to build for this type of questions.
+
+
+## Conclusion
+Despite having distinct characteristics, there is some overlap between the two types of frontend interviews. First and foremost the candidate has to showcase a solid grasp over JavaScript for either type of interviews. Being able to produce high-quality, idiomatic JavaScript code should be table stakes for being a qualified frontend engineer. 
+
+Outside of that, the ability to come up with abstractions that are intuitive, extensible, and maintainable is also often part of the hiring criteria, as a confusing and haphazardly implemented API would prevent your teammates from shipping delightful user experiences.
+
+The next logical question is: how do we get better at frontend coding interviews?
+
+To become better at the UI-building questions, practicing quick prototyping small UI widgets helps. Candidates with apathy towards diving deep in HTML and CSS topics tend to fail catastrophically, so refamiliarize yourself with fundamentals like the box model and browser event system.
+
+To get better at the utility-building questions, having a solid grasp over CS fundamentals is the first step. Second, candidates should be able to pick the appropriate data structures (e.g. array, `Map`, `Set`) and understand the operations they support and speak about space and time complexity. Lastly, studying internal implementations of open sourced utility libraries such as [Mitt](https://github.com/developit/mitt) and [lodash](https://github.com/lodash/lodash) definitely will make you stand out among the competition.
+
+## further reading
+
+- Christoph Nakazawa put out an interesting post called [Frontend Engineer Archetypes](https://cpojer.net/posts/frontend-engineering-archetypes), where he outline the various types of frontend archetypes. I think that echoes some of the themes I raised in my post.
