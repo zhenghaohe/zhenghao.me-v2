@@ -102,7 +102,7 @@ JSON.stringify({ foo: new Map() }); // '{"foo":{}}'
 
 ### Here are a few more exceptions
 
-1. Since string inputs will be wrapped in double quotes ", (e.g. `JSON.stringify('3') === '"3"'`), in order to avoid ambiguity, `JSON.stringify` will escape the ones present in the original input using backslashes, such as ` JSON.stringify('"3"') === '"\\"3\\""'`.
+1. Since string inputs will be wrapped in double quotes ", (e.g. `JSON.stringify('3') === '"3"'`), in order to avoid ambiguity, `JSON.stringify` will escape the ones present in the original input using backslashes, such as `JSON.stringify('"3"') === '"\\"3\\""'`.
 
 1. For the recently added new type `BigInt`, `JSON.stringify` throws a `TypeError`. The other case where `JSON.stringify` throws an error is when a cyclic object is passed. For the most part, `JSON.stringify` is pretty forgiving - it wouldn't make your program crash just because you violate the rules of JSON (unless it is `BigInt` or cyclic objects).
 
