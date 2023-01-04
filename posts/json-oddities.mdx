@@ -114,16 +114,16 @@ JSON.stringify({ foo: new Map() }); // '{"foo":{}}'
    JSON.stringify(BigInt(1234567890)); // ❌ Uncaught TypeError: Do not know how to serialize a BigInt
    ```
 
-2. Despite being of the `number` type, `NaN` and `Infinity` get converted into `null` by `JSON.stringify`. The rational behind the design decision is, as Crockford wrote in his book _How JavaScript Works_, the presence of `NaN` and `Infinity` indicates an error. He excluded them by making them `null` as "we shouldn't put bad data on the wire".
+1. Despite being of the `number` type, `NaN` and `Infinity` get converted into `null` by `JSON.stringify`. The rational behind the design decision is, as Crockford wrote in his book _How JavaScript Works_, the presence of `NaN` and `Infinity` indicates an error. He excluded them by making them `null` as "we shouldn't put bad data on the wire".
    ```javascript
    JSON.stringify(NaN); // 'null'
    JSON.stringify(Infinity); // 'null'
    ```
-3. `Date` objects get encoded into ISO strings by `JSON.stringify` because of `Date.prototype.toJSON`.
+1. `Date` objects get encoded into ISO strings by `JSON.stringify` because of `Date.prototype.toJSON`.
    ```javascript
    JSON.stringify(new Date()); // '"2022-05-19T18:19:54.842Z"'
    ```
-4. `JSON.stringify` only processes enumerable, nonsymbol-keyed object properties. Symbol-keyed non-enumerable properties are ignored:
+1. `JSON.stringify` only processes enumerable, nonsymbol-keyed object properties. Symbol-keyed non-enumerable properties are ignored:
 
    ```javascript
    const foo = {};
@@ -181,11 +181,17 @@ const isCyclic = (input) => {
 function jsonStringify(data) {
   const quotes = '"';
   const QUOTE_ESCAPE = /"/g;
-  if (isCyclic(data)) throw new TypeError('Converting circular structure to JSON');
-  if (typeof data === 'bigint') throw new TypeError('Do not know how to serialize a BigInt');
+
+  if (isCyclic(data)) {
+    throw new TypeError('Converting circular structure to JSON');
+  }
+
+  if (typeof data === 'bigint') {
+    throw new TypeError('Do not know how to serialize a BigInt');
+  }
 
   if (data === null) {
-    // get rid of null first because the type of null is 'object'
+    // Handle null first because the type of null is 'object'.
     return 'null';
   }
 
@@ -193,51 +199,59 @@ function jsonStringify(data) {
 
   if (type === 'number') {
     if (Number.isNaN(data) || !Number.isFinite(data)) {
-      // for NaN and Infinity we return 'null'
+      // For NaN and Infinity we return 'null'.
       return 'null';
     }
-    return data;
+    return String(data);
   }
+
+  if (type === 'boolean') return String(data);
 
   if (type === 'function' || type === 'undefined' || type === 'symbol') {
-    return undefined; // not the string 'undefined'
+    return undefined; // Not the string 'undefined'.
   }
 
-  if (type === 'string') return quotes + data.replace(QUOTE_ESCAPE, '\\"') + quotes;
-
-  if (type === 'object') {
-    if (typeof data.toJSON === 'function') {
-      // if data has user-provided `toJSON` method, we use that instead.
-      return jsonStringify(data.toJSON());
-    }
-
-    if (data instanceof Array) {
-      return '[' + data.map((item) => jsonStringify(item)) + ']'; // here Array.prototype.toString will be invoked implicitly during string concatenation
-    }
-
-    // data is a plaid object
-    const entries = Object.entries(data)
-      .map(([key, value]) => {
-        const shouldIgnoreEntry =
-          typeof key === 'symbol' ||
-          value === undefined ||
-          typeof value === 'function' ||
-          typeof value === 'symbol';
-
-        if (shouldIgnoreEntry) return;
-        return quotes + key + quotes + ':' + jsonStringify(value);
-      })
-      .filter((value) => value !== undefined);
-    return '{' + entries + '}';
+  if (type === 'string') {
+    return quotes + data.replace(QUOTE_ESCAPE, '\\"') + quotes;
   }
+
+  // at this point `data` is either an array, an plaid object, or other unsupported object types such as `Map` and `Set`
+  if (typeof data.toJSON === 'function') {
+    // If data has user-provided `toJSON` method, we use that instead.
+    return jsonStringify(data.toJSON());
+  }
+
+  if (data instanceof Array) {
+    // Array.prototype.toString will be invoked implicitly during string concatenation.
+    return '[' + data.map((item) => jsonStringify(item)) + ']';
+  }
+
+  // data is a plain object.
+  const entries = Object.entries(data)
+    .map(([key, value]) => {
+      const shouldIgnoreEntry =
+        typeof key === 'symbol' ||
+        value === undefined ||
+        typeof value === 'function' ||
+        typeof value === 'symbol';
+
+      if (shouldIgnoreEntry) {
+        return;
+      }
+
+      return quotes + key + quotes + ':' + jsonStringify(value);
+    })
+    .filter((value) => value !== undefined);
+  // Again, Object.prototype.toString will be invoked implicitly during string concatenation
+  return '{' + entries + '}';
 }
 ```
 
 ### A faster JSON.stringify
+
 It's quite obvious that the implementation of `JSON.stringify` involves frequent runtime type checks due to the dynamic typing nature of the JavaScript language. One way we can make our own implementation of `JSON.stringify` faster is to have the user provide a schema of the object so we know the object structure before serialization. This can save us a ton of work. In fact, many `JSON.stringify`-alternative libraries are implemented this way to make serialization faster. One example would be [fast-json-stringify](https://github.com/fastify/fast-json-stringify)
 
 ## Further Reading
 
 - [the stringify spec](https://262.ecma-international.org/5.1/#sec-15.12.3)
 - There are some criticisms of JSON as a configuration language. Check out [Why JSON Isn't a Good Configuration Language](https://dzone.com/articles/why-json-isnt-a-good-configuration-language) if you are interested in the alternatives.
-
