@@ -4,11 +4,19 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Tue, 03 Jan 2023 22:32:08 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 02 Feb 2023 18:08:49 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2023, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[The Perils of being a siloed frontend engineer on a team]]></title>
+            <link>https://zhenghao.io/posts/siloed-fee</link>
+            <guid>https://zhenghao.io/posts/siloed-fee</guid>
+            <pubDate>Wed, 01 Feb 2023 08:00:00 GMT</pubDate>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>muse</category>
+        </item>
         <item>
             <title><![CDATA[The frontend interview guide you've been missing]]></title>
             <link>https://zhenghao.io/posts/frontend-interview-type</link>
