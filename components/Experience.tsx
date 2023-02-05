@@ -8,7 +8,7 @@ const experience = [
     location: 'Seattle',
     position: 'Senior Software Engineer',
     startDate: 'June, 2021',
-    endDate: 'present',
+    endDate: 'Dec, 2022',
     details: (
       <>
         <p>
