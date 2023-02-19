@@ -4,18 +4,29 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Thu, 02 Feb 2023 18:08:49 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 19 Feb 2023 20:15:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
         <copyright>All rights reserved 2023, Zhenghao He</copyright>
+        <item>
+            <title><![CDATA[Three common interview practices considered harmful]]></title>
+            <link>https://zhenghao.io/posts/bad-interview-practices</link>
+            <guid>https://zhenghao.io/posts/bad-interview-practices</guid>
+            <pubDate>Sun, 19 Feb 2023 08:00:00 GMT</pubDate>
+            <description><![CDATA[practices that I think interviewers should avoid when conducting coding interview]]></description>
+            <content:encoded><![CDATA[practices that I think interviewers should avoid when conducting coding interview]]></content:encoded>
+            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
+            <category>technical interviews</category>
+            <category>musing</category>
+        </item>
         <item>
             <title><![CDATA[The Perils of being a siloed frontend engineer on a team]]></title>
             <link>https://zhenghao.io/posts/siloed-fee</link>
             <guid>https://zhenghao.io/posts/siloed-fee</guid>
             <pubDate>Wed, 01 Feb 2023 08:00:00 GMT</pubDate>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>muse</category>
+            <category>musing</category>
         </item>
         <item>
             <title><![CDATA[The frontend interview guide you've been missing]]></title>
@@ -169,7 +180,7 @@
             <category>react</category>
         </item>
         <item>
-            <title><![CDATA[A complete guide to TypeScript’s never type]]></title>
+            <title><![CDATA[A complete guide to TypeScript's never type]]></title>
             <link>https://zhenghao.io/posts/ts-never</link>
             <guid>https://zhenghao.io/posts/ts-never</guid>
             <pubDate>Fri, 04 Mar 2022 08:00:00 GMT</pubDate>
@@ -213,15 +224,6 @@
             <pubDate>Sat, 22 Jan 2022 08:00:00 GMT</pubDate>
             <description><![CDATA[Why primitive values are not allocated on the stack]]></description>
             <content:encoded><![CDATA[Why primitive values are not allocated on the stack]]></content:encoded>
-            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>javascript</category>
-            <category>v8</category>
-        </item>
-        <item>
-            <title><![CDATA[What are JavaScript variables made of]]></title>
-            <link>https://zhenghao.io/posts/javascript-variables</link>
-            <guid>https://zhenghao.io/posts/javascript-variables</guid>
-            <pubDate>Fri, 21 Jan 2022 08:00:00 GMT</pubDate>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>javascript</category>
             <category>v8</category>
