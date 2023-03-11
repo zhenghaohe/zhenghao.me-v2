@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sun, 19 Feb 2023 21:41:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 11 Mar 2023 19:42:44 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -86,17 +86,6 @@
             <description><![CDATA[one of the rare cases that I need to work with MIME types in frontend web development]]></description>
             <content:encoded><![CDATA[one of the rare cases that I need to work with MIME types in frontend web development]]></content:encoded>
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>javascript</category>
-        </item>
-        <item>
-            <title><![CDATA[One of my favorite JavaScript question - Remote Add]]></title>
-            <link>https://zhenghao.io/posts/remote-add</link>
-            <guid>https://zhenghao.io/posts/remote-add</guid>
-            <pubDate>Sun, 12 Jun 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[A coding question that tests for both algorithmic thinking and mastery over asynchronous JavaScript]]></description>
-            <content:encoded><![CDATA[A coding question that tests for both algorithmic thinking and mastery over asynchronous JavaScript]]></content:encoded>
-            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>technical interviews</category>
             <category>javascript</category>
         </item>
         <item>
