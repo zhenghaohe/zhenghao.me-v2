@@ -6,8 +6,7 @@ export function Tag({ tag, count }: { tag: string; count?: number }) {
   const isSelected = tags.has(tag);
   const router = useRouter();
   const isInPosts = router.asPath.includes('posts/');
-  const isInNotes = router.asPath.includes('notes/');
-  const isIsPreviewList = !isInPosts && !isInNotes;
+  const isIsPreviewList = !isInPosts;
 
   return (
     <small
@@ -16,9 +15,6 @@ export function Tag({ tag, count }: { tag: string; count?: number }) {
       onClick={() => {
         if (isInPosts) {
           router.push('/posts');
-          resetTags();
-        } else if (isInNotes) {
-          router.push('/notes');
           resetTags();
         }
         toggleTags(tag);

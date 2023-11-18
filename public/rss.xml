@@ -4,7 +4,7 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sat, 18 Nov 2023 18:59:33 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 18 Nov 2023 19:06:43 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -126,27 +126,6 @@
             <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
             <category>technical interviews</category>
             <category>musing</category>
-        </item>
-        <item>
-            <title><![CDATA[take control over your coding interview]]></title>
-            <link>https://zhenghao.io/posts/take-control-coding-interview</link>
-            <guid>https://zhenghao.io/posts/take-control-coding-interview</guid>
-            <pubDate>Wed, 20 Apr 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[take control over your coding interview so you don't have to guess the answer the interviewer is thinking of]]></description>
-            <content:encoded><![CDATA[take control over your coding interview so you don't have to guess the answer the interviewer is thinking of]]></content:encoded>
-            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>technical interviews</category>
-            <category>musing</category>
-        </item>
-        <item>
-            <title><![CDATA[an overlooked factor for performance optimization in React]]></title>
-            <link>https://zhenghao.io/posts/top-level-perf</link>
-            <guid>https://zhenghao.io/posts/top-level-perf</guid>
-            <pubDate>Thu, 07 Apr 2022 07:00:00 GMT</pubDate>
-            <description><![CDATA[ when talking about performance, remember to consider the component’s position in the tree.]]></description>
-            <content:encoded><![CDATA[ when talking about performance, remember to consider the component’s position in the tree.]]></content:encoded>
-            <author>zhenghaohe17@gmail.com (Zhenghao He)</author>
-            <category>react</category>
         </item>
         <item>
             <title><![CDATA[Preemptive memoization in React is probably not Evil (yet)]]></title>

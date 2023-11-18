@@ -19,7 +19,6 @@ module.exports = {
     './components/**/*.{jsx,tsx}',
     './content/**/*.{mdx}',
     './posts/**/*.{mdx}',
-    './notes/**/*.{mdx}'
   ],
   darkMode: 'class',
   theme: {
