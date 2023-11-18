@@ -13,8 +13,8 @@
     "linaria"
   ],
   "scripts": {
-    "dev": "next",
-    "build": "next build",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
     "postbuild": "next-sitemap",
     "start": "next start",
     "build:art": "esno utils/buildArt.ts",
@@ -31,7 +31,7 @@
     "light-date": "^1.2.0",
     "mdx-bundler": "^8.0.1",
     "micromark-extension-gfm-footnote": "^2.0.0",
-    "next": "^14.0.3",
+    "next": "^11.1.2",
     "next-plugin-preact": "^3.0.6",
     "next-seo": "^4.28.1",
     "preact": "^10.5.15",
