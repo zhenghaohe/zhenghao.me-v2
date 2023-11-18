@@ -54,7 +54,7 @@
     "@typescript-eslint/parser": "5.1.0",
     "autoprefixer": "^10.3.7",
     "babel-plugin-import-glob-array": "^0.2.0",
-    "eslint": "^8.0.1",
+    "eslint": "^7.32.0",
     "eslint-config-next": "^11.1.2",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
