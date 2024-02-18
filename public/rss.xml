@@ -4,11 +4,11 @@
         <title>Zhenghao's blog</title>
         <link>https://zhenghao.io</link>
         <description>You can find me talking about topics related to JavaScript, TypeScript, React, Web development and technical/coding interviews</description>
-        <lastBuildDate>Sat, 18 Nov 2023 19:26:15 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 18 Feb 2024 22:00:22 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
-        <copyright>All rights reserved 2023, Zhenghao He</copyright>
+        <copyright>All rights reserved 2024, Zhenghao He</copyright>
         <item>
             <title><![CDATA[Three common interview practices I wish to see less of]]></title>
             <link>https://zhenghao.io/posts/bad-interview-practices</link>
